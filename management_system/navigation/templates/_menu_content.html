@@ -1,0 +1,43 @@
+{% load static %}
+
+<div class="text-center mb-4">
+    <img src="{% static 'images/logo-blanco1.png' %}" alt="Logo del Sistema" class="img-fluid" style="max-width: 130px;">
+</div>
+
+<ul class="nav flex-column">
+    {% for item in menu_items %}
+        <li class="nav-item">
+            <a href="{{ item.url }}" class="nav-link txt-color {% if request.path == item.url %}active bg-menu-active fw-bold{% endif %}">
+                {{ item.name }}
+            </a>
+            {% if item.children.all %}
+                <ul class="list-unstyled ps-3">
+                    {% for child in item.children.all %}
+                        <li class="{% if request.path == child.url %}bg-menu{% endif %}">
+                            <a href="{{ child.url }}" class="nav-link text-white ps-4 {% if request.path == child.url %}active fw-bold bg-light{% endif %}">
+                                {{ child.name }}
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </li>
+    {% empty %}
+        <li class="nav-item">No hay opciones disponibles</li>
+    {% endfor %}
+</ul>
+
+<div class="mt-auto">
+    <hr class="text-white-50">
+    <ul class="nav flex-column bg-danger">
+        <li class="nav-item">
+            <form method="post" action="{% url 'logout' %}" onsubmit="return confirm('¿Estás seguro de que deseas salir?');">
+                {% csrf_token %}
+                
+                <button type="submit" class="nav-link text-white text-start w-100 btn btn-link fw-bold">
+                    Cerrar sesión
+                </button>
+            </form>
+        </li>
+    </ul>
+</div>

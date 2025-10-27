@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Reportes{% endblock %}
+
+{% block content %}
+  <div>
+    <h2 class="h3 fw-bold mb-2">Reportes</h2>
+    <h3 class="h5 fw-italic mb-4 text-muted">Genera reportes detallados del sistema</h3>
+  </div>
+
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <h4 class="card-title h5 fw-bold mb-3">
+        <i class="bi bi-funnel me-2"></i> Configuración del Reporte
+      </h4>
+      <p class="card-subtitle text-muted mb-4">Selecciona el tipo de reporte y el rango de fechas</p>
+
+      <form>
+        <div class="row g-3 align-items-end">
+          <div class="col-md-4">
+            <label for="tipoReporte" class="form-label">Tipo de Reporte</label>
+            <select class="form-select" id="tipoReporte">
+              <option selected>Seleccionar reporte</option>
+              <option value="1">Reporte de Ventas</option>
+              <option value="2">Reporte de Usuarios</option>
+              <option value="3">Reporte de Inventario</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label for="fechaInicio" class="form-label">Fecha Inicio</label>
+            <div class="input-group">
+              <input type="date" class="form-control" id="fechaInicio">
+            </div>
+          </div>
+          <div class="col-md-4">
+            <label for="fechaFin" class="form-label">Fecha Fin</label>
+            <div class="input-group">
+              <input type="date" class="form-control" id="fechaFin">
+            </div>
+          </div>
+        </div>
+        <div class="mt-4">
+          <button type="submit" class="btn btn-secondary">
+            <i class="bi bi-file-earmark-bar-graph me-2"></i> Generar Reporte
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h3>Resultados del Reporte</h3>
+      <p>Aquí se mostrará el reporte generado...</p>
+    </div>
+  </div>
+{% endblock %}

@@ -1,0 +1,253 @@
+body {
+  font-family: 'Montserrat', sans-serif;
+}
+
+.btn-color {
+  background-color: #05174F;
+  color: #D5D3D5;
+}
+
+.btn-color:hover {
+  background-color: #092C86;
+  color: #D5D3D5;
+
+}
+
+/* ================================================================== */
+/* Estilos del Menú (ya los tenías)
+/* ================================================================== */
+.bg-menu {
+  background-color: #05174F;
+}
+
+.bg-menu-active {
+  background-color: #12255B;
+  border-radius: 3px;
+  color: black;
+}
+
+.nav-item {
+  .txt-color {
+    color: #D5D3D5;
+  }
+}
+
+/* ================================================================== */
+/* Estilos de la Barra de Navegación
+/* ================================================================== */
+
+/* Estilo base para los enlaces del navbar */
+.navbar-nav .nav-link {
+  padding: 0.5rem 1rem; /* Hacemos el área de clic un poco más grande */
+  border-radius: 6px;  /* Bordes redondeados para el hover */
+  transition: background-color 0.3s ease, color 0.3s ease; /* Transición suave */
+  font-weight: 500; /* Un grosor de fuente medio */
+}
+
+/* El efecto HOVER */
+.navbar-nav .nav-link:hover {
+  background-color: #e9ecef; /* Un gris claro (similar al de Bootstrap) */
+  color: #000; /* Color de texto más oscuro al pasar el ratón */
+}
+
+/* Opcional: Estilo para el enlace "activo" (si usas JS para marcarlo) */
+.navbar-nav .nav-link.active {
+  background-color: #0d6efd; /* Color primario de Bootstrap */
+  color: #fff; /* Texto blanco */
+  font-weight: 700;
+}
+
+/* Opcional: Estilo para el enlace "activo" al hacer hover */
+.navbar-nav .nav-link.active:hover {
+  background-color: #0b5ed7; /* Un poco más oscuro que el color primario */
+}
+
+
+/* ================================================================== */
+/* Estilos del Carrusel Principal (Banners)
+/* ================================================================== */
+
+.carousel-bienvenida .carousel-item {
+  height: 450px; /* <--- ¡AJUSTA ESTA ALTURA A TU GUSTO! */
+  
+  /* Esto es opcional, pero ayuda a centrar imágenes
+     que sean más altas que anchas (verticales) */
+  background-color: #222; 
+}
+
+.carousel-bienvenida .carousel-item img {
+  height: 100%;            /* La imagen ocupa el 100% del alto del item (500px) */
+  width: 100%;             /* La imagen ocupa el 100% del ancho */
+  object-fit: cover;       /* Esta es la clave: 
+                             Cubre todo el espacio sin deformarse. 
+                             Recortará la imagen si es necesario. */
+  object-position: center; /* Centra la imagen al recortar */
+}
+
+.carousel-bienvenida .carousel-item::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40%; /* Altura del degradado */
+  background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.65) 100%);
+  z-index: 1; /* Se asegura que esté sobre la imagen pero debajo del texto */
+}
+
+/* 2. Estilos para el texto (Caption) */
+.carousel-bienvenida .carousel-caption {
+  background-color: transparent;
+  z-index: 2; /* Por encima del degradado */
+  bottom: 1.5rem; /* Un poco más de espacio desde abajo */
+}
+
+/* 3. Estilos para el Título (h5) */
+.carousel-bienvenida .carousel-caption h5 {
+  font-weight: 700; /* Letra más gruesa */
+  font-size: 2rem;  /* Letra más grande */
+  text-shadow: 1px 1px 3px rgba(0,0,0,0.5); /* Sombra para legibilidad */
+}
+
+/* 4. Estilos para la Descripción (p) */
+.carousel-bienvenida .carousel-caption p {
+  font-size: 1.1rem;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.7); /* Sombra para legibilidad */
+}
+
+/* 5. Estilos para los Indicadores (los puntos de abajo) */
+.carousel-bienvenida .carousel-indicators [data-bs-target] {
+  background-color: #ffffff; /* Color blanco */
+  width: 10px;           /* Un poco más anchos */
+  height: 10px;          /* Un poco más altos */
+  border-radius: 50%;    /* Círculos perfectos */
+  opacity: 0.7;          /* Ligeramente transparentes */
+  margin: 0 5px;         /* Más separación entre ellos */
+  border: 0;
+}
+
+.carousel-bienvenida .carousel-indicators .active {
+  opacity: 1; /* El indicador activo es totalmente opaco */
+}
+
+/* 6. Estilos para las Flechas (Controles Prev/Next) */
+.carousel-bienvenida .carousel-control-prev-icon,
+.carousel-bienvenida .carousel-control-next-icon {
+
+  background-color: rgba(0, 0, 0, 0.);
+  border-radius: 50%; /* Fondo circular */
+  padding: 1.2rem;     /* Hacemos el círculo más grande que el icono */
+}
+
+/* Efecto hover para las flechas */
+.carousel-bienvenida .carousel-control-prev:hover .carousel-control-prev-icon,
+.carousel-bienvenida .carousel-control-next:hover .carousel-control-next-icon {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+/* ================================================================== */
+/* Estilos del Carrusel de Cursos (Tarjetas)
+/* ================================================================== */
+
+/* --- 1. La Tarjeta (Contenedor) --- */
+.course-card {
+  border: 0;
+  border-radius: 0;
+  overflow: hidden;
+  position: relative; /* IMPORTANTE: para el overlay */
+  cursor: pointer;   /* Indica que es interactiva */
+}
+
+/* --- 2. Placeholder de Imagen (Fondo azul/icono) --- */
+.course-card .card-img-placeholder {
+  background-color: #344574; /* Tu color azul corporativo */
+  color: #6a6a6a;           
+  height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.3s ease; /* Transición para el hover */
+}
+
+/* El icono dentro del placeholder */
+.course-card .card-img-placeholder .bi {
+  font-size: 3.5rem;
+}
+
+/* --- 3. Cuerpo de la Tarjeta (Texto inferior) --- */
+.course-card .card-body {
+  background-color: #4a4a4a; /* Gris oscuro */
+  color: #f0f0f0;           
+  min-height: 120px;
+  transition: opacity 0.3s ease; /* Transición para el hover */
+}
+
+/* --- 4. Overlay de Información (Aparece al hover) --- */
+.course-info-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.85); /* Fondo oscuro semitransparente */
+  color: white;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  z-index: 1;
+  border-radius: inherit;
+  
+  /* Para centrar el contenido del overlay */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 1rem; /* Añadimos padding para que el texto no se pegue */
+}
+
+/* --- 5. Efectos al pasar el ratón (Hover) --- */
+
+/* Muestra el overlay */
+.course-card:hover .course-info-overlay {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Oculta (difumina) el contenido original */
+.course-card:hover .card-img-placeholder,
+.course-card:hover .card-body {
+  opacity: 0.1; /* Lo tenías en 0.1, si es muy bajo puedes subirlo a 0.2 */
+}
+
+.carousel-control-next, .carousel-control-prev {
+  width: 8%;
+}
+
+/* --- 6. Flechas del Carrusel de Cursos --- */
+#cursosCarousel .carousel-control-prev-icon,
+#cursosCarousel .carousel-control-next-icon {
+  border-radius: 50%;
+  padding: 1.2rem;
+  width: 10%;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+#disponiblesCarousel .carousel-control-prev-icon,
+#disponiblesCarousel .carousel-control-next-icon {
+  border-radius: 50%;
+  padding: 1.2rem;
+  width: 10%;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.bg-body-secondary {
+  background-color: white !important;
+}
+
+/* ================================================================== */
+/* Scroll Suave (ya lo tenías)
+/* ================================================================== */
+html {
+  scroll-behavior: smooth;
+}

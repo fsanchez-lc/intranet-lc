@@ -1,0 +1,65 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Sistema{% endblock %}</title>
+  <!-- Bootstrap CSS CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  <!-- Select 2 -->
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
+</head>
+<body class="bg-light min-vh-100 d-flex">
+
+  <!-- Sidebar -->
+  <aside class="d-none d-lg-flex flex-column text-white p-4 bg-menu" style="width: 280px; flex-shrink: 0;">
+    {% include '_menu_content.html' %}
+  </aside>
+
+  <div class="d-flex flex-column flex-grow-1">
+    <nav class="navbar bg-light d-lg-none">
+        <div class="container-fluid">
+          <div class="text-center mb-4">
+              <img src="{% static 'images/logo-blanco1.png' %}" alt="Logo del Sistema" class="img-fluid" style="max-width: 100px;">
+          </div>            
+            <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileMenu" aria-controls="mobileMenu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+        </div>
+    </nav>
+    <!-- Contenido principal -->
+    <main class="flex-grow-1 p-4 overflow-auto">
+      <div class="container-fluid">
+        {% block content %}{% endblock %}
+      </div>
+    </main>
+  </div>
+
+
+  <div class="offcanvas offcanvas-start bg-menu txt-color d-lg-none" tabindex="-1" id="mobileMenu">
+        <div class="offcanvas-header">
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+            {% include '_menu_content.html' %}
+        </div>
+  </div>
+
+  <!-- Bootstrap JS (opcional, para componentes interactivos) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- JQUERY -->
+  <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+  <!-- SELECT2 -->
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script> 
+
+</body>
+</html>

@@ -1,0 +1,1991 @@
+[
+{
+  "model": "auth.group",
+  "pk": 1,
+  "fields": {
+    "name": "Administrativo",
+    "permissions": [
+      [
+        "add_logentry",
+        "admin",
+        "logentry"
+      ],
+      [
+        "change_logentry",
+        "admin",
+        "logentry"
+      ],
+      [
+        "delete_logentry",
+        "admin",
+        "logentry"
+      ],
+      [
+        "view_logentry",
+        "admin",
+        "logentry"
+      ],
+      [
+        "add_group",
+        "auth",
+        "group"
+      ],
+      [
+        "change_group",
+        "auth",
+        "group"
+      ],
+      [
+        "delete_group",
+        "auth",
+        "group"
+      ],
+      [
+        "view_group",
+        "auth",
+        "group"
+      ],
+      [
+        "add_permission",
+        "auth",
+        "permission"
+      ],
+      [
+        "change_permission",
+        "auth",
+        "permission"
+      ],
+      [
+        "delete_permission",
+        "auth",
+        "permission"
+      ],
+      [
+        "view_permission",
+        "auth",
+        "permission"
+      ],
+      [
+        "add_user",
+        "auth",
+        "user"
+      ],
+      [
+        "change_user",
+        "auth",
+        "user"
+      ],
+      [
+        "delete_user",
+        "auth",
+        "user"
+      ],
+      [
+        "view_user",
+        "auth",
+        "user"
+      ],
+      [
+        "add_contenttype",
+        "contenttypes",
+        "contenttype"
+      ],
+      [
+        "change_contenttype",
+        "contenttypes",
+        "contenttype"
+      ],
+      [
+        "delete_contenttype",
+        "contenttypes",
+        "contenttype"
+      ],
+      [
+        "view_contenttype",
+        "contenttypes",
+        "contenttype"
+      ],
+      [
+        "add_menuitem",
+        "navigation",
+        "menuitem"
+      ],
+      [
+        "change_menuitem",
+        "navigation",
+        "menuitem"
+      ],
+      [
+        "delete_menuitem",
+        "navigation",
+        "menuitem"
+      ],
+      [
+        "view_menuitem",
+        "navigation",
+        "menuitem"
+      ],
+      [
+        "add_session",
+        "sessions",
+        "session"
+      ],
+      [
+        "change_session",
+        "sessions",
+        "session"
+      ],
+      [
+        "delete_session",
+        "sessions",
+        "session"
+      ],
+      [
+        "view_session",
+        "sessions",
+        "session"
+      ]
+    ]
+  }
+},
+{
+  "model": "auth.group",
+  "pk": 2,
+  "fields": {
+    "name": "Gerente",
+    "permissions": [
+      [
+        "add_logentry",
+        "admin",
+        "logentry"
+      ],
+      [
+        "change_logentry",
+        "admin",
+        "logentry"
+      ],
+      [
+        "delete_logentry",
+        "admin",
+        "logentry"
+      ],
+      [
+        "view_logentry",
+        "admin",
+        "logentry"
+      ],
+      [
+        "add_group",
+        "auth",
+        "group"
+      ],
+      [
+        "change_group",
+        "auth",
+        "group"
+      ],
+      [
+        "delete_group",
+        "auth",
+        "group"
+      ],
+      [
+        "view_group",
+        "auth",
+        "group"
+      ],
+      [
+        "add_permission",
+        "auth",
+        "permission"
+      ],
+      [
+        "change_permission",
+        "auth",
+        "permission"
+      ],
+      [
+        "delete_permission",
+        "auth",
+        "permission"
+      ],
+      [
+        "view_permission",
+        "auth",
+        "permission"
+      ],
+      [
+        "add_user",
+        "auth",
+        "user"
+      ],
+      [
+        "change_user",
+        "auth",
+        "user"
+      ],
+      [
+        "delete_user",
+        "auth",
+        "user"
+      ],
+      [
+        "view_user",
+        "auth",
+        "user"
+      ],
+      [
+        "add_contenttype",
+        "contenttypes",
+        "contenttype"
+      ],
+      [
+        "change_contenttype",
+        "contenttypes",
+        "contenttype"
+      ],
+      [
+        "delete_contenttype",
+        "contenttypes",
+        "contenttype"
+      ],
+      [
+        "view_contenttype",
+        "contenttypes",
+        "contenttype"
+      ],
+      [
+        "add_menuitem",
+        "navigation",
+        "menuitem"
+      ],
+      [
+        "change_menuitem",
+        "navigation",
+        "menuitem"
+      ],
+      [
+        "delete_menuitem",
+        "navigation",
+        "menuitem"
+      ],
+      [
+        "view_menuitem",
+        "navigation",
+        "menuitem"
+      ],
+      [
+        "add_session",
+        "sessions",
+        "session"
+      ],
+      [
+        "change_session",
+        "sessions",
+        "session"
+      ],
+      [
+        "delete_session",
+        "sessions",
+        "session"
+      ],
+      [
+        "view_session",
+        "sessions",
+        "session"
+      ]
+    ]
+  }
+},
+{
+  "model": "auth.group",
+  "pk": 3,
+  "fields": {
+    "name": "Empleado",
+    "permissions": []
+  }
+},
+{
+  "model": "auth.user",
+  "pk": 1,
+  "fields": {
+    "password": "pbkdf2_sha256$1000000$UTaBgnGU46klQ2BFlPpUJG$ZVgC2W1oJJN1+ylArhZeLJa2wIoIlgS1H4QNMcbvnXA=",
+    "last_login": "2025-10-08T19:05:16.981Z",
+    "is_superuser": true,
+    "username": "sistemas-lc",
+    "first_name": "",
+    "last_name": "",
+    "email": "",
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2025-10-07T20:32:30Z",
+    "groups": [
+      [
+        "Administrativo"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "auth.user",
+  "pk": 4,
+  "fields": {
+    "password": "pbkdf2_sha256$1000000$eO6rCT4UxuOLnWCNNITIGu$bnJlhwu80lOWQv7eHyngv6/iL0rdVJUSnFCOQZsxixc=",
+    "last_login": "2025-10-08T19:04:06.512Z",
+    "is_superuser": false,
+    "username": "user-test",
+    "first_name": "",
+    "last_name": "",
+    "email": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2025-10-08T18:50:31Z",
+    "groups": [
+      [
+        "Empleado"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "sessions.session",
+  "pk": "bpsp2ycldf0wpgwg3hor3jr2kmgxsril",
+  "fields": {
+    "session_data": ".eJxVjEsOwjAMBe-SNYriNHJqluw5Q-TYCS2gVupnVXF3FKkL2L6ZeYdJvG9D2teypFHN1YC5_G6Z5VWmBvTJ02O2Mk_bMmbbFHvS1d5nLe_b6f4dDLwOrc6uBOiIq_aeMFIXEDX2QIF7YJCKMYjUiIDgfPTKQkrqnatCNZvPF9GLN7E:1v6ZTQ:N4rbDMv5safExTNuio0uiq4OZPGa4SZXyvDUGekYohQ",
+    "expire_date": "2025-10-22T19:05:16.990Z"
+  }
+},
+{
+  "model": "navigation.menuitem",
+  "pk": 1,
+  "fields": {
+    "name": "Dashboard",
+    "url": "/",
+    "icon": null,
+    "parent": null,
+    "order": 1,
+    "groups": [
+      [
+        "Administrativo"
+      ],
+      [
+        "Empleado"
+      ]
+    ]
+  }
+},
+{
+  "model": "navigation.menuitem",
+  "pk": 2,
+  "fields": {
+    "name": "Equipos",
+    "url": "/equipos/",
+    "icon": null,
+    "parent": null,
+    "order": 2,
+    "groups": [
+      [
+        "Administrativo"
+      ]
+    ]
+  }
+},
+{
+  "model": "navigation.menuitem",
+  "pk": 4,
+  "fields": {
+    "name": "Empleados",
+    "url": "/empleados/",
+    "icon": null,
+    "parent": null,
+    "order": 3,
+    "groups": [
+      [
+        "Administrativo"
+      ],
+      [
+        "Empleado"
+      ]
+    ]
+  }
+},
+{
+  "model": "navigation.menuitem",
+  "pk": 5,
+  "fields": {
+    "name": "Usuarios",
+    "url": "/usuarios/",
+    "icon": null,
+    "parent": null,
+    "order": 4,
+    "groups": [
+      [
+        "Administrativo"
+      ]
+    ]
+  }
+},
+{
+  "model": "navigation.menuitem",
+  "pk": 6,
+  "fields": {
+    "name": "Tipos de equipos",
+    "url": "/tipo-equipos/",
+    "icon": null,
+    "parent": null,
+    "order": 5,
+    "groups": [
+      [
+        "Administrativo"
+      ]
+    ]
+  }
+},
+{
+  "model": "navigation.menuitem",
+  "pk": 7,
+  "fields": {
+    "name": "Estaciones de servicio",
+    "url": "/estaciones-servicio/",
+    "icon": null,
+    "parent": null,
+    "order": 6,
+    "groups": [
+      [
+        "Administrativo"
+      ]
+    ]
+  }
+},
+{
+  "model": "navigation.menuitem",
+  "pk": 8,
+  "fields": {
+    "name": "Tickets",
+    "url": "/tickets/",
+    "icon": null,
+    "parent": null,
+    "order": 7,
+    "groups": [
+      [
+        "Administrativo"
+      ],
+      [
+        "Empleado"
+      ]
+    ]
+  }
+},
+{
+  "model": "navigation.menuitem",
+  "pk": 9,
+  "fields": {
+    "name": "Reportes",
+    "url": "/reportes/",
+    "icon": null,
+    "parent": null,
+    "order": 8,
+    "groups": [
+      [
+        "Administrativo"
+      ]
+    ]
+  }
+},
+{
+  "model": "navigation.menuitem",
+  "pk": 10,
+  "fields": {
+    "name": "Enlaces Drive",
+    "url": "/enlaces-drive/",
+    "icon": null,
+    "parent": null,
+    "order": 8,
+    "groups": [
+      [
+        "Administrativo"
+      ],
+      [
+        "Empleado"
+      ]
+    ]
+  }
+},
+{
+  "model": "navigation.menuitem",
+  "pk": 11,
+  "fields": {
+    "name": "Asistente IA",
+    "url": "/asistente-ia/",
+    "icon": null,
+    "parent": null,
+    "order": 9,
+    "groups": [
+      [
+        "Administrativo"
+      ],
+      [
+        "Empleado"
+      ]
+    ]
+  }
+},
+{
+  "model": "navigation.menuitem",
+  "pk": 12,
+  "fields": {
+    "name": "Permisos",
+    "url": "/permisos/",
+    "icon": null,
+    "parent": null,
+    "order": 10,
+    "groups": [
+      [
+        "Administrativo"
+      ]
+    ]
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 1,
+  "fields": {
+    "action_time": "2025-10-07T21:26:46.583Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "auth",
+      "group"
+    ],
+    "object_id": "1",
+    "object_repr": "administrador",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 2,
+  "fields": {
+    "action_time": "2025-10-07T21:27:34.551Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "auth",
+      "group"
+    ],
+    "object_id": "1",
+    "object_repr": "administrativo",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"Name\", \"Permissions\"]}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 3,
+  "fields": {
+    "action_time": "2025-10-07T21:28:29.420Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "auth",
+      "group"
+    ],
+    "object_id": "2",
+    "object_repr": "sistemas",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 4,
+  "fields": {
+    "action_time": "2025-10-07T21:30:49.798Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "auth",
+      "user"
+    ],
+    "object_id": "2",
+    "object_repr": "administrador-user",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 5,
+  "fields": {
+    "action_time": "2025-10-07T21:31:11.559Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "auth",
+      "user"
+    ],
+    "object_id": "2",
+    "object_repr": "administrador-user",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"Groups\"]}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 6,
+  "fields": {
+    "action_time": "2025-10-07T21:34:03.711Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "navigation",
+      "menuitem"
+    ],
+    "object_id": "1",
+    "object_repr": "Dashboard",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 7,
+  "fields": {
+    "action_time": "2025-10-07T21:34:21.163Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "navigation",
+      "menuitem"
+    ],
+    "object_id": "2",
+    "object_repr": "Equipos",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 8,
+  "fields": {
+    "action_time": "2025-10-08T17:27:17.003Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "navigation",
+      "menuitem"
+    ],
+    "object_id": "3",
+    "object_repr": "test",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 9,
+  "fields": {
+    "action_time": "2025-10-08T17:51:34.371Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "auth",
+      "user"
+    ],
+    "object_id": "1",
+    "object_repr": "sistemas-lc",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"Groups\"]}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 10,
+  "fields": {
+    "action_time": "2025-10-08T18:20:32.414Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "navigation",
+      "menuitem"
+    ],
+    "object_id": "4",
+    "object_repr": "Empleados",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 11,
+  "fields": {
+    "action_time": "2025-10-08T18:20:45.584Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "navigation",
+      "menuitem"
+    ],
+    "object_id": "5",
+    "object_repr": "Usuarios",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 12,
+  "fields": {
+    "action_time": "2025-10-08T18:45:53.462Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "auth",
+      "group"
+    ],
+    "object_id": "3",
+    "object_repr": "Empleado",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 13,
+  "fields": {
+    "action_time": "2025-10-08T18:46:06.743Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "auth",
+      "group"
+    ],
+    "object_id": "1",
+    "object_repr": "Administrativo",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"Name\", \"Permissions\"]}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 14,
+  "fields": {
+    "action_time": "2025-10-08T18:46:17.794Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "auth",
+      "group"
+    ],
+    "object_id": "2",
+    "object_repr": "Gerente",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"Name\"]}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 15,
+  "fields": {
+    "action_time": "2025-10-08T18:50:03.312Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "auth",
+      "user"
+    ],
+    "object_id": "3",
+    "object_repr": "test",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 16,
+  "fields": {
+    "action_time": "2025-10-08T18:50:31.167Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "auth",
+      "user"
+    ],
+    "object_id": "4",
+    "object_repr": "user-test",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 17,
+  "fields": {
+    "action_time": "2025-10-08T18:51:06.544Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "auth",
+      "user"
+    ],
+    "object_id": "4",
+    "object_repr": "user-test",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"Groups\"]}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 18,
+  "fields": {
+    "action_time": "2025-10-08T18:54:16.282Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "auth",
+      "user"
+    ],
+    "object_id": "4",
+    "object_repr": "user-test",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"password\"]}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 19,
+  "fields": {
+    "action_time": "2025-10-08T18:56:00.626Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "auth",
+      "user"
+    ],
+    "object_id": "2",
+    "object_repr": "administrador-user",
+    "action_flag": 3,
+    "change_message": ""
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 20,
+  "fields": {
+    "action_time": "2025-10-08T18:56:00.626Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "auth",
+      "user"
+    ],
+    "object_id": "3",
+    "object_repr": "test",
+    "action_flag": 3,
+    "change_message": ""
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 21,
+  "fields": {
+    "action_time": "2025-10-08T18:56:10.466Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "navigation",
+      "menuitem"
+    ],
+    "object_id": "3",
+    "object_repr": "test",
+    "action_flag": 3,
+    "change_message": ""
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 22,
+  "fields": {
+    "action_time": "2025-10-08T18:57:03.044Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "navigation",
+      "menuitem"
+    ],
+    "object_id": "6",
+    "object_repr": "Tipos de equipos",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 23,
+  "fields": {
+    "action_time": "2025-10-08T18:57:24.790Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "navigation",
+      "menuitem"
+    ],
+    "object_id": "7",
+    "object_repr": "Estaciones de servicio",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 24,
+  "fields": {
+    "action_time": "2025-10-08T18:57:47.542Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "navigation",
+      "menuitem"
+    ],
+    "object_id": "8",
+    "object_repr": "Tickets",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 25,
+  "fields": {
+    "action_time": "2025-10-08T18:58:05.775Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "navigation",
+      "menuitem"
+    ],
+    "object_id": "9",
+    "object_repr": "Reportes",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 26,
+  "fields": {
+    "action_time": "2025-10-08T18:58:23.338Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "navigation",
+      "menuitem"
+    ],
+    "object_id": "10",
+    "object_repr": "Enlaces Drive",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 27,
+  "fields": {
+    "action_time": "2025-10-08T18:58:37.703Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "navigation",
+      "menuitem"
+    ],
+    "object_id": "11",
+    "object_repr": "Asistente IA",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 28,
+  "fields": {
+    "action_time": "2025-10-08T18:59:07.741Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "navigation",
+      "menuitem"
+    ],
+    "object_id": "12",
+    "object_repr": "Permisos",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 29,
+  "fields": {
+    "action_time": "2025-10-08T18:59:19.343Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "navigation",
+      "menuitem"
+    ],
+    "object_id": "4",
+    "object_repr": "Empleados",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"Groups\"]}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 30,
+  "fields": {
+    "action_time": "2025-10-08T18:59:24.576Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "navigation",
+      "menuitem"
+    ],
+    "object_id": "1",
+    "object_repr": "Dashboard",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"Groups\"]}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 31,
+  "fields": {
+    "action_time": "2025-10-08T18:59:29.103Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "navigation",
+      "menuitem"
+    ],
+    "object_id": "2",
+    "object_repr": "Equipos",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"Groups\"]}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 32,
+  "fields": {
+    "action_time": "2025-10-08T18:59:32.955Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "navigation",
+      "menuitem"
+    ],
+    "object_id": "4",
+    "object_repr": "Empleados",
+    "action_flag": 2,
+    "change_message": "[]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 33,
+  "fields": {
+    "action_time": "2025-10-08T18:59:38.369Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "navigation",
+      "menuitem"
+    ],
+    "object_id": "5",
+    "object_repr": "Usuarios",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"Groups\"]}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 34,
+  "fields": {
+    "action_time": "2025-10-08T18:59:42.418Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "navigation",
+      "menuitem"
+    ],
+    "object_id": "6",
+    "object_repr": "Tipos de equipos",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"Groups\"]}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 35,
+  "fields": {
+    "action_time": "2025-10-08T18:59:46.141Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "navigation",
+      "menuitem"
+    ],
+    "object_id": "8",
+    "object_repr": "Tickets",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"Groups\"]}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 36,
+  "fields": {
+    "action_time": "2025-10-08T18:59:50.905Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "navigation",
+      "menuitem"
+    ],
+    "object_id": "10",
+    "object_repr": "Enlaces Drive",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"Groups\"]}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 37,
+  "fields": {
+    "action_time": "2025-10-08T18:59:55.860Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "navigation",
+      "menuitem"
+    ],
+    "object_id": "12",
+    "object_repr": "Permisos",
+    "action_flag": 2,
+    "change_message": "[]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 38,
+  "fields": {
+    "action_time": "2025-10-08T18:59:59.150Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "navigation",
+      "menuitem"
+    ],
+    "object_id": "11",
+    "object_repr": "Asistente IA",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"Groups\"]}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 39,
+  "fields": {
+    "action_time": "2025-10-08T19:00:03.788Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "navigation",
+      "menuitem"
+    ],
+    "object_id": "9",
+    "object_repr": "Reportes",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"Groups\"]}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 40,
+  "fields": {
+    "action_time": "2025-10-08T19:00:07.701Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "navigation",
+      "menuitem"
+    ],
+    "object_id": "10",
+    "object_repr": "Enlaces Drive",
+    "action_flag": 2,
+    "change_message": "[]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 41,
+  "fields": {
+    "action_time": "2025-10-08T19:00:10.857Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "navigation",
+      "menuitem"
+    ],
+    "object_id": "8",
+    "object_repr": "Tickets",
+    "action_flag": 2,
+    "change_message": "[]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 42,
+  "fields": {
+    "action_time": "2025-10-08T19:00:14.368Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "navigation",
+      "menuitem"
+    ],
+    "object_id": "7",
+    "object_repr": "Estaciones de servicio",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"Groups\"]}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 43,
+  "fields": {
+    "action_time": "2025-10-08T19:00:16.684Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "navigation",
+      "menuitem"
+    ],
+    "object_id": "5",
+    "object_repr": "Usuarios",
+    "action_flag": 2,
+    "change_message": "[]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 44,
+  "fields": {
+    "action_time": "2025-10-08T19:00:19.133Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "navigation",
+      "menuitem"
+    ],
+    "object_id": "7",
+    "object_repr": "Estaciones de servicio",
+    "action_flag": 2,
+    "change_message": "[]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 45,
+  "fields": {
+    "action_time": "2025-10-08T19:00:21.589Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "navigation",
+      "menuitem"
+    ],
+    "object_id": "7",
+    "object_repr": "Estaciones de servicio",
+    "action_flag": 2,
+    "change_message": "[]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 46,
+  "fields": {
+    "action_time": "2025-10-08T19:00:23.535Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "navigation",
+      "menuitem"
+    ],
+    "object_id": "4",
+    "object_repr": "Empleados",
+    "action_flag": 2,
+    "change_message": "[]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 47,
+  "fields": {
+    "action_time": "2025-10-08T19:00:25.354Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "navigation",
+      "menuitem"
+    ],
+    "object_id": "2",
+    "object_repr": "Equipos",
+    "action_flag": 2,
+    "change_message": "[]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 48,
+  "fields": {
+    "action_time": "2025-10-08T19:00:28.153Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "navigation",
+      "menuitem"
+    ],
+    "object_id": "7",
+    "object_repr": "Estaciones de servicio",
+    "action_flag": 2,
+    "change_message": "[]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 49,
+  "fields": {
+    "action_time": "2025-10-08T19:00:30.433Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "navigation",
+      "menuitem"
+    ],
+    "object_id": "6",
+    "object_repr": "Tipos de equipos",
+    "action_flag": 2,
+    "change_message": "[]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 50,
+  "fields": {
+    "action_time": "2025-10-08T19:00:34.985Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "navigation",
+      "menuitem"
+    ],
+    "object_id": "5",
+    "object_repr": "Usuarios",
+    "action_flag": 2,
+    "change_message": "[]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 51,
+  "fields": {
+    "action_time": "2025-10-08T19:00:52.678Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "navigation",
+      "menuitem"
+    ],
+    "object_id": "8",
+    "object_repr": "Tickets",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"Groups\"]}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 52,
+  "fields": {
+    "action_time": "2025-10-08T19:01:04.460Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "auth",
+      "user"
+    ],
+    "object_id": "4",
+    "object_repr": "user-test",
+    "action_flag": 2,
+    "change_message": "[]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 53,
+  "fields": {
+    "action_time": "2025-10-08T19:01:20.465Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "navigation",
+      "menuitem"
+    ],
+    "object_id": "1",
+    "object_repr": "Dashboard",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"Groups\"]}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 54,
+  "fields": {
+    "action_time": "2025-10-08T19:01:24.279Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "navigation",
+      "menuitem"
+    ],
+    "object_id": "2",
+    "object_repr": "Equipos",
+    "action_flag": 2,
+    "change_message": "[]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 55,
+  "fields": {
+    "action_time": "2025-10-08T19:01:30.432Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "navigation",
+      "menuitem"
+    ],
+    "object_id": "10",
+    "object_repr": "Enlaces Drive",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"Groups\"]}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 56,
+  "fields": {
+    "action_time": "2025-10-08T19:01:44.202Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "navigation",
+      "menuitem"
+    ],
+    "object_id": "11",
+    "object_repr": "Asistente IA",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"Groups\"]}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 57,
+  "fields": {
+    "action_time": "2025-10-08T19:02:08.346Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "navigation",
+      "menuitem"
+    ],
+    "object_id": "4",
+    "object_repr": "Empleados",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"Groups\"]}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 58,
+  "fields": {
+    "action_time": "2025-10-08T19:04:57.283Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "auth",
+      "user"
+    ],
+    "object_id": "1",
+    "object_repr": "sistemas-lc",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"Groups\"]}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 59,
+  "fields": {
+    "action_time": "2025-10-08T21:00:04.268Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "navigation",
+      "menuitem"
+    ],
+    "object_id": "5",
+    "object_repr": "Usuarios",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"Url\"]}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 60,
+  "fields": {
+    "action_time": "2025-10-08T21:05:00.779Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "navigation",
+      "menuitem"
+    ],
+    "object_id": "5",
+    "object_repr": "Usuarios",
+    "action_flag": 2,
+    "change_message": "[]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 61,
+  "fields": {
+    "action_time": "2025-10-08T21:45:57.236Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "navigation",
+      "menuitem"
+    ],
+    "object_id": "5",
+    "object_repr": "Usuarios",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"Url\"]}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 62,
+  "fields": {
+    "action_time": "2025-10-08T21:46:09.563Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "navigation",
+      "menuitem"
+    ],
+    "object_id": "5",
+    "object_repr": "Usuarios",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"Url\"]}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 63,
+  "fields": {
+    "action_time": "2025-10-08T21:59:57.447Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "navigation",
+      "menuitem"
+    ],
+    "object_id": "5",
+    "object_repr": "Usuarios",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"Url\"]}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 64,
+  "fields": {
+    "action_time": "2025-10-08T22:11:19.135Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "navigation",
+      "menuitem"
+    ],
+    "object_id": "5",
+    "object_repr": "Usuarios",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"Url\"]}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 65,
+  "fields": {
+    "action_time": "2025-10-08T22:29:03.326Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "navigation",
+      "menuitem"
+    ],
+    "object_id": "5",
+    "object_repr": "Usuarios",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"Url\"]}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 66,
+  "fields": {
+    "action_time": "2025-10-08T22:29:21.719Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "navigation",
+      "menuitem"
+    ],
+    "object_id": "5",
+    "object_repr": "Usuarios",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"Url\"]}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 67,
+  "fields": {
+    "action_time": "2025-10-08T22:42:54.566Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "navigation",
+      "menuitem"
+    ],
+    "object_id": "5",
+    "object_repr": "Usuarios",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"Url\"]}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 68,
+  "fields": {
+    "action_time": "2025-10-08T22:46:23.293Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "navigation",
+      "menuitem"
+    ],
+    "object_id": "1",
+    "object_repr": "Dashboard",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"Url\"]}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 69,
+  "fields": {
+    "action_time": "2025-10-08T22:46:30.083Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "navigation",
+      "menuitem"
+    ],
+    "object_id": "2",
+    "object_repr": "Equipos",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"Url\"]}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 70,
+  "fields": {
+    "action_time": "2025-10-08T22:46:41.899Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "navigation",
+      "menuitem"
+    ],
+    "object_id": "4",
+    "object_repr": "Empleados",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"Url\"]}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 71,
+  "fields": {
+    "action_time": "2025-10-08T22:49:55.227Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "navigation",
+      "menuitem"
+    ],
+    "object_id": "6",
+    "object_repr": "Tipos de equipos",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"Url\"]}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 72,
+  "fields": {
+    "action_time": "2025-10-08T22:50:07.442Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "navigation",
+      "menuitem"
+    ],
+    "object_id": "7",
+    "object_repr": "Estaciones de servicio",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"Url\"]}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 73,
+  "fields": {
+    "action_time": "2025-10-08T22:50:14.531Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "navigation",
+      "menuitem"
+    ],
+    "object_id": "8",
+    "object_repr": "Tickets",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"Url\"]}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 74,
+  "fields": {
+    "action_time": "2025-10-08T22:50:22.743Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "navigation",
+      "menuitem"
+    ],
+    "object_id": "10",
+    "object_repr": "Enlaces Drive",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"Url\"]}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 75,
+  "fields": {
+    "action_time": "2025-10-08T22:50:30.379Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "navigation",
+      "menuitem"
+    ],
+    "object_id": "9",
+    "object_repr": "Reportes",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"Url\"]}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 76,
+  "fields": {
+    "action_time": "2025-10-08T22:50:39.972Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "navigation",
+      "menuitem"
+    ],
+    "object_id": "11",
+    "object_repr": "Asistente IA",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"Url\"]}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 77,
+  "fields": {
+    "action_time": "2025-10-08T22:50:46.828Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "navigation",
+      "menuitem"
+    ],
+    "object_id": "12",
+    "object_repr": "Permisos",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"Url\"]}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 78,
+  "fields": {
+    "action_time": "2025-10-08T22:51:02.323Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "navigation",
+      "menuitem"
+    ],
+    "object_id": "5",
+    "object_repr": "Usuarios",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"Url\"]}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 79,
+  "fields": {
+    "action_time": "2025-10-08T22:55:00.978Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "navigation",
+      "menuitem"
+    ],
+    "object_id": "1",
+    "object_repr": "Dashboard",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"Url\"]}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 80,
+  "fields": {
+    "action_time": "2025-10-08T22:55:20.177Z",
+    "user": [
+      "sistemas-lc"
+    ],
+    "content_type": [
+      "navigation",
+      "menuitem"
+    ],
+    "object_id": "1",
+    "object_repr": "Dashboard",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"Url\"]}}]"
+  }
+}
+]

@@ -1,0 +1,311 @@
+{% extends "base.html" %}
+
+{% block title %}Equipos {% endblock %}
+
+{% block content %}
+
+  <div class="toast-container position-fixed bottom-0 end-0 p-3">
+    {% if messages %}
+      {% for message in messages %}
+        <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+          <div class="toast-header text-white 
+            {% if message.tags == 'success' %} bg-success 
+            {% elif message.tags == 'info' %} bg-primary 
+            {% elif message.tags == 'warning' %} bg-warning 
+            {% elif message.tags == 'error' %} bg-danger 
+            {% endif %}">
+            <i class="bi bi-bell-fill me-2"></i>
+            <strong class="me-auto">Notificación</strong>
+            <small>Ahora</small>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+          <div class="toast-body">
+            {{ message }}
+          </div>
+        </div>
+      {% endfor %}
+    {% endif %}
+  </div>
+
+  <div class="d-flex justify-content-between align-items-start mb-4">
+    <div>
+      <h2 class="h3 fw-bold mb-2">Equipos</h2>
+      <h3 class="h5 fw-italic mb-4 text-muted">Gestión de equipos tecnológicos</h3>
+    </div>
+
+    <a href="#" class="btn btn-primary btn-color d-none d-md-flex align-items-center" data-bs-toggle="modal" data-bs-target="#modalEquipo">
+      <i class="bi bi-plus-lg me-2"></i>Nuevo Equipo
+    </a>
+  </div>
+
+  <a 
+    href="#" 
+    class="
+      btn btn-primary btn-lg rounded-circle shadow 
+      position-fixed bottom-0 end-0 m-3 d-md-none 
+      d-flex align-items-center justify-content-center " 
+    data-bs-toggle="modal" 
+    data-bs-target="#modalEquipo" 
+    style="width: 58px; height: 58px; z-index: 1030;"> <i class="bi bi-plus-lg fs-4"></i>
+  </a>
+
+<div class="row g-4">
+  {% for equipo in lista_de_equipos %}
+  <div class="col-md-6 col-lg-4">
+    <div class="card shadow-sm h-100 p-2">
+      <div class="card-body d-flex flex-column">
+        
+        <div class="d-flex justify-content-between align-items-start mb-2">
+          <div>
+            <h5 class="card-title fw-bold mb-1">{{ equipo.nombre }}</h5>
+            <p class="card-subtitle text-muted">
+              {% if equipo.marca and equipo.modelo %}
+                {{ equipo.marca }} / {{ equipo.modelo }}
+              {% elif equipo.marca %}
+                {{ equipo.marca }}
+              {% elif equipo.modelo %}
+                {{ equipo.modelo }}
+              {% endif %}
+            </p>          
+          </div>
+          
+          {% if equipo.estado %}
+          {# Comprobamos el nombre del estado y asignamos un color #}
+          {% if equipo.estado.nombre == 'Disponible' %}
+            <span class="badge bg-success rounded-pill p-2">{{ equipo.estado.nombre }}</span>
+          
+          {% elif equipo.estado.nombre == 'Asignado' %}
+            <span class="badge bg-primary rounded-pill p-2">{{ equipo.estado.nombre }}</span>
+
+          {% elif equipo.estado.nombre == 'Mantenimiento' %}
+            <span class="badge bg-warning text-dark rounded-pill p-2">{{ equipo.estado.nombre }}</span>
+
+          {% elif equipo.estado.nombre == 'Retirado' %}
+            <span class="badge bg-dark rounded-pill p-2">{{ equipo.estado.nombre }}</span>
+
+          {% else %}
+            {# Un color por defecto si el estado es otro no especificado #}
+            <span class="badge bg-light text-dark rounded-pill p-2">{{ equipo.estado.nombre }}</span>
+          {% endif %}
+
+        {% else %}
+          {# Si el equipo no tiene ningún estado asignado #}
+          <span class="badge bg-secondary rounded-pill p-2">Sin estado</span>
+        {% endif %}
+        </div>
+
+        <div class="mt-3">
+          <p class="mb-1"><strong>Tipo:</strong> {{ equipo.tipo_equipo.nombre | default:"N/A" }}</p>
+          <p class="mb-1"><strong>Asignado a:</strong> {{ equipo.asignado_a.nombre | default:"Sin asignar" }}</p>
+          <p class="mb-1"><strong>Num. Serie:</strong> {{ equipo.numero_serie | default:"N/A" }}</p>
+          <p class="mb-1"><strong>Estación:</strong> {{ equipo.estacion_servicio.nombre | default:"N/A" }}</p>
+        </div>
+
+        <div class="mt-auto text-end pt-2">
+          <a href="#" class="btn btn-sm btn-outline-warning p-2 btn-editar" 
+            data-bs-toggle="modal" 
+            data-bs-target="#modalEquipo"
+            data-id="{{ equipo.id }}"
+            data-nombre="{{ equipo.nombre }}"
+            data-marca="{{ equipo.marca | default:'' }}"
+            data-modelo="{{ equipo.modelo | default:'' }}"
+            data-numero_serie="{{ equipo.numero_serie | default:'' }}"
+            data-tipo_id="{{ equipo.tipo_equipo.id | default:'' }}"
+            data-estado_id="{{ equipo.estado.id | default:'' }}"
+            data-asignado_a_id="{{ equipo.asignado_a.id | default:'' }}"
+            data-estacion_id="{{ equipo.estacion_servicio.id | default:'' }}"
+            data-fecha_compra="{{ equipo.fecha_compra|date:'Y-m-d' }}"
+            data-vencimiento_garantia="{{ equipo.vencimiento_garantia|date:'Y-m-d' }}">
+              <i class="bi bi-pencil-square m-2"></i>
+          </a>
+          <form action="{% url 'eliminar_equipo_url' equipo.id %}" method="POST" class="d-inline">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-sm btn-outline-danger p-2" onclick="return confirm('¿Estás seguro de que quieres eliminar este equipo?');">
+                <i class="bi bi-trash m-2"></i>
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <div class="col-12">
+    <div class="card shadow-sm">
+      <div class="card-body text-center text-muted py-5">
+        <h4 class="h4">Sin Equipos</h4>
+        <p class="mb-0">No se encontraron equipos registrados.</p>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+  <div class="modal fade" id="modalEquipo" tabindex="-1" aria-labelledby="modalEquipoLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content p-1">
+
+      <div class="modal-header">
+        <div>
+          <h5 class="modal-title fw-bold" id="modalEquipoLabel"></h5>
+          <p class="mb-0 text-muted small">Agrega un nuevo equipo al inventario</p>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body">
+        <form id="formEquipo" method="POST" action="">
+        {% csrf_token %}
+
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="nombreEquipo" class="form-label">Nombre <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="nombreEquipo" name="nombre" required>
+              </div>
+              <div class="mb-3">
+                <label for="modeloEquipo" class="form-label">Modelo</label>
+                <input type="text" class="form-control" id="modeloEquipo" name="modelo">
+              </div>
+              <div class="mb-3">
+                <label for="tipoEquipo" class="form-label">Tipo de Equipo</label>
+                <select class="form-select" id="tipoEquipo" name="tipo_equipo">
+                  <option selected disabled>Seleccionar tipo</option>
+                  {% for tipo in tipos_de_equipo %}
+                    <option value="{{ tipo.id }}">{{ tipo.nombre }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="asignadoA" class="form-label">Asignado a</label>
+                <select class="form-select" id="asignadoA" name="asignado_a">
+                  <option value="" selected>Sin asignar</option>
+                  {% for empleado in empleados %}
+                      <option value="{{ empleado.id }}">{{ empleado.nombre }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="fechaCompra" class="form-label">Fecha de Compra</label>
+                <div class="input-group">
+                  <input type="date" class="form-control" id="fechaCompra" name="fecha_compra">
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="marcaEquipo" class="form-label">Marca</label>
+                <input type="text" class="form-control" id="marcaEquipo" name="marca">
+              </div>
+              <div class="mb-3">
+                <label for="numeroSerie" class="form-label">Número de Serie</label>
+                <input type="text" class="form-control" id="numeroSerie" name="numero_serie">
+              </div>
+              <div class="mb-3">
+                <label for="estadoEquipo" class="form-label">Estado</label>
+                <select class="form-select" id="estadoEquipo" name="estado">
+                  <option selected disabled>Sin estado</option>
+                  {% for estado in estados_de_equipo %}
+                    <option value="{{ estado.id }}">{{ estado.nombre }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="estacionServicio" class="form-label">Estación de Servicio</label>
+                <select class="form-select" id="estacionServicio" name="estacion_servicio">
+                  <option selected disabled>Seleccionar estación</option>
+                  {% for estacion in estaciones_de_servicio %}
+                    <option value="{{ estacion.id }}">{{ estacion.nombre }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="fechaGarantia" class="form-label">Vencimiento de Garantía</label>
+                <div class="input-group">
+                  <input type="date" class="form-control" id="fechaGarantia" name="vencimiento_garantia">
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="submit" form="formEquipo" class="btn btn-primary" id="btnGuardarEquipo"></button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // ✅ CORRECCIÓN 1: Definimos las variables del modal aquí para que todo el script las pueda usar.
+    const modalEl = document.getElementById('modalEquipo');
+    const myModal = new bootstrap.Modal(modalEl); // ✅ CORRECCIÓN 2: Creamos la instancia del modal que faltaba.
+
+    // --- LÓGICA PARA CARGAR DATOS EN EL MODAL (EXISTENTE) ---
+    modalEl.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget;
+        const modalTitle = document.getElementById('modalEquipoLabel');
+        const form = document.getElementById('formEquipo');
+        const submitButton = document.getElementById('btnGuardarEquipo');
+        const equipoId = button.dataset.id;
+
+        if (equipoId) {
+            modalTitle.textContent = 'Editar Equipo';
+            submitButton.textContent = 'Guardar Cambios';
+            form.action = `/equipos/editar/${equipoId}/`;
+            form.querySelector('#nombreEquipo').value = button.dataset.nombre;
+            form.querySelector('#marcaEquipo').value = button.dataset.marca;
+            form.querySelector('#modeloEquipo').value = button.dataset.modelo;
+            form.querySelector('#numeroSerie').value = button.dataset.numero_serie;
+            form.querySelector('#tipoEquipo').value = button.dataset.tipo_id;
+            form.querySelector('#estadoEquipo').value = button.dataset.estado_id;
+            form.querySelector('#asignadoA').value = button.dataset.asignado_a_id;
+            form.querySelector('#estacionServicio').value = button.dataset.estacion_id;
+            form.querySelector('#fechaCompra').value = button.dataset.fecha_compra;
+            form.querySelector('#fechaGarantia').value = button.dataset.vencimiento_garantia;
+        } else {
+            modalTitle.textContent = 'Nuevo Equipo';
+            submitButton.textContent = 'Guardar Equipo';
+            form.action = "{% url 'crear_equipo_url' %}";
+            form.reset();
+        }
+    });
+
+    // --- LÓGICA PARA LOS TOASTS (EXISTENTE) ---
+    const toastElements = document.querySelectorAll('.toast');
+    if (toastElements.length > 0) {
+        toastElements.forEach(function (toastEl) {
+            const toast = new bootstrap.Toast(toastEl, { autohide: true, delay: 5000 });
+            toast.show();
+        });
+    }
+
+    // 1. Al abrir el modal, añadimos una entrada al historial.
+    modalEl.addEventListener('show.bs.modal', function () {
+        const modalState = { modal: true };
+        history.pushState(modalState, '', '#modal');
+    });
+
+    // 2. Al cerrar el modal, limpiamos esa entrada del historial.
+    modalEl.addEventListener('hide.bs.modal', function () {
+        if (window.location.hash === '#modal') {
+            history.back();
+        }
+    });
+
+    // 3. Al detectar el gesto "atrás", cerramos el modal si está abierto.
+    window.addEventListener('popstate', function () {
+        if (modalEl.classList.contains('show')) {
+            // Usamos la instancia 'myModal' para cerrarlo
+            myModal.hide();
+        }
+    });
+  });
+</script>
+{% endblock %}
+{% endblock %}

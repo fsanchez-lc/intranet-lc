@@ -1,0 +1,125 @@
+{% for documento in documentos %}
+<div class="col">
+  <div class="bg-body-secondary p-3 rounded-3 position-relative h-100 d-flex flex-column">
+    
+    {% if documento.enlace_externo %}
+      <a href="{{ documento.enlace_externo }}" 
+         target="_blank" 
+         rel="noopener noreferrer" 
+         class="text-dark position-absolute top-0 end-0 m-3 fs-5"
+         title="Abrir en pestaña nueva">
+        <i class="bi bi-box-arrow-up-right"></i>
+      </a>
+    {% elif documento.archivo %}
+      <a href="{{ documento.archivo.url }}" 
+         target="_blank" 
+         rel="noopener noreferrer" 
+         class="text-dark position-absolute top-0 end-0 m-3 fs-5"
+         title="Abrir en pestaña nueva">
+        <i class="bi bi-box-arrow-up-right"></i>
+      </a>
+    {% else %}
+      <a href="#" 
+         class="text-muted position-absolute top-0 end-0 m-3 fs-5 disabled"
+         title="No disponible" 
+         onclick="return false;">
+        <i class="bi bi-box-arrow-up-right"></i>
+      </a>
+    {% endif %}
+    <div>
+      <h6 class="mb-1 me-5">{{ documento.nombre }}</h6>
+      <p class="text-muted small mb-3">
+          {{ documento.tipo_documento.nombre }}
+      </p>
+    </div>
+
+    <div class="d-flex flex-wrap gap-2 mt-auto">
+      
+      {% if documento.archivo and ".pdf" in documento.archivo.url|lower %}
+        <button type="button" 
+          class="btn btn-secondary btn-sm d-flex align-items-center gap-1 btn-color"
+          data-bs-toggle="modal" 
+          data-bs-target="#previewModal"
+          data-src="{{ documento.archivo.url }}" data-title="{{ documento.nombre }}">
+          Vista previa
+          <i class="bi bi-arrows-fullscreen"></i>
+        </button>
+      {% elif not documento.archivo and documento.enlace_externo and ".pdf" in documento.enlace_externo|lower %}
+        <button type="button" 
+          class="btn btn-secondary btn-sm d-flex align-items-center gap-1 btn-color"
+          data-bs-toggle="modal" 
+          data-bs-target="#previewModal"
+          data-src="{{ documento.enlace_externo }}" data-title="{{ documento.nombre }}">
+          Vista previa
+          <i class="bi bi-arrows-fullscreen"></i>
+        </button>
+      {% endif %}
+      {% if documento.archivo %}
+        <a href="{{ documento.archivo.url }}" 
+           class="btn btn-secondary btn-sm d-flex align-items-center gap-1 btn-color" 
+           download> 
+           Descargar
+           <i class="bi bi-download"></i>
+        </a>
+      {% elif documento.enlace_externo %}
+        <a href="{{ documento.enlace_externo }}" 
+           target="_blank" rel="noopener noreferrer"
+           class="btn btn-secondary btn-sm d-flex align-items-center gap-1 btn-color"> 
+           Ver enlace
+           <i class="bi bi-box-arrow-up-right"></i>
+        </a>
+      {% endif %}
+      </div>
+  </div>
+</div>
+{% endfor %}
+
+
+<div class="modal fade" id="previewModal" tabindex="-1" aria-labelledby="previewModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="previewModalLabel">Vista Previa</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-0" style="height: 80vh;">
+        
+        <iframe id="previewIframe" src="" width="100%" height="100%" frameborder="0">
+            Tu navegador no soporta esta opción.
+        </iframe>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const previewModal = document.getElementById('previewModal');
+    if (previewModal) {
+      const iframe = document.getElementById('previewIframe');
+      const modalTitle = document.getElementById('previewModalLabel');
+
+      // Evento que se dispara CUANDO el modal se va a mostrar
+      previewModal.addEventListener('show.bs.modal', function (event) {
+        // 'event.relatedTarget' es el botón que abrió el modal
+        const button = event.relatedTarget; 
+        
+        // Extraemos los datos del botón
+        const fileUrl = button.getAttribute('data-src');
+        const fileTitle = button.getAttribute('data-title');
+
+        // Asignamos los datos al modal
+        modalTitle.textContent = fileTitle;
+        iframe.src = fileUrl;
+      });
+
+      // Evento que se dispara CUANDO el modal se oculta
+      previewModal.addEventListener('hidden.bs.modal', function () {
+        // Limpiamos el iframe para detener la carga (importante)
+        iframe.src = '';
+        modalTitle.textContent = 'Vista Previa';
+      });
+    }
+  });
+</script>
