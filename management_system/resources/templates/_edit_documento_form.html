@@ -1,0 +1,116 @@
+{% comment %} 
+Este template es SOLO el formulario que se inyectará en el modal.
+Usa los IDs únicos que el JS espera (ej: campoDepartamentosEditDoc)
+y el 'prefix' ("edit-doc") que la vista definió.
+{% endcomment %}
+
+<form action="{% url 'resources:edit_documento' documento.id %}" method="POST" enctype="multipart/form-data">
+  {% csrf_token %}
+  <p class="text-muted small">
+    Modifica los detalles del documento. Los campos con (<span class="text-danger">*</span>) son obligatorios.
+  </p>
+
+  <div class="mb-3">
+    <label for="{{ form_documento.nombre.id_for_label }}" class="form-label">
+      {{ form_documento.nombre.label }}<span class="text-danger"> *</span>
+    </label>
+    {{ form_documento.nombre }}
+    <div class="form-text">{{ form_documento.nombre.help_text }}</div>
+    {% if form_documento.nombre.errors %}<div class="invalid-feedback d-block">{{ form_documento.nombre.errors.0 }}</div>{% endif %}
+  </div>
+  
+  <div class="mb-3">
+    <label for="{{ form_documento.descripcion.id_for_label }}" class="form-label">
+      {{ form_documento.descripcion.label }}
+    </label>
+    {{ form_documento.descripcion }}
+    <div class="form-text">{{ form_documento.descripcion.help_text }}</div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-6 mb-3">
+      <label for="{{ form_documento.codigo_documento.id_for_label }}" class="form-label">
+        {{ form_documento.codigo_documento.label }}
+      </label>
+      {{ form_documento.codigo_documento }}
+      <div class="form-text">{{ form_documento.codigo_documento.help_text }}</div>
+    </div>
+    <div class="col-md-6 mb-3">
+      <label for="{{ form_documento.tipo_documento.id_for_label }}" class="form-label">
+        {{ form_documento.tipo_documento.label }}<span class="text-danger"> *</span>
+      </label>
+      {{ form_documento.tipo_documento }}
+      <div class="form-text">{{ form_documento.tipo_documento.help_text }}</div>
+      {% if form_documento.tipo_documento.errors %}<div class="invalid-feedback d-block">{{ form_documento.tipo_documento.errors.0 }}</div>{% endif %}
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-6 mb-3">
+      <label for="{{ form_documento.archivo.id_for_label }}" class="form-label">
+        {{ form_documento.archivo.label }}
+      </label>
+      {{ form_documento.archivo }}
+      <div class="form-text">{{ form_documento.archivo.help_text }}</div>
+      {% if documento.archivo %}
+        <div class="form-text">Archivo actual: 
+          <a href="{{ documento.archivo.url }}" target="_blank">
+            {{ documento.archivo.name|truncatechars:30 }}
+          </a>
+        </div>
+      {% endif %}
+    </div>
+    <div class="col-md-6 mb-3">
+      <label for="{{ form_documento.enlace_externo.id_for_label }}" class="form-label">
+        {{ form_documento.enlace_externo.label }}
+      </label>
+      {{ form_documento.enlace_externo }}
+      <div class="form-text">{{ form_documento.enlace_externo.help_text }}</div>
+    </div>
+  </div>
+  <p class="text-muted small text-center">Debes proporcionar al menos un archivo o un enlace externo.</p>
+
+
+  <div class="row">
+    <div class="col-md-6 mb-3">
+        <label for="{{ form_documento.palabras_clave.id_for_label }}" class="form-label">
+          {{ form_documento.palabras_clave.label }}
+        </label>
+        {{ form_documento.palabras_clave }}
+        <div class="form-text">{{ form_documento.palabras_clave.help_text }}</div>
+      </div>
+    <div class="col-md-6 mb-3">
+        <label for="{{ form_documento.estado.id_for_label }}" class="form-label">
+          {{ form_documento.estado.label }}<span class="text-danger"> *</span>
+        </label>
+        {{ form_documento.estado }}
+        <div class="form-text">{{ form_documento.estado.help_text }}</div>
+    </div>
+  </div>
+  
+  <hr class="my-4">
+
+  <div class="form-check mb-3">
+    {{ form_documento.es_general }}
+    <label class="form-check-label" for="{{ form_documento.es_general.id_for_label }}">
+      {{ form_documento.es_general.label }}
+    </label>
+    <div class="form-text">{{ form_documento.es_general.help_text }}</div>
+  </div>
+
+  <div class="mb-3" id="campoDepartamentosEditDoc">
+    <label for="{{ form_documento.departamentos_destinados.id_for_label }}" class="form-label">
+      {{ form_documento.departamentos_destinados.label }}
+    </label>
+    {{ form_documento.departamentos_destinados }}
+    <div class="form-text">{{ form_documento.departamentos_destinados.help_text }}</div>
+  </div>
+
+  <div class="d-flex justify-content-end mt-5">
+    <button type="submit" class="btn btn-primary">Actualizar Documento</button>
+  </div>
+</form>
+
+<form id="archiveDocumentoForm" action="" method="POST" style="display: none;">
+  {% csrf_token %}
+</form>

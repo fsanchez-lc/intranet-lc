@@ -9,6 +9,7 @@ from django.template.loader import render_to_string
 from django.http import JsonResponse
 from .forms import CursoForm, DocumentoForm
 from django.contrib.auth.models import Group
+from django.views.decorators.http import require_POST # <--- 1. IMPORT AÑADIDO
 
 @login_required
 def ResourcesView(request):
@@ -109,6 +110,7 @@ def ResourcesView(request):
         'mis_cursos_chunks': mis_cursos_chunks,                  # <-- Lista 1 (Cursos registrados)
         'cursos_disponibles_chunks': cursos_disponibles_chunks,  # <-- Lista 2 (Cursos disponibles) 
         'todos_los_cursos': todos_los_cursos_list,               # <-- Lista 3 (Todos los cursos)
+        'todos_los_documentos': documentos_list, # Lista COMPLETA y FILTRADA para modal Editar Documento
         'documentos': documentos_page_1,   
         'is_admin': is_admin,                                    # <-- Comprobación si es del grupo Administrador
     }
@@ -191,3 +193,55 @@ def CursoEditView(request, curso_id):
     return render(request, '_curso_edit_form.html', {
         'form': form
     })
+
+@user_passes_test(is_admin_check)
+def edit_documento(request, documento_id):
+    """
+    Maneja el GET (cargar formulario parcial) y POST (actualizar)
+    para el modal de edición de documentos.
+    """
+    documento = get_object_or_404(Documento, id=documento_id)
+    
+    if request.method == 'POST':
+        # El usuario está enviando el formulario actualizado
+        form = DocumentoForm(request.POST, request.FILES, instance=documento, prefix="edit-doc")
+        
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'Documento "{documento.nombre}" actualizado con éxito.')
+            return redirect('resources:resources')
+        else:
+            # Si el formulario no es válido, re-renderizamos el parcial con errores
+            messages.error(request, 'Error al actualizar el documento. Revisa los campos.')
+            pass # Continúa para renderizar el form con errores abajo
+
+    else:
+        # El usuario está pidiendo el formulario por primera vez (AJAX/Fetch)
+        form = DocumentoForm(instance=documento, prefix="edit-doc")
+    
+    # Para GET o POST fallido, renderizamos el formulario parcial
+    return render(request, '_edit_documento_form.html', {
+        'form_documento': form,
+        'documento': documento
+    })
+
+
+@user_passes_test(is_admin_check)
+@require_POST  # Asegura que esta vista solo acepte peticiones POST
+def archive_documento(request, documento_id):
+    """
+    Marca un documento como obsoleto (borrado lógico) en lugar de eliminarlo.
+    """
+    documento = get_object_or_404(Documento, id=documento_id)
+    try:
+        nombre_doc = documento.nombre
+        
+        # Lógica de borrado lógico
+        documento.estado = Documento.Estado.OBSOLETO
+        documento.save() 
+        
+        messages.success(request, f'Documento "{nombre_doc}" marcado como obsoleto.')
+    except Exception as e:
+        messages.error(request, f'Error al archivar el documento: {e}')
+    
+    return redirect('resources:resources')

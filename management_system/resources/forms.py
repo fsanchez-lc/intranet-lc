@@ -53,7 +53,6 @@ class CursoForm(forms.ModelForm):
         self.fields['departamentos_destinados'].queryset = Departamento.objects.all()
         self.fields['inscritos'].queryset = Empleado.objects.all().order_by('nombre') # Asumiendo que Empleado tiene un campo 'nombre_completo'
 
-
 class DocumentoForm(forms.ModelForm):
     
     # Override para inicializar con Select2
