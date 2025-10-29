@@ -3,6 +3,35 @@
 {% block title %}Repositorio de Conocimiento{% endblock %}
 
 {% block content %}
+
+  <style>
+    /* Contenedor relativo para posicionar el botón */
+    .course-card {
+      position: relative;
+    }
+
+    /* Estilo del botón de editar (oculto por defecto) */
+    .course-card .btn-edit-curso {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 10;
+      
+      /* Ocultar por defecto */
+      opacity: 0;
+      visibility: hidden;
+      transform: scale(0.8);
+      transition: all 0.2s ease-in-out;
+    }
+
+    /* Mostrar al hacer hover en la tarjeta */
+    .course-card:hover .btn-edit-curso {
+      opacity: 1;
+      visibility: visible;
+      transform: scale(1);
+    }
+  </style>
+
   <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1100">
     {% if messages %}
       {% for message in messages %}
@@ -142,22 +171,22 @@
   </div>
 
   {% for slide in slides %}
-    <div class="modal fade" id="modalSlide{{ forloop.counter0 }}" tabindex="-1" aria-labelledby="modalLabel{{ forloop.counter0 }}" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="modalLabel{{ forloop.counter0 }}">{{ slide.title }}</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-            <img src="{{ slide.image.url }}" class="img-fluid w-100" alt="{{ slide.alt_text }}">
-            {% if slide.description %}
-              <p class="mt-2">{{ slide.description }}</p>
-            {% endif %}
-          </div>
+  <div class="modal fade" id="modalSlide{{ forloop.counter0 }}" tabindex="-1" aria-labelledby="modalLabel{{ forloop.counter0 }}" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalLabel{{ forloop.counter0 }}">{{ slide.title }}</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <img src="{{ slide.image.url }}" class="img-fluid w-100" alt="{{ slide.alt_text }}">
+          {% if slide.description %}
+            <p class="mt-2">{{ slide.description }}</p>
+          {% endif %}
         </div>
       </div>
     </div>
+  </div>
   {% endfor %}
   {% endif %}
 
@@ -215,6 +244,18 @@
               <div class="col-md-4">
                   <div class="card border-0 rounded-0 course-card">
                     
+                    {% if is_admin %}
+                    <a href="#" 
+                        class="btn btn-warning btn-sm rounded-circle shadow-sm btn-edit-curso" 
+                        data-bs-toggle="modal" 
+                        data-bs-target="#modalEditarCurso" 
+                        data-curso-id="{{ curso.id }}"
+                        aria-label="Editar curso"
+                        style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-gear-fill fs-5"></i>
+                    </a>
+                    {% endif %}
+
                     {% if curso.imagen %}
                       <img src="{{ curso.imagen.url }}" 
                           class="card-img-top" 
@@ -317,7 +358,17 @@
               {% for curso in chunk %}
               <div class="col-md-4">
                   <div class="card border-0 rounded-0 course-card">
-                    
+                    {% if is_admin %}
+                    <a href="#" 
+                        class="btn btn-warning btn-sm rounded-circle shadow-sm btn-edit-curso" 
+                        data-bs-toggle="modal" 
+                        data-bs-target="#modalEditarCurso" 
+                        data-curso-id="{{ curso.id }}"
+                        aria-label="Editar curso"
+                        style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-gear-fill fs-5"></i>
+                    </a>
+                    {% endif %}
                     {% if curso.imagen %}
                       <img src="{{ curso.imagen.url }}" 
                           class="card-img-top" 
@@ -729,11 +780,6 @@
             <p>Cargando datos del curso...</p>
           </div>
         </div>
-
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        </div>
-
       </div>
     </div>
   </div>
@@ -844,12 +890,12 @@
     
     // --- Inicialización Select2 (Modales de CREAR) ---
     try {
-      $('#modalCrearCurso #id_departamentos_destinados').select2({          
+      $('#modalCrearCurso #id_create_curso-departamentos_destinados').select2({          
           theme: 'bootstrap-5',
           allowClear: true, 
           dropdownParent: $('#modalCrearCurso .modal-content')
       });
-      $('#modalCrearCurso #id_inscritos').select2({          
+      $('#modalCrearCurso #id_create_curso-inscritos').select2({          
           theme: 'bootstrap-5',
           allowClear: true,
           dropdownParent: $('#modalCrearCurso .modal-content')
@@ -860,7 +906,7 @@
     }
 
     try {
-      $('#modalCrearDocumento #id_departamentos_destinados').select2({          
+      $('#modalCrearDocumento #id_create_doc-departamentos_destinados').select2({          
           theme: 'bootstrap-5',
           allowClear: true, 
           dropdownParent: $('#modalCrearDocumento .modal-content')
@@ -872,89 +918,108 @@
 
     // --- Lógica modal EDITAR CURSO ---
 
-    // 1. Resetear modal de CURSO al abrir
-    modalEditarCursoEl.addEventListener('show.bs.modal', function() {
-        if(cursoSelector) cursoSelector.value = ""; // Reset dropdown
-        if(cursoFormContainer) cursoFormContainer.innerHTML = ""; // Clear previous form
-        if(cursoFormContainer) cursoFormContainer.style.display = "none"; // Hide form container
-        if(loadingSpinnerEditarCurso) loadingSpinnerEditarCurso.style.display = "none"; // Hide spinner
-    });
+    // --- 1. FUNCIÓN REUTILIZABLE PARA CARGAR EL FORMULARIO ---
+    // (Extraemos la lógica de fetch para poder llamarla desde dos sitios)
+    const getFormUrlBase = "{% url 'resources:edit_curso' 0 %}";
 
-    // 2. Lógica de Fetch para CURSO
-    if (cursoSelector) {
-      const getFormUrlBase = "{% url 'resources:edit_curso' 0 %}";
-      
-      cursoSelector.addEventListener('change', async function() {
-        const cursoId = this.value;
+    async function loadCursoEditForm(cursoId) {
         if (!cursoId) return;
 
+        // Mostrar spinner, ocultar form
         if(loadingSpinnerEditarCurso) loadingSpinnerEditarCurso.style.display = "block";
         if(cursoFormContainer) cursoFormContainer.style.display = "none";
         if(cursoFormContainer) cursoFormContainer.innerHTML = "";
 
         try {
-          const url = getFormUrlBase.replace('0', cursoId); 
-          const response = await fetch(url);
-          if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
-          const html = await response.text();
-          
-          if(cursoFormContainer) {
-            cursoFormContainer.innerHTML = html;
-            cursoFormContainer.style.display = "block";
+            const url = getFormUrlBase.replace('0', cursoId); 
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
+            
+            const html = await response.text();
+            
+            if(cursoFormContainer) {
+                cursoFormContainer.innerHTML = html;
+                cursoFormContainer.style.display = "block";
 
-            setTimeout(function() {
-              console.log("Formulario (Editar Curso) cargado. Inicializando Select2...");
-              
-            try {
-              // Inicializar Select2 para departamentos con dropdownParent
-              $('#edit-curso-form #id_edit-departamentos_destinados').select2({
-                theme: 'bootstrap-5',
-                allowClear: true,
-                dropdownParent: $('#modalEditarCurso')
-              });
-              console.log("Select2 para Departamentos (Editar) ¡OK!");
+                // Inicializar Select2s DENTRO del formulario cargado
+                // Usamos un setTimeout de 0ms para asegurar que el DOM se haya actualizado
+                setTimeout(function() {
+                    console.log("Formulario (Editar Curso) cargado. Inicializando Select2...");
+                    try {
+                        $('#edit-curso-form #id_edit-departamentos_destinados').select2({
+                            theme: 'bootstrap-5',
+                            allowClear: true,
+                            dropdownParent: $('#modalEditarCurso .modal-content') // <-- Corregido
+                        });
+                        console.log("Select2 para Departamentos (Editar) ¡OK!");
 
-              // Inicializar Select2 para inscritos con dropdownParent
-              $('#edit-curso-form #id_edit-inscritos').select2({
-                theme: 'bootstrap-5',
-                allowClear: true,
-                dropdownParent: $('#modalEditarCurso')
-              });
-              console.log("Select2 para Inscritos (Editar) ¡OK!");
+                        $('#edit-curso-form #id_edit-inscritos').select2({
+                            theme: 'bootstrap-5',
+                            allowClear: true,
+                            dropdownParent: $('#modalEditarCurso .modal-content') // <-- Corregido
+                        });
+                        console.log("Select2 para Inscritos (Editar) ¡OK!");
 
-            } catch (e) {
-                  console.error("¡Falló la inicialización de Select2 (Editar Curso)!", e);
-              }
-            }, 0); // 0ms de espera es suficiente
-          }
+                    } catch (e) {
+                        console.error("¡Falló la inicialización de Select2 (Editar Curso)!", e);
+                    }
+                }, 0); 
+            }
         } catch (error) {
-          console.error("Error cargando el form de editar (curso):", error);
-          if(cursoFormContainer) {
-              cursoFormContainer.innerHTML = `<div class="alert alert-danger">No se pudo cargar el formulario. ${error.message}</div>`;
-              cursoFormContainer.style.display = "block";
-          }
+            console.error("Error cargando el form de editar (curso):", error);
+            if(cursoFormContainer) {
+                cursoFormContainer.innerHTML = `<div class="alert alert-danger">No se pudo cargar el formulario. ${error.message}</div>`;
+                cursoFormContainer.style.display = "block";
+            }
         } finally {
-          if(loadingSpinnerEditarCurso) loadingSpinnerEditarCurso.style.display = "none";
+            if(loadingSpinnerEditarCurso) loadingSpinnerEditarCurso.style.display = "none";
         }
+    }
+    // --- FIN DE LA FUNCIÓN REUTILIZABLE ---
+
+
+    // (Este listener detecta QUÉ botón abrió el modal)
+    modalEditarCursoEl.addEventListener('show.bs.modal', function(event) {
+      // event.relatedTarget es el botón que hizo clic (el engranaje o el botón "Modificar")
+      const triggerButton = event.relatedTarget;
+      const selectorContainer = document.getElementById('curso-selector-container');
+
+      // Reseteo base cada vez que se abre
+      if(cursoSelector) cursoSelector.value = "";
+      if(cursoFormContainer) cursoFormContainer.innerHTML = "";
+      if(cursoFormContainer) cursoFormContainer.style.display = "none";
+      if(loadingSpinnerEditarCurso) loadingSpinnerEditarCurso.style.display = "none";
+
+      if (triggerButton && triggerButton.classList.contains('btn-edit-curso')) {
+          // --- CASO 1: Se hizo clic en el ENGRANAJE ---
+          const cursoId = triggerButton.dataset.cursoId;
+          
+          // Ocultamos el dropdown selector y cargamos el form directamente
+          if(selectorContainer) selectorContainer.style.display = "none";
+          loadCursoEditForm(cursoId); // Llamamos a la función con el ID
+          
+      } else {
+        // --- CASO 2: Se hizo clic en el botón genérico "Modificar cursos" ---
+        // Mostramos el dropdown selector para que elija
+        if(selectorContainer) selectorContainer.style.display = "block";
+      }
+    });
+
+    // --- 3. LÓGICA DEL DROPDOWN (AHORA SOLO LLAMA A LA FUNCIÓN) ---
+    // (Esta lógica sigue funcionando para el dropdown)
+    if (cursoSelector) {
+      cursoSelector.addEventListener('change', function() {
+        // El dropdown simplemente llama a la misma función
+        loadCursoEditForm(this.value);
       });
     }
 
     // --- Lógica modal EDITAR DOCUMENTO ---
 
-    // 1. Resetear modal de DOCUMENTO al abrir
-    modalEditarDocumentoEl.addEventListener('show.bs.modal', function() {
-      if(documentoSelector) documentoSelector.value = ""; 
-      if(documentoFormContainer) documentoFormContainer.innerHTML = "";
-      if(documentoFormContainer) documentoFormContainer.style.display = "none";
-      if(loadingSpinnerEditarDocumento) loadingSpinnerEditarDocumento.style.display = "none";
-    });
+// --- 1. FUNCIÓN REUTILIZABLE PARA CARGAR EL FORMULARIO DE DOCUMENTO ---
+    const getDocFormUrlBase = "{% url 'resources:edit_documento' 0 %}";
 
-    // 2. Lógica de Fetch para DOCUMENTO
-    if (documentoSelector) {
-      const getDocFormUrlBase = "{% url 'resources:edit_documento' 0 %}";
-      
-      documentoSelector.addEventListener('change', async function() {
-        const documentoId = this.value;
+    async function loadDocumentoEditForm(documentoId) {
         if (!documentoId) return;
 
         if(loadingSpinnerEditarDocumento) loadingSpinnerEditarDocumento.style.display = "block";
@@ -962,42 +1027,79 @@
         if(documentoFormContainer) documentoFormContainer.innerHTML = "";
 
         try {
-          const url = getDocFormUrlBase.replace('0', documentoId); 
-          const response = await fetch(url);
-          if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
-          const html = await response.text();
-          
-          if(documentoFormContainer) {
-            documentoFormContainer.innerHTML = html;
-            documentoFormContainer.style.display = "block";
+            const url = getDocFormUrlBase.replace('0', documentoId); 
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
+            const html = await response.text();
+            
+            if(documentoFormContainer) {
+                documentoFormContainer.innerHTML = html;
+                documentoFormContainer.style.display = "block";
 
-            setTimeout(function() {
-              console.log("Formulario (Editar Doc) cargado. Inicializando Select2...");
-              try {
-                $('#documento-form-container #id_edit-doc-departamentos_destinados').select2({
-                    placeholder: "Busca y selecciona departamentos",
-                    width: '100%',
-                    theme: "bootstrap-5",
-                    dropdownParent: $('#modalEditarDocumento .modal-content')
-                });
-                console.log("Select2 para Departamentos (Editar Doc) ¡OK!");
-
-              } catch (e) {
-                  console.error("¡Falló la inicialización de Select2 (Editar Doc)!", e);
-              }
-            }, 0); // 0ms de espera
-          }
+                setTimeout(function() {
+                    console.log("Formulario (Editar Doc) cargado. Inicializando Select2...");
+                    try {
+                        $('#documento-form-container #id_edit-doc-departamentos_destinados').select2({
+                            placeholder: "Busca y selecciona departamentos",
+                            width: '100%',
+                            theme: "bootstrap-5",
+                            dropdownParent: $('#modalEditarDocumento .modal-content')
+                        });
+                        console.log("Select2 para Departamentos (Editar Doc) ¡OK!");
+                    } catch (e) {
+                        console.error("¡Falló la inicialización de Select2 (Editar Doc)!", e);
+                    }
+                }, 0); 
+            }
         } catch (error) {
-          console.error("Error cargando el form de editar (documento):", error);
-          if(documentoFormContainer) {
-              documentoFormContainer.innerHTML = `<div class="alert alert-danger">No se pudo cargar el formulario. ${error.message}</div>`;
-              documentoFormContainer.style.display = "block";
-          }
+            console.error("Error cargando el form de editar (documento):", error);
+            if(documentoFormContainer) {
+                documentoFormContainer.innerHTML = `<div class="alert alert-danger">No se pudo cargar el formulario. ${error.message}</div>`;
+                documentoFormContainer.style.display = "block";
+            }
         } finally {
-          if(loadingSpinnerEditarDocumento) loadingSpinnerEditarDocumento.style.display = "none";
+            if(loadingSpinnerEditarDocumento) loadingSpinnerEditarDocumento.style.display = "none";
         }
-      });
     }
+    // --- FIN FUNCIÓN REUTILIZABLE ---
+
+
+    // --- 2. LÓGICA MEJORADA PARA ABRIR EL MODAL DE DOCUMENTO ---
+    modalEditarDocumentoEl.addEventListener('show.bs.modal', function(event) {
+        const triggerButton = event.relatedTarget; // El botón que abrió el modal
+        const selectorContainerDoc = document.getElementById('documento-selector-container');
+
+        // Reseteo base
+        if(documentoSelector) documentoSelector.value = ""; 
+        if(documentoFormContainer) documentoFormContainer.innerHTML = "";
+        if(documentoFormContainer) documentoFormContainer.style.display = "none";
+        if(loadingSpinnerEditarDocumento) loadingSpinnerEditarDocumento.style.display = "none";
+
+        if (triggerButton && triggerButton.classList.contains('btn-edit-documento')) {
+            // --- CASO 1: Se hizo clic en el ENGRANAJE ---
+            const documentoId = triggerButton.dataset.documentoId; // Obtener ID del botón
+            
+            // Ocultar el dropdown y cargar el form directamente
+            if(selectorContainerDoc) selectorContainerDoc.style.display = "none";
+            loadDocumentoEditForm(documentoId); // Llamar a la función
+            
+        } else {
+            // --- CASO 2: Se hizo clic en el botón genérico "Modificar documento" ---
+            // Mostrar el dropdown selector
+            if(selectorContainerDoc) selectorContainerDoc.style.display = "block";
+        }
+    });
+
+
+    // --- 3. LÓGICA DEL DROPDOWN DE DOCUMENTO (LLAMA A LA FUNCIÓN) ---
+    if (documentoSelector) {
+        documentoSelector.addEventListener('change', function() {
+            loadDocumentoEditForm(this.value); // El dropdown también usa la función
+        });
+    }
+
+  
+
 
     // --- Lógica Búsqueda de Documentos
     async function fetchdocumentos(page, query, append = false) { 

@@ -35,8 +35,8 @@ def ResourcesView(request):
         if form_type == 'curso':
             form_curso = CursoForm(request.POST, request.FILES)
             if form_curso.is_valid():
-                form_curso.save()
-                messages.success(request, '¡Nuevo curso guardado exitosamente! 👍')
+                curso_guardado = form_curso.save() # Guardamos la instancia
+                messages.success(request, f'¡Nuevo curso "{curso_guardado.titulo}" guardado exitosamente! 👍')                
                 return redirect(request.path_info) 
             else:
                 messages.error(request, 'Error al guardar el curso. Revisa los campos.')
@@ -44,22 +44,22 @@ def ResourcesView(request):
         elif form_type == 'documento':
             form_documento = DocumentoForm(request.POST, request.FILES)
             if form_documento.is_valid():
-                form_documento.save()
-                messages.success(request, '¡Nuevo documento guardado exitosamente! 📄')
+                doc_guardado = form_documento.save() # Guardamos la instancia
+                # 2. Mensaje de éxito dinámico
+                messages.success(request, f'¡Nuevo documento "{doc_guardado.nombre}" guardado exitosamente! 📄')
                 return redirect(request.path_info)
             else:
                 messages.error(request, 'Error al guardar el documento. Revisa los campos.')
-        
         else:
             # Fallback por si no se identifica el form
             messages.error(request, 'Error desconocido al enviar el formulario.')
-            form_curso = CursoForm()
-            form_documento = DocumentoForm()
+            form_curso = CursoForm(prefix='create_curso')
+            form_documento = DocumentoForm(prefix='create_doc')
 
     else:
         # Lógica para el GET (cuando se carga la página)
-        form_curso = CursoForm() # Crea un formulario de curso vacío
-        form_documento = DocumentoForm() # Crea un formulario de documento vacío
+        form_curso = CursoForm(prefix='create_curso')
+        form_documento = DocumentoForm(prefix='create_doc')
     # --- FIN: LÓGICA DE FORMULARIOS MODIFICADA ---
 
     try:
@@ -105,7 +105,7 @@ def ResourcesView(request):
     todos_los_cursos_list = Curso.objects.all().order_by('titulo')
 
     context = {
-        'form_curso': form_curso,         # <--- Variable actualizada
+        'form_curso': form_curso,
         'form_documento': form_documento,
         'slides': slides_activos,
         'mis_cursos_chunks': mis_cursos_chunks,                  # <-- Lista 1 (Cursos registrados)
@@ -173,8 +173,7 @@ def CursoEditView(request, curso_id):
         
         if form.is_valid():
             form.save()
-            messages.success(request, '¡Curso actualizado exitosamente! 🚀')
-            # Redirigimos a la página principal del repositorio
+            messages.success(request, f'¡Curso "{curso.titulo}" actualizado exitosamente! 🚀')            # Redirigimos a la página principal del repositorio
             return redirect('resources:resources')
         else:
             # Si el form no es válido, se lo devolvemos al JS con los errores
