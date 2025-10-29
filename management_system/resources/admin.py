@@ -17,8 +17,10 @@ class SlideAdmin(admin.ModelAdmin):
 
 @admin.register(Curso)
 class CursoAdmin(admin.ModelAdmin):
-    list_display = ('titulo', 'fecha', 'plataforma', 'duracion_horas')
-    list_filter = ('plataforma', 'departamentos_destinados')
+    list_display = ('titulo', 'fecha', 'plataforma', 'duracion_horas', 'estado')
+    list_filter = ('estado','plataforma', 'departamentos_destinados')
+
+    list_editable = ('fecha', 'estado',)
     search_fields = ('titulo', 'descripcion', 'plataforma')
     
     # Para campos ManyToMany, 'filter_horizontal' es más amigable

@@ -533,6 +533,15 @@
               </label>
               {{ form_curso.imagen }}
             </div>
+
+            <div class="col-md-6 mb-3">
+              <label for="{{ form_curso.estado.id_for_label }}" class="form-label">
+                {{ form_curso.estado.label }}
+              </label>
+              {{ form_curso.estado }}
+              <div class="form-text">{{ form_curso.estado.help_text|default:'' }}</div>
+              {% if form_curso.estado.errors %}<div class="invalid-feedback d-block">{{ form_curso.estado.errors.0 }}</div>{% endif %}
+            </div>
             
             <hr class="my-4">
 
@@ -835,33 +844,35 @@
     
     // --- Inicialización Select2 (Modales de CREAR) ---
     try {
-      $('#modalCrearCurso #id_departamentos_destinados').select2({ 
+      $('#modalCrearCurso #id_departamentos_destinados').select2({          
           theme: 'bootstrap-5',
           allowClear: true, 
           dropdownParent: $('#modalCrearCurso .modal-content')
       });
-      $('#modalCrearCurso #id_inscritos').select2({ 
+      $('#modalCrearCurso #id_inscritos').select2({          
           theme: 'bootstrap-5',
           allowClear: true,
           dropdownParent: $('#modalCrearCurso .modal-content')
       });
+      console.log("Select2 (Crear Curso) inicializado.");
     } catch (e) {
-      console.error("Error initializing Select2 (Create Curso):", e);
+      console.error("Error inicializando Select2 (Crear Curso):", e);
     }
 
     try {
-      $('#modalCrearDocumento #id_departamentos_destinados').select2({ 
+      $('#modalCrearDocumento #id_departamentos_destinados').select2({          
           theme: 'bootstrap-5',
           allowClear: true, 
           dropdownParent: $('#modalCrearDocumento .modal-content')
       });
+      console.log("Select2 (Crear Documento) inicializado.");
     } catch (e) {
-      console.error("Error initializing Select2 (Create Documento):", e);
+      console.error("Error inicializando Select2 (Crear Documento):", e);
     }
 
     // --- Lógica modal EDITAR CURSO ---
 
-    // 1. Resetear modal de CURSO al abrir (¡Eliminamos el duplicado!)
+    // 1. Resetear modal de CURSO al abrir
     modalEditarCursoEl.addEventListener('show.bs.modal', function() {
         if(cursoSelector) cursoSelector.value = ""; // Reset dropdown
         if(cursoFormContainer) cursoFormContainer.innerHTML = ""; // Clear previous form
@@ -888,14 +899,36 @@
           const html = await response.text();
           
           if(cursoFormContainer) {
-              cursoFormContainer.innerHTML = html;
-              cursoFormContainer.style.display = "block";
-          }
-          // ¡ELIMINADO! El código de Select2/toggle se movió al template parcial _curso_edit_form.html
-          // (Ver Paso 2 abajo)
+            cursoFormContainer.innerHTML = html;
+            cursoFormContainer.style.display = "block";
 
+            setTimeout(function() {
+              console.log("Formulario (Editar Curso) cargado. Inicializando Select2...");
+              
+            try {
+              // Inicializar Select2 para departamentos con dropdownParent
+              $('#edit-curso-form #id_edit-departamentos_destinados').select2({
+                theme: 'bootstrap-5',
+                allowClear: true,
+                dropdownParent: $('#modalEditarCurso')
+              });
+              console.log("Select2 para Departamentos (Editar) ¡OK!");
+
+              // Inicializar Select2 para inscritos con dropdownParent
+              $('#edit-curso-form #id_edit-inscritos').select2({
+                theme: 'bootstrap-5',
+                allowClear: true,
+                dropdownParent: $('#modalEditarCurso')
+              });
+              console.log("Select2 para Inscritos (Editar) ¡OK!");
+
+            } catch (e) {
+                  console.error("¡Falló la inicialización de Select2 (Editar Curso)!", e);
+              }
+            }, 0); // 0ms de espera es suficiente
+          }
         } catch (error) {
-          console.error("Error loading edit form (curso):", error);
+          console.error("Error cargando el form de editar (curso):", error);
           if(cursoFormContainer) {
               cursoFormContainer.innerHTML = `<div class="alert alert-danger">No se pudo cargar el formulario. ${error.message}</div>`;
               cursoFormContainer.style.display = "block";
@@ -935,14 +968,27 @@
           const html = await response.text();
           
           if(documentoFormContainer) {
-              documentoFormContainer.innerHTML = html;
-              documentoFormContainer.style.display = "block";
-          }
-          // ¡ELIMINADO! El código de Select2/toggle ya está dentro del
-          // template parcial _edit_documento_form.html que te pasé.
+            documentoFormContainer.innerHTML = html;
+            documentoFormContainer.style.display = "block";
 
+            setTimeout(function() {
+              console.log("Formulario (Editar Doc) cargado. Inicializando Select2...");
+              try {
+                $('#documento-form-container #id_edit-doc-departamentos_destinados').select2({
+                    placeholder: "Busca y selecciona departamentos",
+                    width: '100%',
+                    theme: "bootstrap-5",
+                    dropdownParent: $('#modalEditarDocumento .modal-content')
+                });
+                console.log("Select2 para Departamentos (Editar Doc) ¡OK!");
+
+              } catch (e) {
+                  console.error("¡Falló la inicialización de Select2 (Editar Doc)!", e);
+              }
+            }, 0); // 0ms de espera
+          }
         } catch (error) {
-          console.error("Error loading edit form (documento):", error);
+          console.error("Error cargando el form de editar (documento):", error);
           if(documentoFormContainer) {
               documentoFormContainer.innerHTML = `<div class="alert alert-danger">No se pudo cargar el formulario. ${error.message}</div>`;
               documentoFormContainer.style.display = "block";
@@ -1053,7 +1099,7 @@
       }
     });
     
-    // ¡NUEVO! EDITAR DOCUMENTO
+    // EDITAR DOCUMENTO
     modalEditarDocumentoEl.addEventListener('show.bs.modal', function () {
       if (window.location.hash !== '#modalEditDoc') { // Hash único
         history.pushState({ modal: 'editDoc' }, '', '#modalEditDoc');
@@ -1068,7 +1114,6 @@
       if(documentoSelector) documentoSelector.value = ""; 
     });
 
-
     // Listener de Popstate para cerrar modales
     window.addEventListener('popstate', function (event) {
       if (!event.state || !event.state.modal) { 
@@ -1078,17 +1123,6 @@
           if (modalEditarDocumentoEl.classList.contains('show')) myModalEditarDocumento.hide();
       }
     });
-
-    // Selector para el campo 'inscritos' de ESTE formulario
-    $('#modalEditarCurso #{{ form.inscritos.id_for_label }}').select2({ 
-        theme: 'bootstrap-5',
-        allowClear: true,
-        placeholder: 'Busca y selecciona empleados...', 
-        dropdownParent: $('#modalEditarCurso .modal-content')
-    });
-
   });
 </script>
-
-
 {% endblock %}

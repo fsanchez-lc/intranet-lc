@@ -1,9 +1,23 @@
 from django.db import models
 
 class Curso(models.Model):
+
+    class Estado(models.TextChoices):
+        ACTIVO = 'activo', 'Activo'
+        INACTIVO = 'inactivo', 'Inactivo'
+    #
+
     titulo = models.CharField(max_length=200, help_text="Título oficial del curso")
     descripcion = models.TextField(blank=True, null=True, help_text="Descripción detallada del curso")
     
+    estado = models.CharField(
+        max_length=10,
+        choices=Estado.choices,
+        default=Estado.ACTIVO,
+        verbose_name="Estado",
+        help_text="Define si el curso está activo o inactivo."
+    )
+
     fecha = models.DateField(
         null=True, 
         blank=True, 

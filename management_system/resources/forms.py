@@ -1,5 +1,5 @@
 from django import forms
-from .models import Curso, Documento, TipoDocumento
+from .models import Curso, Documento
 from employees.models import Empleado, Departamento
 from django.core.exceptions import ValidationError
 
@@ -9,7 +9,7 @@ class CursoForm(forms.ModelForm):
         model = Curso
         fields = [
             'titulo', 'descripcion', 'fecha', 'horario', 'duracion_horas',
-            'plataforma', 'link', 'imagen', 'es_general',
+            'plataforma', 'link', 'imagen', 'estado', 'es_general',
             'departamentos_destinados', 'inscritos'
         ]
 
@@ -26,6 +26,8 @@ class CursoForm(forms.ModelForm):
             'link': forms.URLInput(attrs={'class': 'form-control'}),
             'imagen': forms.FileInput(attrs={'class': 'form-control'}),
             
+            'estado': forms.Select(attrs={'class': 'form-select'}),
+
             # Checkbox usa una clase diferente
             'es_general': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             
@@ -51,7 +53,7 @@ class CursoForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(CursoForm, self).__init__(*args, **kwargs)
         self.fields['departamentos_destinados'].queryset = Departamento.objects.all()
-        self.fields['inscritos'].queryset = Empleado.objects.all().order_by('nombre') # Asumiendo que Empleado tiene un campo 'nombre_completo'
+        self.fields['inscritos'].queryset = Empleado.objects.all().order_by('nombre')
 
 class DocumentoForm(forms.ModelForm):
     

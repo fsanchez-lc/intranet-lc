@@ -24,8 +24,8 @@ def ResourcesView(request):
     empleado = None
 
     # Inicializa ambos formularios como None
-    form_curso = CursoForm()
-    form_documento = DocumentoForm()
+    form_curso = CursoForm(prefix='create_curso') 
+    form_documento = DocumentoForm(prefix='create_doc')
 
     # Lógica para el POST (cuando se envía el modal)
     if request.method == 'POST':
@@ -69,21 +69,22 @@ def ResourcesView(request):
 
     if empleado:
         # Obtenemos los cursos donde el empleado está inscrito
-        mis_cursos = empleado.cursos_inscritos.all().order_by('fecha')
-
+        mis_cursos = empleado.cursos_inscritos.filter(
+            estado=Curso.Estado.ACTIVO  # <-- CAMBIO AQUÍ
+        ).order_by('fecha')
     # Empleado con departamento, ve solo sus cursos
     if empleado and empleado.departamento:
         query_disponibles = Q(es_general=True) | Q(departamentos_destinados=empleado.departamento)
-        cursos_disponibles = Curso.objects.filter(query_disponibles)\
-            .exclude(inscritos=empleado)\
-            .distinct()\
-            .order_by('fecha')
+        cursos_disponibles = Curso.objects.filter(
+            query_disponibles, 
+            estado=Curso.Estado.ACTIVO
+        ).exclude(inscritos=empleado).distinct().order_by('fecha')
     else:
         # Empleado sin departamento, solo ve generales
-        cursos_disponibles = Curso.objects.filter(es_general=True)\
-            .exclude(inscritos=empleado)\
-            .distinct()\
-            .order_by('fecha')
+        cursos_disponibles = Curso.objects.filter(
+            es_general=True,
+            estado=Curso.Estado.ACTIVO  # <-- CAMBIO AQUÍ
+        ).exclude(inscritos=empleado).distinct().order_by('fecha')
 
     chunk_size = 3
     mis_cursos_chunks = [mis_cursos[i:i + chunk_size] for i in range(0, len(mis_cursos), chunk_size)]
@@ -156,7 +157,6 @@ def BuscarDocumentosView(request):
         'has_next': page_obj.has_next()
     })
 
-
 # Función para verificar si es admin
 def is_admin_check(user):
     return user.is_authenticated and user.groups.filter(name='Administrativo').exists()
@@ -224,24 +224,3 @@ def edit_documento(request, documento_id):
         'form_documento': form,
         'documento': documento
     })
-
-
-@user_passes_test(is_admin_check)
-@require_POST  # Asegura que esta vista solo acepte peticiones POST
-def archive_documento(request, documento_id):
-    """
-    Marca un documento como obsoleto (borrado lógico) en lugar de eliminarlo.
-    """
-    documento = get_object_or_404(Documento, id=documento_id)
-    try:
-        nombre_doc = documento.nombre
-        
-        # Lógica de borrado lógico
-        documento.estado = Documento.Estado.OBSOLETO
-        documento.save() 
-        
-        messages.success(request, f'Documento "{nombre_doc}" marcado como obsoleto.')
-    except Exception as e:
-        messages.error(request, f'Error al archivar el documento: {e}')
-    
-    return redirect('resources:resources')
