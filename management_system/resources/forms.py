@@ -55,6 +55,28 @@ class CursoForm(forms.ModelForm):
         self.fields['departamentos_destinados'].queryset = Departamento.objects.all()
         self.fields['inscritos'].queryset = Empleado.objects.all().order_by('nombre')
 
+    def clean(self):
+        """
+        Validación personalizada para la regla de negocio.
+        """
+        # 1. Obtiene los datos limpios
+        cleaned_data = super().clean()
+        
+        # 2. Saca los valores de los campos
+        es_general = cleaned_data.get('es_general')
+        departamentos = cleaned_data.get('departamentos_destinados')
+
+        # 3. Aplica tu regla:
+        # Si 'es_general' NO está marcado (es False) Y 'departamentos' está vacío...
+        if not es_general and not departamentos:
+            
+            # 4. Lanza un error de validación en el campo específico
+            self.add_error('departamentos_destinados', 
+                           "Si el curso NO es 'General', debes seleccionar al menos un departamento.")
+
+        # 5. Devuelve siempre los datos limpios
+        return cleaned_data
+
 class DocumentoForm(forms.ModelForm):
     
     # Override para inicializar con Select2
@@ -110,5 +132,14 @@ class DocumentoForm(forms.ModelForm):
                 code='archivo_o_enlace_requerido'
             )
         
+        es_general = cleaned_data.get('es_general')
+        departamentos = cleaned_data.get('departamentos_destinados')
+
+        # Si 'es_general' NO está marcado Y 'departamentos' está vacío...
+        if not es_general and not departamentos:
+            # Lanza un error de validación en el campo específico
+            self.add_error('departamentos_destinados', 
+                           "Si el documento NO es 'General', debes seleccionar al menos un departamento.")
+            
         # Si al menos uno tiene valor, la validación es correcta
         return cleaned_data

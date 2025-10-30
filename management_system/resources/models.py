@@ -19,14 +19,10 @@ class Curso(models.Model):
     )
 
     fecha = models.DateField(
-        null=True, 
-        blank=True, 
         help_text="Fecha programada para el curso (YYYY-MM-DD)"
     )
     
     horario = models.TimeField(
-        null=True, 
-        blank=True, 
         help_text="Hora de inicio del curso (HH:MM)"
     )
     
@@ -41,20 +37,26 @@ class Curso(models.Model):
     plataforma = models.CharField(
         max_length=100, 
         blank=True, 
+        null=True, 
         help_text="Plataforma o lugar (Ej. Zoom, Teams, Sala de Juntas 1)"
     )
 
     link = models.URLField(
         max_length=255, 
-        blank=True,
-        null=True,
         help_text="Enlace a la sesión (Zoom, Teams) o a los materiales del curso"
     )
 
     es_general = models.BooleanField(
-        default=False,
+        default=True,
         verbose_name="Curso General",
-        help_text="Marcar si este curso es para TODOS los departamentos."
+        help_text="Desmarcar si este curso NO es para TODOS los departamentos."
+    )
+
+    departamentos_destinados = models.ManyToManyField(
+        'employees.Departamento',
+        related_name="cursos_disponibles",
+        blank=True,
+        help_text="Departamentos que pueden ver y tomar este curso"
     )
 
     imagen = models.ImageField(
@@ -62,13 +64,6 @@ class Curso(models.Model):
         blank=True,                   # Permite que el campo esté vacío (opcional)
         null=True,                    
         help_text="Imagen de portada para el curso (Si se tiene)"
-    )
-    
-    departamentos_destinados = models.ManyToManyField(
-        'employees.Departamento',
-        related_name="cursos_disponibles",
-        blank=True,
-        help_text="Departamentos que pueden ver y tomar este curso"
     )
     
     inscritos = models.ManyToManyField(
@@ -120,7 +115,6 @@ class Documento(models.Model):
     class Estado(models.TextChoices):
         ACTIVO = 'activo', 'Activo'
         OBSOLETO = 'obsoleto', 'Obsoleto'
-        BORRADOR = 'borrador', 'Borrador'
 
     nombre = models.CharField(
         max_length=200, 
@@ -176,9 +170,9 @@ class Documento(models.Model):
     )
 
     es_general = models.BooleanField(
-        default=False,
+        default=True,
         verbose_name="Formato General",
-        help_text="Marcar si este formato es para TODOS los departamentos."
+        help_text="Desmarcar si este formato NO es para TODOS los departamentos."
     )
 
     departamentos_destinados = models.ManyToManyField(

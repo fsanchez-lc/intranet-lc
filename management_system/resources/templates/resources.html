@@ -1,467 +1,470 @@
-{% extends "base.html" %}
+  {% extends "base.html" %}
 
-{% block title %}Repositorio de Conocimiento{% endblock %}
+  {% block title %}Repositorio de Conocimiento{% endblock %}
 
-{% block content %}
+  {% block content %}
 
-  <style>
-    /* Contenedor relativo para posicionar el botón */
-    .course-card {
-      position: relative;
-    }
+    <style>
+      /* Contenedor relativo para posicionar el botón */
+      .course-card {
+        position: relative;
+      }
 
-    /* Estilo del botón de editar (oculto por defecto) */
-    .course-card .btn-edit-curso {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      z-index: 10;
-      
-      /* Ocultar por defecto */
-      opacity: 0;
-      visibility: hidden;
-      transform: scale(0.8);
-      transition: all 0.2s ease-in-out;
-    }
+      /* Estilo del botón de editar (oculto por defecto) */
+      .course-card .btn-edit-curso {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 10;
+        
+        /* Ocultar por defecto */
+        opacity: 0;
+        visibility: hidden;
+        transform: scale(0.8);
+        transition: all 0.2s ease-in-out;
+      }
 
-    /* Mostrar al hacer hover en la tarjeta */
-    .course-card:hover .btn-edit-curso {
-      opacity: 1;
-      visibility: visible;
-      transform: scale(1);
-    }
-  </style>
+      /* Mostrar al hacer hover en la tarjeta */
+      .course-card:hover .btn-edit-curso {
+        opacity: 1;
+        visibility: visible;
+        transform: scale(1);
+      }
+    </style>
 
-  <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1100">
-    {% if messages %}
-      {% for message in messages %}
-        <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-          <div class="toast-header text-white 
-            {% if message.tags == 'success' %} bg-success 
-            {% elif message.tags == 'info' %} bg-primary 
-            {% elif message.tags == 'warning' %} bg-warning 
-            {% elif message.tags == 'error' %} bg-danger 
-            {% endif %}">
-            <i class="bi bi-bell-fill me-2"></i>
-            <strong class="me-auto">Notificación</strong>
-            <small>Ahora</small>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1100">
+      {% if messages %}
+        {% for message in messages %}
+          <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header text-white 
+              {% if message.tags == 'success' %} bg-success 
+              {% elif message.tags == 'info' %} bg-primary 
+              {% elif message.tags == 'warning' %} bg-warning 
+              {% elif message.tags == 'error' %} bg-danger 
+              {% endif %}">
+              <i class="bi bi-bell-fill me-2"></i>
+              <strong class="me-auto">Notificación</strong>
+              <small>Ahora</small>
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body">
+              {{ message }}
+            </div>
           </div>
-          <div class="toast-body">
-            {{ message }}
-          </div>
-        </div>
-      {% endfor %}
-    {% endif %}
-  </div>
-
-  <div class="d-flex justify-content-between align-items-start">
-    <div>
-      <h2 class="h3 fw-bold mb-2">Repositorio de conocimiento</h2>
-      <h3 class="h5 fw-italic text-muted">Gestión de empleados y expedientes</h3>
-    </div>
-    
-    <div class="d-flex flex-column gap-2">
-      {% if is_admin %}
-      <a href="#" class="btn bg-success d-flex align-items-center gap-2 d-none d-md-flex fw-medium text-white"
-              data-bs-toggle="modal" 
-              data-bs-target="#modalCrearCurso">
-      <i class="bi bi-plus-lg"></i>
-      Añadir un curso
-      </a>
-      <a href="#" class="btn d-flex bg-warning align-items-center gap-2 d-none d-md-flex fw-medium text-white"
-              data-bs-toggle="modal" 
-              data-bs-target="#modalEditarCurso">
-      <i class="bi bi-pencil"></i>
-      Modificar cursos
-      </a>
+        {% endfor %}
       {% endif %}
     </div>
-    
-  </div>
 
-  <div class="position-fixed bottom-0 end-0 m-3 d-md-none d-flex flex-column gap-2" style="z-index: 1030;">
-  {% if is_admin %}
-  
-    <div class="btn-group dropstart">
-      <button type="button" class="btn btn-color btn-lg rounded-circle shadow d-flex align-items-center justify-content-center bg-success dropdown-toggle" 
-              data-bs-toggle="dropdown" 
-              aria-expanded="false" 
-              style="width: 58px; height: 58px;">
-        <i class="bi bi-plus-lg fs-4"></i>
-      </button>
-      <ul class="dropdown-menu">
-        <li>
-          <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#modalCrearCurso">
-            Añadir curso
-          </a>
-        </li>
-        <li>
-          <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#modalCrearDocumento">
-            Añadir documento
-          </a>
-        </li>
-      </ul>
-    </div>
-
-    <div class="btn-group dropstart">
-      <button type="button" class="btn btn-color btn-lg rounded-circle shadow d-flex align-items-center justify-content-center bg-warning dropdown-toggle" 
-              data-bs-toggle="dropdown" 
-              aria-expanded="false" 
-              style="width: 58px; height: 58px;"
-              >
-        <i class="bi bi-pencil fs-4"></i>
-      </button>
-      <ul class="dropdown-menu">
-        <li>
-          <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#modalEditarCurso">
-            Modificar curso
-          </a>
-        </li>
-        <li>
-          <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#modalEditarDocumento">
-            Modificar documento
-          </a>
-        </li>
-      </ul>
-    </div>
-    
-    {% endif %}
-  </div>
-
-  <hr class="my-4">
-
-  {% if slides %}
-  <div id="carouselCaptions" class="carousel slide carousel-fade carousel-bienvenida shadow-lg rounded-3" data-bs-ride="carousel" data-bs-interval="4000">
-    
-    <div class="carousel-indicators">
-      {% for slide in slides %}
-        <button type="button" 
-                data-bs-target="#carouselCaptions" 
-                data-bs-slide-to="{{ forloop.counter0 }}"
-                {% if forloop.first %}class="active" aria-current="true"{% endif %}
-                aria-label="Slide {{ forloop.counter }}">
-        </button>
-      {% endfor %}
-    </div>
-
-    <div class="carousel-inner">
-      {% for slide in slides %}
-        <div class="carousel-item {% if forloop.first %}active{% endif %}">
-          
-        <a href="#" data-bs-toggle="modal" data-bs-target="#modalSlide{{ forloop.counter0 }}">
-          <img src="{{ slide.image.url }}" class="d-block w-100" alt="{{ slide.alt_text }}" style="cursor: pointer;">
-        </a>          
-          <div class="carousel-caption d-md-block">
-            <h5 class="">{{ slide.title }}</h5>
-            <p>{{ slide.description }}</p>
-          </div>
-        </div>
-      {% endfor %}
-    </div>
-
-    <button class="carousel-control-prev" type="button" data-bs-target="#carouselCaptions" data-bs-slide="prev">
-      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-      <span class="visually-hidden">Previous</span>
-    </button>
-    <button class="carousel-control-next" type="button" data-bs-target="#carouselCaptions" data-bs-slide="next">
-      <span class="carousel-control-next-icon" aria-hidden="true"></span>
-      <span class="visually-hidden">Next</span>
-    </button>
-  </div>
-
-  {% for slide in slides %}
-  <div class="modal fade" id="modalSlide{{ forloop.counter0 }}" tabindex="-1" aria-labelledby="modalLabel{{ forloop.counter0 }}" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="modalLabel{{ forloop.counter0 }}">{{ slide.title }}</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <img src="{{ slide.image.url }}" class="img-fluid w-100" alt="{{ slide.alt_text }}">
-          {% if slide.description %}
-            <p class="mt-2">{{ slide.description }}</p>
-          {% endif %}
-        </div>
+    <div class="d-flex justify-content-between align-items-start">
+      <div>
+        <h2 class="h3 fw-bold mb-2">Repositorio de conocimiento</h2>
+        <h3 class="h5 fw-italic text-muted">Gestión de empleados y expedientes</h3>
       </div>
     </div>
-  </div>
-  {% endfor %}
-  {% endif %}
 
-  <nav class="navbar navbar-expand-lg bg-body-tertiary mt-3">
-    <div class="container-fluid">
+    <div class="position-fixed bottom-0 end-0 m-3 d-md-none d-flex flex-column gap-2" style="z-index: 1030;">
+    {% if is_admin %}
     
-      <button class="navbar-toggler" type="button" 
-              data-bs-toggle="collapse" 
-              data-bs-target="#navbarNav" 
-              aria-controls="navbarNav" 
-              aria-expanded="false" 
-              aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon" style="font-size: .8rem;"></span>
-      </button>
-      
-      <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
-  
-        <ul class="navbar-nav text-center">
-          
-          <li class="nav-item border-lg-end px-lg-3 py-2">
-            <a class="nav-link" href="#MisCursos">Mis cursos</a>
+      <div class="btn-group dropstart">
+        <button type="button" class="btn btn-color btn-lg rounded-circle shadow d-flex align-items-center justify-content-center bg-success dropdown-toggle" 
+                data-bs-toggle="dropdown" 
+                aria-expanded="false" 
+                style="width: 58px; height: 58px;">
+          <i class="bi bi-plus-lg fs-4"></i>
+        </button>
+        <ul class="dropdown-menu">
+          <li>
+            <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#modalCrearCurso">
+              Añadir curso
+            </a>
           </li>
-          
-          <li class="nav-item border-lg-end px-lg-3 py-2">
-            <a class="nav-link" href="#CursosDisponibles">Cursos disponibles</a>
-          </li>
-          
-          <li class="nav-item px-lg-3 py-2">
-            <a class="nav-link" href="#Documentos">Documentos corporativos</a>
+          <li>
+            <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#modalCrearDocumento">
+              Añadir documento
+            </a>
           </li>
         </ul>
       </div>
 
-    </div>
-  </nav>
-
-  <hr class="my-1">
-
-  {% if mis_cursos_chunks %}
-  <div class="mb-5 p-3" id="MisCursos">
-    <h2 class="h4 mb-2">Mis cursos</h2>
-    <p class="text-muted">
-      Aquí puedes visualizar los materiales de capacitación y de aprendizajes en los que estás inscrito/a.
-    </p>
-
-    <div class="bg-body-secondary p-3 rounded-3">
-      <div id="cursosCarousel" class="carousel slide">
-        <div class="carousel-inner">
-
-          {% for chunk in mis_cursos_chunks %}
-          <div class="carousel-item {% if forloop.first %}active{% endif %}">
-            <div class="row g-3">
-              
-              {% for curso in chunk %}
-              <div class="col-md-4">
-                  <div class="card border-0 rounded-0 course-card">
-                    
-                    {% if is_admin %}
-                    <a href="#" 
-                        class="btn btn-warning btn-sm rounded-circle shadow-sm btn-edit-curso" 
-                        data-bs-toggle="modal" 
-                        data-bs-target="#modalEditarCurso" 
-                        data-curso-id="{{ curso.id }}"
-                        aria-label="Editar curso"
-                        style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
-                        <i class="bi bi-gear-fill fs-5"></i>
-                    </a>
-                    {% endif %}
-
-                    {% if curso.imagen %}
-                      <img src="{{ curso.imagen.url }}" 
-                          class="card-img-top" 
-                          alt="Portada de {{ curso.titulo }}" 
-                          style="height: 200px; object-fit: cover;"> {% else %}
-                      <div class="card-img-placeholder">
-                          <i class="bi bi-mortarboard-fill"></i>
-                      </div>
-                    {% endif %}
-                    
-                    <div class="card-body text-white" style="background-color: #12255B;">
-                      <h5 class="card-title h6">{{ curso.titulo }}</h5>
-                      
-                      <p class="card-text small mb-0">
-                        Fecha: {{ curso.fecha|date:"d/m/Y"|default:"No definida" }}
-                      </p>
-                      <p class="card-text small">
-                        Horario: {{ curso.horario|time:"H:i"|default:"No definido" }} hrs
-                      </p>
-                    </div>
-
-                    <div style="background-color: rgba(18, 37, 91, 0.9);" class="course-info-overlay p-5 text-center d-flex flex-column justify-content-center align-items-center">
-                      <h5 class="fw-bold">{{ curso.titulo }}</h5>
-                      {% if curso.descripcion %}
-                        <p class="text-white-50 small">{{ curso.descripcion|truncatechars:100 }}</p>
-                      {% endif %}
-                      <p class="small mb-1">
-                        <i class="bi bi-calendar"></i> {{ curso.fecha|date:"d/m/Y"|default:"N/A" }}
-                        {% if curso.horario %} | <i class="bi bi-clock"></i> {{ curso.horario|time:"H:i" }} hrs {% endif %}
-                      </p>
-                      {% if curso.duracion_horas %}
-                        <p class="small mb-1"><i class="bi bi-hourglass-split"></i> {{ curso.duracion_horas|floatformat:1 }} horas</p>
-                      {% endif %}
-                      {% if curso.plataforma %}
-                        <p class="small mb-3"><i class="bi bi-geo-alt"></i> {{ curso.plataforma }}</p>
-                      {% endif %}
-
-                      {% if curso.link %}
-                        <a href="{{ curso.link }}" target="_blank" class="btn btn-sm mt-auto btn-color">
-                          Ir al Curso <i class="bi bi-box-arrow-up-right"></i>
-                        </a>
-                      {% else %}
-                        <span class="text-white-50 small mt-auto">Enlace no disponible</span>
-                      {% endif %}
-                    </div>
-                  </div>
-              </div>
-              {% endfor %}
-
-            </div>
-          </div>
-          {% endfor %}
-          </div>
-
-        {% if mis_cursos_chunks|length > 1 %}
-        <button class="carousel-control-prev" type="button" data-bs-target="#cursosCarousel" data-bs-slide="prev">
-          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-          <span class="visually-hidden">Previous</span>
+      <div class="btn-group dropstart">
+        <button type="button" class="btn btn-color btn-lg rounded-circle shadow d-flex align-items-center justify-content-center bg-warning dropdown-toggle" 
+                data-bs-toggle="dropdown" 
+                aria-expanded="false" 
+                style="width: 58px; height: 58px;"
+                >
+          <i class="bi bi-pencil fs-4"></i>
         </button>
-        <button class="carousel-control-next" type="button" data-bs-target="#cursosCarousel" data-bs-slide="next">
-          <span class="carousel-control-next-icon" aria-hidden="true"></span>
-          <span class="visually-hidden">Next</span>
-        </button>
-        {% endif %}
-      </div>
-    </div>
-  </div>
-  {% else %}
-  <div class="mb-5 p-3" id="MisCursos">
-    <h2 class="h4 mb-2">Mis cursos</h2>
-    <p class="text-muted">
-      Aquí puedes visualizar los materiales de capacitación y de aprendizajes en los que estás inscrito/a.
-    </p>
-    
-    <div class="bg-body-tertiary p-5 rounded-3 text-center">
-      <p class="lead text-muted">
-        <i class="bi bi-info-circle me-2"></i>No te has registrado a ningún curso.
-      </p>
-    </div>
-  </div>
-  {% endif %}
-
-  <hr class="my-1">
-
-  {% if cursos_disponibles_chunks %}
-  <div class="mb-3 p-3" id="CursosDisponibles">
-    <h2 class="h4 mb-2">Cursos disponibles</h2>
-    <p class="text-muted">
-      Los cursos disponibles para tu área y generales.
-    </p>
-
-    <div class="bg-body-secondary p-3 rounded-3">
-      <div id="disponiblesCarousel" class="carousel slide">
-        <div class="carousel-inner">
-
-          {% for chunk in cursos_disponibles_chunks %}
-          <div class="carousel-item {% if forloop.first %}active{% endif %}">
-            <div class="row g-3">
-              
-              {% for curso in chunk %}
-              <div class="col-md-4">
-                  <div class="card border-0 rounded-0 course-card">
-                    {% if is_admin %}
-                    <a href="#" 
-                        class="btn btn-warning btn-sm rounded-circle shadow-sm btn-edit-curso" 
-                        data-bs-toggle="modal" 
-                        data-bs-target="#modalEditarCurso" 
-                        data-curso-id="{{ curso.id }}"
-                        aria-label="Editar curso"
-                        style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
-                        <i class="bi bi-gear-fill fs-5"></i>
-                    </a>
-                    {% endif %}
-                    {% if curso.imagen %}
-                      <img src="{{ curso.imagen.url }}" 
-                          class="card-img-top" 
-                          alt="Portada de {{ curso.titulo }}" 
-                          style="height: 200px; object-fit: cover;"> {% else %}
-                      <div class="card-img-placeholder d-flex align-items-center justify-content-center" 
-                        style="height: 200px;">
-                        <i class="bi bi-mortarboard-fill fs-1 text-muted"></i>
-                      </div>
-                    {% endif %}
-                    
-                    <div class="card-body text-white" style="background-color: #12255B;">
-                      <h5 class="card-title h6">{{ curso.titulo }}</h5>
-                      
-                      <p class="card-text small mb-0">
-                        Fecha: {{ curso.fecha|date:"d/m/Y"|default:"No definida" }}
-                      </p>
-                      <p class="card-text small">
-                        Horario: {{ curso.horario|time:"H:i"|default:"No definido" }} hrs
-                      </p>
-                    </div>
-
-                    <div style="background-color: rgba(18, 37, 91, 0.9);" class="course-info-overlay p-5 text-center d-flex flex-column justify-content-center align-items-center">
-                      <h5 class="fw-bold">{{ curso.titulo }}</h5>
-                      {% if curso.descripcion %}
-                        <p class="text-white-50 small mb-2">{{ curso.descripcion|truncatechars:100 }}</p>
-                      {% endif %}
-                      <p class="small mb-1">
-                        <i class="bi bi-calendar"></i> {{ curso.fecha|date:"d/m/Y"|default:"N/A" }}
-                        {% if curso.horario %} | <i class="bi bi-clock"></i> {{ curso.horario|time:"H:i" }} hrs {% endif %}
-                      </p>
-                      {% if curso.duracion_horas %}
-                        <p class="small mb-1"><i class="bi bi-hourglass-split"></i> {{ curso.duracion_horas|floatformat:1 }} horas</p>
-                      {% endif %}
-                      {% if curso.plataforma %}
-                        <p class="small mb-3"><i class="bi bi-geo-alt"></i> {{ curso.plataforma }}</p>
-                      {% endif %}
-
-                      {% if curso.link %}
-                        <a href="{{ curso.link }}" target="_blank" class="btn btn-sm mt-auto btn-color">
-                          Ir al Curso <i class="bi bi-box-arrow-up-right"></i>
-                        </a>
-                      {% else %}
-                        <span class="text-white-50 small mt-auto">Enlace no disponible</span>
-                      {% endif %}
-                    </div>
-                  </div>
-              </div>
-              {% endfor %}
-
-            </div>
-          </div>
-          {% endfor %}
-          </div>
-
-        {% if cursos_disponibles_chunks|length > 1 %}
-        <button class="carousel-control-prev" type="button" data-bs-target="#disponiblesCarousel" data-bs-slide="prev">
-          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-          <span class="visually-hidden">Previous</span>
-        </button>
-        <button class="carousel-control-next" type="button" data-bs-target="#disponiblesCarousel" data-bs-slide="next">
-          <span class="carousel-control-next-icon" aria-hidden="true"></span>
-          <span class="visually-hidden">Next</span>
-        </button>
-        {% endif %}
-      </div>
-    </div>
-  </div>
-  {% else %}
-  <div class="mb-5" id="CursosDisponibles">
-    <h2 class="h4 p-3 mb-2">Cursos disponibles</h2>
-    <p class="text-muted">
-      Los cursos disponibles para tu área y generales.    
-    </p>
-    
-    <div class="bg-body-tertiary p-5 rounded-3 text-center">
-      <p class="lead text-muted">
-        <i class="bi bi-info-circle me-2"></i>No hay ningún curso disponible para registrarse.
-      </p>
-    </div>
-  </div>
-  {% endif %}
-
-  <hr class="my-1">
-
-  <div class="mb-3 p-3" id="Documentos">
-    <div class="d-flex justify-content-between align-items-start">
-      <div>
-        <h2 class="h4 mb-2">Documentos de interés</h2>
-        <p class="text-muted">Documentos tales como formatos, plantillas, políticas y anexos.</p>
+        <ul class="dropdown-menu">
+          <li>
+            <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#modalEditarCurso">
+              Modificar curso
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#modalEditarDocumento">
+              Modificar documento
+            </a>
+          </li>
+        </ul>
       </div>
       
-      <div class="d-flex flex-column gap-2">
+      {% endif %}
+    </div>
+
+    <hr class="my-4">
+
+    {% if slides %}
+    <div id="carouselCaptions" class="carousel slide carousel-fade carousel-bienvenida shadow-lg rounded-3" data-bs-ride="carousel" data-bs-interval="4000">
+      
+      <div class="carousel-indicators">
+        {% for slide in slides %}
+          <button type="button" 
+                  data-bs-target="#carouselCaptions" 
+                  data-bs-slide-to="{{ forloop.counter0 }}"
+                  {% if forloop.first %}class="active" aria-current="true"{% endif %}
+                  aria-label="Slide {{ forloop.counter }}">
+          </button>
+        {% endfor %}
+      </div>
+
+      <div class="carousel-inner">
+        {% for slide in slides %}
+          <div class="carousel-item {% if forloop.first %}active{% endif %}">
+            
+          <a href="#" data-bs-toggle="modal" data-bs-target="#modalSlide{{ forloop.counter0 }}">
+            <img src="{{ slide.image.url }}" class="d-block w-100" alt="{{ slide.alt_text }}" style="cursor: pointer;">
+          </a>          
+            <div class="carousel-caption d-md-block">
+              <h5 class="">{{ slide.title }}</h5>
+              <p>{{ slide.description }}</p>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+
+      <button class="carousel-control-prev" type="button" data-bs-target="#carouselCaptions" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Previous</span>
+      </button>
+      <button class="carousel-control-next" type="button" data-bs-target="#carouselCaptions" data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Next</span>
+      </button>
+    </div>
+
+    {% for slide in slides %}
+    <div class="modal fade" id="modalSlide{{ forloop.counter0 }}" tabindex="-1" aria-labelledby="modalLabel{{ forloop.counter0 }}" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalLabel{{ forloop.counter0 }}">{{ slide.title }}</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <img src="{{ slide.image.url }}" class="img-fluid w-100" alt="{{ slide.alt_text }}">
+            {% if slide.description %}
+              <p class="mt-2">{{ slide.description }}</p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <nav class="navbar navbar-expand-lg bg-body-tertiary mt-3">
+      <div class="container-fluid">
+      
+        <button class="navbar-toggler" type="button" 
+                data-bs-toggle="collapse" 
+                data-bs-target="#navbarNav" 
+                aria-controls="navbarNav" 
+                aria-expanded="false" 
+                aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon" style="font-size: .8rem;"></span>
+        </button>
+        
+        <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
+          <ul class="navbar-nav text-center">
+            <li class="nav-item border-lg-end px-lg-2">
+              <a class="nav-link" href="#MisCursos">Mis cursos</a>
+            </li>
+            <li class="nav-item border-lg-end px-lg-2">
+              <a class="nav-link" href="#CursosDisponibles">Cursos disponibles</a>
+            </li>
+            <li class="nav-item border-lg-end px-lg-2">
+              <a class="nav-link" href="#Formatos">Formatos</a>
+            </li>
+            <li class="nav-item border-lg-end px-lg-2">
+              <a class="nav-link" href="#Documentos">Documentos de interés</a>
+            </li>
+            <li class="nav-item px-lg-2">
+              <a class="nav-link" href="#DesarrolloProfesional">Desarrollo profesional</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <hr class="my-1">
+
+    <div class="p-3">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Cursos</h2>
+        
+        <div class="d-flex gap-2">
+          {% if is_admin %}
+          <a href="#" class="btn bg-success d-flex align-items-center gap-2 d-none d-md-flex fw-medium text-white"
+                  data-bs-toggle="modal" 
+                  data-bs-target="#modalCrearCurso">
+          <i class="bi bi-plus-lg"></i>
+          Añadir un curso
+          </a>
+          <a href="#" class="btn d-flex bg-warning align-items-center gap-2 d-none d-md-flex fw-medium text-white"
+                  data-bs-toggle="modal" 
+                  data-bs-target="#modalEditarCurso">
+          <i class="bi bi-pencil"></i>
+          Modificar cursos
+          </a>
+          {% endif %}
+        </div>
+      </div>
+
+      <hr class="my-1">
+
+      {% if mis_cursos_chunks %}
+      <div class="mb-5 p-3" id="MisCursos">
+        <h2 class="h4 mb-2">Mis cursos</h2>
+        <p class="text-muted">
+          Aquí puedes visualizar los materiales de capacitación y de aprendizajes en los que estás inscrito/a.
+        </p>
+
+        <div class="bg-body-secondary p-3 rounded-3">
+          <div id="cursosCarousel" class="carousel slide">
+            <div class="carousel-inner">
+
+              {% for chunk in mis_cursos_chunks %}
+              <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                <div class="row g-3">
+                  
+                  {% for curso in chunk %}
+                  <div class="col-md-4">
+                      <div class="card border-0 rounded-0 course-card">
+                        
+                        {% if is_admin %}
+                        <a href="#" 
+                            class="btn btn-warning btn-sm rounded-circle shadow-sm btn-edit-curso" 
+                            data-bs-toggle="modal" 
+                            data-bs-target="#modalEditarCurso" 
+                            data-curso-id="{{ curso.id }}"
+                            aria-label="Editar curso"
+                            style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                            <i class="bi bi-gear-fill fs-5"></i>
+                        </a>
+                        {% endif %}
+
+                        {% if curso.imagen %}
+                          <img src="{{ curso.imagen.url }}" 
+                              class="card-img-top" 
+                              alt="Portada de {{ curso.titulo }}" 
+                              style="height: 200px; object-fit: cover;"> {% else %}
+                          <div class="card-img-placeholder">
+                              <i class="bi bi-mortarboard-fill"></i>
+                          </div>
+                        {% endif %}
+                        
+                        <div class="card-body text-white" style="background-color: #12255B;">
+                          <h5 class="card-title h6">{{ curso.titulo }}</h5>
+                          
+                          <p class="card-text small mb-0">
+                            Fecha: {{ curso.fecha|date:"d/m/Y"|default:"No definida" }}
+                          </p>
+                          <p class="card-text small">
+                            Horario: {{ curso.horario|time:"H:i"|default:"No definido" }} hrs
+                          </p>
+                        </div>
+
+                        <div style="background-color: rgba(18, 37, 91, 0.9);" class="course-info-overlay p-5 text-center d-flex flex-column justify-content-center align-items-center">
+                          <h5 class="fw-bold">{{ curso.titulo }}</h5>
+                          {% if curso.descripcion %}
+                            <p class="text-white-50 small">{{ curso.descripcion|truncatechars:100 }}</p>
+                          {% endif %}
+                          <p class="small mb-1">
+                            <i class="bi bi-calendar"></i> {{ curso.fecha|date:"d/m/Y"|default:"N/A" }}
+                            {% if curso.horario %} | <i class="bi bi-clock"></i> {{ curso.horario|time:"H:i" }} hrs {% endif %}
+                          </p>
+                          {% if curso.duracion_horas %}
+                            <p class="small mb-1"><i class="bi bi-hourglass-split"></i> {{ curso.duracion_horas|floatformat:1 }} horas</p>
+                          {% endif %}
+                          {% if curso.plataforma %}
+                            <p class="small mb-3"><i class="bi bi-geo-alt"></i> {{ curso.plataforma }}</p>
+                          {% endif %}
+
+                          {% if curso.link %}
+                            <a href="{{ curso.link }}" target="_blank" class="btn btn-sm mt-auto btn-color">
+                              Ir al Curso <i class="bi bi-box-arrow-up-right"></i>
+                            </a>
+                          {% else %}
+                            <span class="text-white-50 small mt-auto">Enlace no disponible</span>
+                          {% endif %}
+                        </div>
+                      </div>
+                  </div>
+                  {% endfor %}
+
+                </div>
+              </div>
+              {% endfor %}
+              </div>
+
+            {% if mis_cursos_chunks|length > 1 %}
+            <button class="carousel-control-prev" type="button" data-bs-target="#cursosCarousel" data-bs-slide="prev">
+              <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+              <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#cursosCarousel" data-bs-slide="next">
+              <span class="carousel-control-next-icon" aria-hidden="true"></span>
+              <span class="visually-hidden">Next</span>
+            </button>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  
+    {% else %}
+    <div class="mb-5 p-3" id="MisCursos">
+      <h2 class="h4 mb-2">Mis cursos</h2>
+      <p class="text-muted">
+        Aquí puedes visualizar los materiales de capacitación y de aprendizajes en los que estás inscrito/a.
+      </p>
+      
+      <div class="bg-body-tertiary p-5 rounded-3 text-center">
+        <p class="lead text-muted">
+          <i class="bi bi-info-circle me-2"></i>No te has registrado a ningún curso.
+        </p>
+      </div>
+    </div>
+    {% endif %}
+
+    {% if cursos_disponibles_chunks %}
+    <div class="mb-3 p-3" id="CursosDisponibles">
+      <h2 class="h4 mb-2">Cursos disponibles</h2>
+      <p class="text-muted">
+        Los cursos disponibles para tu área y generales.
+      </p>
+
+      <div class="bg-body-secondary p-3 rounded-3">
+        <div id="disponiblesCarousel" class="carousel slide">
+          <div class="carousel-inner">
+
+            {% for chunk in cursos_disponibles_chunks %}
+            <div class="carousel-item {% if forloop.first %}active{% endif %}">
+              <div class="row g-3">
+                
+                {% for curso in chunk %}
+                <div class="col-md-4">
+                    <div class="card border-0 rounded-0 course-card">
+                      {% if is_admin %}
+                      <a href="#" 
+                          class="btn btn-warning btn-sm rounded-circle shadow-sm btn-edit-curso" 
+                          data-bs-toggle="modal" 
+                          data-bs-target="#modalEditarCurso" 
+                          data-curso-id="{{ curso.id }}"
+                          aria-label="Editar curso"
+                          style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                          <i class="bi bi-gear-fill fs-5"></i>
+                      </a>
+                      {% endif %}
+                      {% if curso.imagen %}
+                        <img src="{{ curso.imagen.url }}" 
+                            class="card-img-top" 
+                            alt="Portada de {{ curso.titulo }}" 
+                            style="height: 200px; object-fit: cover;"> {% else %}
+                        <div class="card-img-placeholder d-flex align-items-center justify-content-center" 
+                          style="height: 200px;">
+                          <i class="bi bi-mortarboard-fill fs-1 text-muted"></i>
+                        </div>
+                      {% endif %}
+                      
+                      <div class="card-body text-white" style="background-color: #12255B;">
+                        <h5 class="card-title h6">{{ curso.titulo }}</h5>
+                        
+                        <p class="card-text small mb-0">
+                          Fecha: {{ curso.fecha|date:"d/m/Y"|default:"No definida" }}
+                        </p>
+                        <p class="card-text small">
+                          Horario: {{ curso.horario|time:"H:i"|default:"No definido" }} hrs
+                        </p>
+                      </div>
+
+                      <div style="background-color: rgba(18, 37, 91, 0.9);" class="course-info-overlay p-5 text-center d-flex flex-column justify-content-center align-items-center">
+                        <h5 class="fw-bold">{{ curso.titulo }}</h5>
+                        {% if curso.descripcion %}
+                          <p class="text-white-50 small mb-2">{{ curso.descripcion|truncatechars:100 }}</p>
+                        {% endif %}
+                        <p class="small mb-1">
+                          <i class="bi bi-calendar"></i> {{ curso.fecha|date:"d/m/Y"|default:"N/A" }}
+                          {% if curso.horario %} | <i class="bi bi-clock"></i> {{ curso.horario|time:"H:i" }} hrs {% endif %}
+                        </p>
+                        {% if curso.duracion_horas %}
+                          <p class="small mb-1"><i class="bi bi-hourglass-split"></i> {{ curso.duracion_horas|floatformat:1 }} horas</p>
+                        {% endif %}
+                        {% if curso.plataforma %}
+                          <p class="small mb-3"><i class="bi bi-geo-alt"></i> {{ curso.plataforma }}</p>
+                        {% endif %}
+
+                        {% if curso.link %}
+                          <a href="{{ curso.link }}" target="_blank" class="btn btn-sm mt-auto btn-color">
+                            Auto-inscribirse <i class="bi bi-box-arrow-up-right"></i>
+                          </a>
+                        {% else %}
+                          <span class="text-white-50 small mt-auto">Enlace no disponible</span>
+                        {% endif %}
+                      </div>
+                    </div>
+                </div>
+                {% endfor %}
+
+              </div>
+            </div>
+            {% endfor %}
+            </div>
+
+          {% if cursos_disponibles_chunks|length > 1 %}
+          <button class="carousel-control-prev" type="button" data-bs-target="#disponiblesCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+          </button>
+          <button class="carousel-control-next" type="button" data-bs-target="#disponiblesCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+          </button>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% else %}
+    <div class="mb-5" id="CursosDisponibles">
+      <h2 class="h4 p-3 mb-2">Cursos disponibles</h2>
+      <p class="text-muted">
+        Los cursos disponibles para tu área y generales.    
+      </p>
+      
+      <div class="bg-body-tertiary p-5 rounded-3 text-center">
+        <p class="lead text-muted">
+          <i class="bi bi-info-circle me-2"></i>No hay ningún curso disponible para registrarse.
+        </p>
+      </div>
+    </div>
+    {% endif %}
+
+    <hr class="my-1">
+
+    <div class="d-flex justify-content-between align-items-center mt-3 mb-3">
+      <h2>Documentos</h2>
+      
+      <div class="d-flex gap-2">
         {% if is_admin %}
         <a href="#" class="btn bg-success d-flex align-items-center gap-2 d-none d-md-flex fw-medium text-white"
                 data-bs-toggle="modal" 
@@ -478,459 +481,533 @@
         {% endif %}
       </div>
     </div>
-    
-    <div class="input-group mb-4">
-      <span class="input-group-text bg-body-tertiary border-0" id="search-icon">
-        <i class="bi bi-search"></i>
-      </span>
-      <input type="text" 
-              id="format-search-input"
+
+    <hr class="my-1">
+
+    <div class="mb-3 p-3" id="Documentos">
+      <h2 class="h4 mb-2">Documentos de apoyo</h2>
+        <p class="text-muted">
+          Documentos tales como guías, políticas y anexos.       
+        </p>
+      
+      <div class="input-group mb-4">
+        <span class="input-group-text bg-body-tertiary border-0" id="search-icon-doc">
+          <i class="bi bi-search"></i>
+        </span>
+        <input type="text" 
+              id="doc-search-input"
               class="form-control bg-body-tertiary border-0" 
               placeholder="Buscar documentos..." 
               aria-label="Buscar" 
-              aria-describedby="search-icon">
-    </div>
+              aria-describedby="search-icon-doc">
+      </div>
 
-    <div id="format-list-container" class="row row-cols-1 row-cols-md-2 g-3">
-      {% include '_documentos_partial.html' with documentos=documentos %}
-    </div>
+      <div id="doc-list-container" class="row row-cols-1 row-cols-md-2 g-3">
+        {% include '_documentos_partial.html' with documentos=documentos_generales %}
+      </div>
 
-    <div id="load-more-container" class="text-center mt-4">
-      <button id="load-more-btn" 
-              class="btn bg-body-secondary px-4 py-2 fw-medium"
-              {% if not documentos.has_next %}style="display: none;"{% endif %}>
-        Cargar más
-      </button>
-      
-      <div id="loading-spinner" class="spinner-border" role="status" style="display: none;">
-        <span class="visually-hidden">Loading...</span>
+      <div id="doc-load-more-container" class="text-center mt-4">
+        <button id="doc-load-more-btn"
+                class="btn btn-color px-4 py-2 fw-medium"
+                {% if not documentos_generales.has_next %}style="display: none;"{% endif %}>
+          Cargar más
+        </button>
+        
+        <div id="doc-loading-spinner" class="spinner-border" role="status" style="display: none;">
+          <span class="visually-hidden">Loading...</span>
+        </div>
       </div>
     </div>
-  </div>
+  
+    <hr class="my-1"> 
+    <div class="mb-3 p-3" id="Formatos">
+      <h2 class="h4 mb-2">Formatos de interés</h2>
+        <p class="text-muted">
+          Documentos tales como formatos y plantillas.
+        </p>
+      
+      <div class="input-group mb-4">
+        <span class="input-group-text bg-body-tertiary border-0" id="search-icon-formato">
+          <i class="bi bi-search"></i>
+        </span>
+        <input type="text" 
+              id="formato-search-input"
+              class="form-control bg-body-tertiary border-0" 
+              placeholder="Buscar formatos..." 
+              aria-label="Buscar" 
+              aria-describedby="search-icon-formato">
+      </div>
 
-  <div class="modal fade" id="modalCrearCurso" tabindex="-1" aria-labelledby="modalCrearCursoLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content p-1">
+      <div id="formato-list-container" class="row row-cols-1 row-cols-md-2 g-3">
+        {% include '_documentos_partial.html' with documentos=formatos %}
+      </div>
+
+      <div id="formato-load-more-container" class="text-center mt-4">
+        <button id="formato-load-more-btn"
+                class="btn btn-color px-4 py-2 fw-medium"
+                {% if not formatos.has_next %}style="display: none;"{% endif %}>
+          Cargar más
+        </button>
         
-        <div class="modal-header">
-          <div>
-            <h5 class="modal-title fw-bold" id="modalCrearCursoLabel">Añadir un curso</h5>
-            <p class="mb-0 text-muted small">Agrega un nuevo curso y a sus invitados.</p>
-          </div>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div id="formato-loading-spinner" class="spinner-border" role="status" style="display: none;">
+          <span class="visually-hidden">Loading...</span>
         </div>
+      </div>
+    </div>
+    
 
-        <div class="modal-body">
-          <form action="" method="POST" enctype="multipart/form-data">
-            {% csrf_token %}
-            <input type="hidden" name="form_type" value="curso">
-            <p class="text-muted small">
-              Completa los detalles del nuevo curso. Los campos con (<span class="text-danger">*</span>) son obligatorios.
-            </p>
-
-            <div class="mb-3">
-              <label for="{{ form_curso.titulo.id_for_label }}" class="form-label">
-                {{ form_curso.titulo.label }}<span class="text-danger"> *</span>
-              </label>
-              {{ form_curso.titulo }}
-              {% if form_curso.titulo.errors %}<div class="invalid-feedback d-block">{{ form_curso.titulo.errors.0 }}</div>{% endif %}
+    <div class="modal fade" id="modalCrearCurso" tabindex="-1" aria-labelledby="modalCrearCursoLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content p-1">
+          
+          <div class="modal-header">
+            <div>
+              <h5 class="modal-title fw-bold" id="modalCrearCursoLabel">Añadir un curso</h5>
+              <p class="mb-0 text-muted small">Agrega un nuevo curso y a sus invitados.</p>
             </div>
-            
-            <div class="mb-3">
-              <label for="{{ form_curso.descripcion.id_for_label }}" class="form-label">
-                {{ form_curso.descripcion.label }}
-              </label>
-              {{ form_curso.descripcion }}
-            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
 
-            <div class="row">
-              <div class="col-md-6 mb-3">
-                <label for="{{ form_curso.fecha.id_for_label }}" class="form-label">
-                  {{ form_curso.fecha.label }}
+          <div class="modal-body">
+            <form action="" method="POST" enctype="multipart/form-data">
+              {% csrf_token %}
+              <input type="hidden" name="form_type" value="curso">
+              <p class="text-muted small">
+                Completa los detalles del nuevo curso. Los campos con (<span class="text-danger">*</span>) son obligatorios.
+              </p>
+
+              <div class="mb-3">
+                <label for="{{ form_curso.titulo.id_for_label }}" class="form-label">
+                  {{ form_curso.titulo.label }}<span class="text-danger"> *</span>
                 </label>
-                {{ form_curso.fecha }}
+                {{ form_curso.titulo }}
               </div>
-              <div class="col-md-6 mb-3">
-                <label for="{{ form_curso.horario.id_for_label }}" class="form-label">
-                  {{ form_curso.horario.label }}
+              
+              <div class="mb-3">
+                <label for="{{ form_curso.descripcion.id_for_label }}" class="form-label">
+                  {{ form_curso.descripcion.label }}
                 </label>
-                {{ form_curso.horario }}
+                {{ form_curso.descripcion }}
               </div>
-            </div>
-            <div class="row">
-              <div class="col-md-6 mb-3">
-                <label for="{{ form_curso.duracion_horas.id_for_label }}" class="form-label">
-                  {{ form_curso.duracion_horas.label }}
+
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="{{ form_curso.fecha.id_for_label }}" class="form-label">
+                    {{ form_curso.fecha.label }}<span class="text-danger"> *</span>
+                  </label>
+                  {{ form_curso.fecha }}
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="{{ form_curso.horario.id_for_label }}" class="form-label">
+                    {{ form_curso.horario.label }}<span class="text-danger"> *</span>
+                  </label>
+                  {{ form_curso.horario }}
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="{{ form_curso.duracion_horas.id_for_label }}" class="form-label">
+                    {{ form_curso.duracion_horas.label }}
+                  </label>
+                  {{ form_curso.duracion_horas }}
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="{{ form_curso.plataforma.id_for_label }}" class="form-label">
+                    {{ form_curso.plataforma.label }}
+                  </label>
+                  {{ form_curso.plataforma }}
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label for="{{ form_curso.link.id_for_label }}" class="form-label">
+                  {{ form_curso.link.label }}<span class="text-danger"> *</span>
                 </label>
-                {{ form_curso.duracion_horas }}
+                {{ form_curso.link }}
               </div>
-              <div class="col-md-6 mb-3">
-                <label for="{{ form_curso.plataforma.id_for_label }}" class="form-label">
-                  {{ form_curso.plataforma.label }}
+              <div class="mb-3">
+                <label for="{{ form_curso.imagen.id_for_label }}" class="form-label">
+                  {{ form_curso.imagen.label }}
                 </label>
-                {{ form_curso.plataforma }}
+                {{ form_curso.imagen }}
               </div>
+
+              <div class="col-md-6 mb-3">
+                <label for="{{ form_curso.estado.id_for_label }}" class="form-label">
+                  {{ form_curso.estado.label }}
+                </label>
+                {{ form_curso.estado }}
+                <div class="form-text">{{ form_curso.estado.help_text|default:'' }}</div>
+                {% if form_curso.estado.errors %}<div class="invalid-feedback d-block">{{ form_curso.estado.errors.0 }}</div>{% endif %}
+              </div>
+              
+              <hr class="my-4">
+
+              <div class="form-check mb-3">
+                {{ form_curso.es_general }}
+                <label class="form-check-label" for="{{ form_curso.es_general.id_for_label }}">
+                  {{ form_curso.es_general.label }}
+                </label>
+                <div class="form-text">{{ form_curso.es_general.help_text }}</div>
+              </div>
+
+              <div class="mb-3" id="campoDepartamentos">
+                <label for="{{ form_curso.departamentos_destinados.id_for_label }}" class="form-label">
+                  {{ form_curso.departamentos_destinados.label }}
+                </label>
+                {{ form_curso.departamentos_destinados }}
+                <div class="form-text">{{ form_curso.departamentos_destinados.help_text }}</div>
+              </div>
+
+              <div class="mb-3">
+                <label for="{{ form_curso.inscritos.id_for_label }}" class="form-label">
+                  {{ form_curso.inscritos.label }}
+                </label>
+                {{ form_curso.inscritos }}
+                <div class="form-text">{{ form_curso.inscritos.help_text }}</div>
+              </div>
+
             </div>
 
-            <div class="mb-3">
-              <label for="{{ form_curso.link.id_for_label }}" class="form-label">
-                {{ form_curso.link.label }}
-              </label>
-              {{ form_curso.link }}
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+              <button type="submit" class="btn btn-primary">Guardar Curso</button>
             </div>
-            <div class="mb-3">
-              <label for="{{ form_curso.imagen.id_for_label }}" class="form-label">
-                {{ form_curso.imagen.label }}
-              </label>
-              {{ form_curso.imagen }}
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="modalCrearDocumento" tabindex="-1" aria-labelledby="modalCrearDocumentoLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content p-1">
+          
+          <div class="modal-header">
+            <div>
+              <h5 class="modal-title fw-bold" id="modalCrearDocumentoLabel">Añadir un Documento</h5>
+              <p class="mb-0 text-muted small">Sube un nuevo documento o enlace al repositorio.</p>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+
+          <div class="modal-body">
+            <form action="" method="POST" enctype="multipart/form-data">
+              {% csrf_token %}
+              <input type="hidden" name="form_type" value="documento"> 
+
+              {% if form_documento.non_field_errors %}
+                <div class="alert alert-danger" role="alert">
+                  {% for error in form_documento.non_field_errors %}
+                    {{ error }}
+                  {% endfor %}
+                </div>
+              {% endif %}
+
+              <p class="text-muted small">
+                Completa los detalles. Los campos con (<span class="text-danger">*</span>) son obligatorios.
+              </p>
+
+              <div class="mb-3">
+                <label for="{{ form_documento.nombre.id_for_label }}" class="form-label">
+                  {{ form_documento.nombre.label }}<span class="text-danger"> *</span>
+                </label>
+                {{ form_documento.nombre }}
+                <div class="form-text">{{ form_documento.nombre.help_text }}</div>
+                {% if form_documento.nombre.errors %}<div class="invalid-feedback d-block">{{ form_documento.nombre.errors.0 }}</div>{% endif %}
+              </div>
+              
+              <div class="mb-3">
+                <label for="{{ form_documento.descripcion.id_for_label }}" class="form-label">
+                  {{ form_documento.descripcion.label }}
+                </label>
+                {{ form_documento.descripcion }}
+                <div class="form-text">{{ form_documento.descripcion.help_text }}</div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="{{ form_documento.codigo_documento.id_for_label }}" class="form-label">
+                    {{ form_documento.codigo_documento.label }}
+                  </label>
+                  {{ form_documento.codigo_documento }}
+                  <div class="form-text">{{ form_documento.codigo_documento.help_text }}</div>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="{{ form_documento.tipo_documento.id_for_label }}" class="form-label">
+                    {{ form_documento.tipo_documento.label }}<span class="text-danger"> *</span>
+                  </label>
+                  {{ form_documento.tipo_documento }}
+                  <div class="form-text">{{ form_documento.tipo_documento.help_text }}</div>
+                  {% if form_documento.tipo_documento.errors %}<div class="invalid-feedback d-block">{{ form_documento.tipo_documento.errors.0 }}</div>{% endif %}
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="{{ form_documento.archivo.id_for_label }}" class="form-label">
+                    {{ form_documento.archivo.label }} <span class="text-danger">* *</span>
+                  </label>
+                  {{ form_documento.archivo }} 
+                  <div class="form-text">{{ form_documento.archivo.help_text }}</div>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="{{ form_documento.enlace_externo.id_for_label }}" class="form-label">
+                    {{ form_documento.enlace_externo.label }} <span class="text-danger">* *</span>
+                  </label>
+                  {{ form_documento.enlace_externo }}
+                  <div class="form-text">{{ form_documento.enlace_externo.help_text }}</div>
+                </div>
+              </div>
+              <p class="text-muted small text-center"><span class="text-danger">* * </span>Debes proporcionar al menos un archivo o un enlace externo.</p>
+
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="{{ form_documento.palabras_clave.id_for_label }}" class="form-label">
+                      {{ form_documento.palabras_clave.label }}
+                    </label>
+                    {{ form_documento.palabras_clave }}
+                    <div class="form-text">{{ form_documento.palabras_clave.help_text }}</div>
+                  </div>
+                <div class="col-md-6 mb-3">
+                    <label for="{{ form_documento.estado.id_for_label }}" class="form-label">
+                      {{ form_documento.estado.label }}<span class="text-danger"> *</span>
+                    </label>
+                    {{ form_documento.estado }}
+                    <div class="form-text">{{ form_documento.estado.help_text }}</div>
+                </div>
+              </div>
+              
+              <hr class="my-4">
+
+              <div class="form-check mb-3">
+                {{ form_documento.es_general }}
+                <label class="form-check-label" for="{{ form_documento.es_general.id_for_label }}">
+                  {{ form_documento.es_general.label_tag }}
+                </label>
+                <div class="form-text">{{ form_documento.es_general.help_text }}</div>
+              </div>
+
+              <div class="mb-3" id="campoDepartamentosDoc"> <label for="{{ form_documento.departamentos_destinados.id_for_label }}" class="form-label">
+                  {{ form_documento.departamentos_destinados.label }}
+                </label>
+                {{ form_documento.departamentos_destinados }}
+                <div class="form-text">{{ form_documento.departamentos_destinados.help_text }}</div>
+              </div>
+
+            </div> <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+              <button type="submit" class="btn btn-primary">Guardar Documento</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="modalEditarCurso" tabindex="-1" aria-labelledby="modalEditarCursoLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content p-1">
+          
+          <div class="modal-header">
+            <div>
+              <h5 class="modal-title fw-bold" id="modalEditarCursoLabel">Modificar un curso</h5>
+              <p class="mb-0 text-muted small">Selecciona un curso para editar sus detalles.</p>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+
+          <div class="modal-body">
+            <div id="curso-selector-container">
+              <select class="form-select" id="select-curso-a-editar">
+                <option value="" selected disabled>Elige un curso...</option>
+                
+                {% for curso in todos_los_cursos %}
+                  <option value="{{ curso.id }}">{{ curso.titulo }}</option>
+                {% endfor %}
+
+              </select>
             </div>
 
-            <div class="col-md-6 mb-3">
-              <label for="{{ form_curso.estado.id_for_label }}" class="form-label">
-                {{ form_curso.estado.label }}
-              </label>
-              {{ form_curso.estado }}
-              <div class="form-text">{{ form_curso.estado.help_text|default:'' }}</div>
-              {% if form_curso.estado.errors %}<div class="invalid-feedback d-block">{{ form_curso.estado.errors.0 }}</div>{% endif %}
-            </div>
-            
-            <hr class="my-4">
+            <div id="curso-form-container" class="mt-4" style="display: none;">
+              </div>
 
-            <div class="form-check mb-3">
-              {{ form_curso.es_general }}
-              <label class="form-check-label" for="{{ form_curso.es_general.id_for_label }}">
-                {{ form_curso.es_general.label }}
-              </label>
-              <div class="form-text">{{ form_curso.es_general.help_text }}</div>
+            <div id="loading-spinner-editar" class="text-center mt-4" style="display: none;">
+              <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+              <p>Cargando datos del curso...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="modalEditarDocumento" tabindex="-1" aria-labelledby="modalEditarDocumentoLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content p-1">
+          
+          <div class="modal-header">
+            <div>
+              <h5 class="modal-title fw-bold" id="modalEditarDocumentoLabel">Modificar un documento</h5>
+              <p class="mb-0 text-muted small">Selecciona un documento para editar sus detalles.</p>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+
+          <div class="modal-body">
+            <div id="documento-selector-container">
+              <select class="form-select" id="select-documento-a-editar">
+                <option value="" selected disabled>Elige un documento...</option>
+                
+                {% for documento in todos_los_documentos %}
+                  <option value="{{ documento.id }}">{{ documento.nombre }}</option>
+                {% endfor %}
+
+              </select>
             </div>
 
-            <div class="mb-3" id="campoDepartamentos">
-              <label for="{{ form_curso.departamentos_destinados.id_for_label }}" class="form-label">
-                {{ form_curso.departamentos_destinados.label }}
-              </label>
-              {{ form_curso.departamentos_destinados }}
-              <div class="form-text">{{ form_curso.departamentos_destinados.help_text }}</div>
-            </div>
+            <div id="documento-form-container" class="mt-4" style="display: none;">
+              </div>
 
-            <div class="mb-3">
-              <label for="{{ form_curso.inscritos.id_for_label }}" class="form-label">
-                {{ form_curso.inscritos.label }}
-              </label>
-              {{ form_curso.inscritos }}
-              <div class="form-text">{{ form_curso.inscritos.help_text }}</div>
+            <div id="loading-spinner-editar-documento" class="text-center mt-4" style="display: none;">
+              <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+              <p>Cargando datos del documento...</p>
             </div>
-
           </div>
 
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            <button type="submit" class="btn btn-primary">Guardar Curso</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
-
-  <div class="modal fade" id="modalCrearDocumento" tabindex="-1" aria-labelledby="modalCrearDocumentoLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content p-1">
-        
-        <div class="modal-header">
-          <div>
-            <h5 class="modal-title fw-bold" id="modalCrearDocumentoLabel">Añadir un Documento</h5>
-            <p class="mb-0 text-muted small">Sube un nuevo documento o enlace al repositorio.</p>
-          </div>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-
-        <div class="modal-body">
-          <form action="" method="POST" enctype="multipart/form-data">
-            {% csrf_token %}
-            <input type="hidden" name="form_type" value="documento"> <p class="text-muted small">
-              Completa los detalles. Los campos con (<span class="text-danger">*</span>) son obligatorios.
-            </p>
-
-            <div class="mb-3">
-              <label for="{{ form_documento.nombre.id_for_label }}" class="form-label">
-                {{ form_documento.nombre.label }}<span class="text-danger"> *</span>
-              </label>
-              {{ form_documento.nombre }}
-              <div class="form-text">{{ form_documento.nombre.help_text }}</div>
-              {% if form_documento.nombre.errors %}<div class="invalid-feedback d-block">{{ form_documento.nombre.errors.0 }}</div>{% endif %}
-            </div>
-            
-            <div class="mb-3">
-              <label for="{{ form_documento.descripcion.id_for_label }}" class="form-label">
-                {{ form_documento.descripcion.label }}
-              </label>
-              {{ form_documento.descripcion }}
-              <div class="form-text">{{ form_documento.descripcion.help_text }}</div>
-            </div>
-
-            <div class="row">
-              <div class="col-md-6 mb-3">
-                <label for="{{ form_documento.codigo_documento.id_for_label }}" class="form-label">
-                  {{ form_documento.codigo_documento.label }}
-                </label>
-                {{ form_documento.codigo_documento }}
-                <div class="form-text">{{ form_documento.codigo_documento.help_text }}</div>
-              </div>
-              <div class="col-md-6 mb-3">
-                <label for="{{ form_documento.tipo_documento.id_for_label }}" class="form-label">
-                  {{ form_documento.tipo_documento.label }}<span class="text-danger"> *</span>
-                </label>
-                {{ form_documento.tipo_documento }}
-                <div class="form-text">{{ form_documento.tipo_documento.help_text }}</div>
-                {% if form_documento.tipo_documento.errors %}<div class="invalid-feedback d-block">{{ form_documento.tipo_documento.errors.0 }}</div>{% endif %}
-              </div>
-            </div>
-
-            <div class="row">
-              <div class="col-md-6 mb-3">
-                <label for="{{ form_documento.archivo.id_for_label }}" class="form-label">
-                  {{ form_documento.archivo.label }}
-                </label>
-                {{ form_documento.archivo }}
-                <div class="form-text">{{ form_documento.archivo.help_text }}</div>
-              </div>
-              <div class="col-md-6 mb-3">
-                <label for="{{ form_documento.enlace_externo.id_for_label }}" class="form-label">
-                  {{ form_documento.enlace_externo.label }}
-                </label>
-                {{ form_documento.enlace_externo }}
-                <div class="form-text">{{ form_documento.enlace_externo.help_text }}</div>
-              </div>
-            </div>
-            <p class="text-muted small text-center">Debes proporcionar al menos un archivo o un enlace externo.</p>
-
-            <div class="row">
-              <div class="col-md-6 mb-3">
-                  <label for="{{ form_documento.palabras_clave.id_for_label }}" class="form-label">
-                    {{ form_documento.palabras_clave.label }}
-                  </label>
-                  {{ form_documento.palabras_clave }}
-                  <div class="form-text">{{ form_documento.palabras_clave.help_text }}</div>
-                </div>
-              <div class="col-md-6 mb-3">
-                  <label for="{{ form_documento.estado.id_for_label }}" class="form-label">
-                    {{ form_documento.estado.label }}<span class="text-danger"> *</span>
-                  </label>
-                  {{ form_documento.estado }}
-                  <div class="form-text">{{ form_documento.estado.help_text }}</div>
-              </div>
-            </div>
-            
-            <hr class="my-4">
-
-            <div class="form-check mb-3">
-              {{ form_documento.es_general }}
-              <label class="form-check-label" for="{{ form_documento.es_general.id_for_label }}">
-                {{ form_documento.es_general.label_tag }}
-              </label>
-              <div class="form-text">{{ form_documento.es_general.help_text }}</div>
-            </div>
-
-            <div class="mb-3" id="campoDepartamentosDoc"> <label for="{{ form_documento.departamentos_destinados.id_for_label }}" class="form-label">
-                {{ form_documento.departamentos_destinados.label }}
-              </label>
-              {{ form_documento.departamentos_destinados }}
-              <div class="form-text">{{ form_documento.departamentos_destinados.help_text }}</div>
-            </div>
-
-          </div> <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            <button type="submit" class="btn btn-primary">Guardar Documento</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
-
-  <div class="modal fade" id="modalEditarCurso" tabindex="-1" aria-labelledby="modalEditarCursoLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content p-1">
-        
-        <div class="modal-header">
-          <div>
-            <h5 class="modal-title fw-bold" id="modalEditarCursoLabel">Modificar un curso</h5>
-            <p class="mb-0 text-muted small">Selecciona un curso para editar sus detalles.</p>
-          </div>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-
-        <div class="modal-body">
-          <div id="curso-selector-container">
-            <select class="form-select" id="select-curso-a-editar">
-              <option value="" selected disabled>Elige un curso...</option>
-              
-              {% for curso in todos_los_cursos %}
-                <option value="{{ curso.id }}">{{ curso.titulo }}</option>
-              {% endfor %}
-
-            </select>
           </div>
 
-          <div id="curso-form-container" class="mt-4" style="display: none;">
-            </div>
-
-          <div id="loading-spinner-editar" class="text-center mt-4" style="display: none;">
-            <div class="spinner-border" role="status">
-              <span class="visually-hidden">Loading...</span>
-            </div>
-            <p>Cargando datos del curso...</p>
-          </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <div class="modal fade" id="modalEditarDocumento" tabindex="-1" aria-labelledby="modalEditarDocumentoLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content p-1">
-        
-        <div class="modal-header">
-          <div>
-            <h5 class="modal-title fw-bold" id="modalEditarDocumentoLabel">Modificar un documento</h5>
-            <p class="mb-0 text-muted small">Selecciona un documento para editar sus detalles.</p>
-          </div>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      let formIsSubmitting = false;
 
-        <div class="modal-body">
-          <div id="documento-selector-container">
-            <select class="form-select" id="select-documento-a-editar">
-              <option value="" selected disabled>Elige un documento...</option>
-              
-              {% for documento in todos_los_documentos %}
-                <option value="{{ documento.id }}">{{ documento.nombre }}</option>
-              {% endfor %}
+      // --- Variables Búsqueda Documentos ---
+      const searchInput_Docs = document.getElementById('doc-search-input');
+      const listContainer_Docs = document.getElementById('doc-list-container');
+      const loadMoreBtn_Docs = document.getElementById('doc-load-more-btn');
+      const loadingSpinner_Docs = document.getElementById('doc-loading-spinner');
+      let currentPage_Docs = 1;
+      let currentQuery_Docs = '';
+      let isLoading_Docs = false;
+      const searchUrl_Docs = "{% url 'resources:search_documentos' %}"; // URL de búsqueda de Documentos
+      
+      const searchInput_Formatos = document.getElementById('formato-search-input');
+      const listContainer_Formatos = document.getElementById('formato-list-container');
+      const loadMoreBtn_Formatos = document.getElementById('formato-load-more-btn');
+      const loadingSpinner_Formatos = document.getElementById('formato-loading-spinner');
+      let currentPage_Formatos = 1;
+      let currentQuery_Formatos = '';
+      let isLoading_Formatos = false;
+      const searchUrl_Formatos = "{% url 'resources:search_formatos' %}"; // URL de búsqueda de Formatos
 
-            </select>
-          </div>
+      // --- Variables Modal CREAR CURSO ---
+      const modalCrearCursoEl = document.getElementById('modalCrearCurso');
+      const myModalCrearCurso = new bootstrap.Modal(modalCrearCursoEl);
+      const esGeneralCheckCurso = document.getElementById("{{ form_curso.es_general.id_for_label }}");
+      const deptoFieldCurso = document.getElementById("campoDepartamentos");
 
-          <div id="documento-form-container" class="mt-4" style="display: none;">
-            </div>
+      // --- Variables Modal CREAR DOCUMENTO ---
+      const modalCrearDocumentoEl = document.getElementById('modalCrearDocumento');
+      const myModalCrearDocumento = new bootstrap.Modal(modalCrearDocumentoEl);
+      const esGeneralCheckDoc = document.getElementById("{{ form_documento.es_general.id_for_label }}");
+      const deptoFieldDoc = document.getElementById("campoDepartamentosDoc");
 
-          <div id="loading-spinner-editar-documento" class="text-center mt-4" style="display: none;">
-            <div class="spinner-border" role="status">
-              <span class="visually-hidden">Loading...</span>
-            </div>
-            <p>Cargando datos del documento...</p>
-          </div>
-        </div>
-
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        </div>
-
-      </div>
-    </div>
-  </div>
-
-<script>
-  document.addEventListener("DOMContentLoaded", () => {
-    
-    // --- Variables Búsqueda Documentos ---
-    const searchInput = document.getElementById('format-search-input');
-    const listContainer = document.getElementById('format-list-container');
-    const loadMoreBtn = document.getElementById('load-more-btn');
-    const loadingSpinnerDoc = document.getElementById('loading-spinner');
-    let currentPage = 1;
-    let currentQuery = '';
-    let isLoadingDocs = false;
-    const searchUrl = "{% url 'resources:search_documentos' %}";
-    
-    // --- Variables Modal CREAR CURSO ---
-    const modalCrearCursoEl = document.getElementById('modalCrearCurso');
-    const myModalCrearCurso = new bootstrap.Modal(modalCrearCursoEl);
-    const esGeneralCheckCurso = document.getElementById("{{ form_curso.es_general.id_for_label }}");
-    const deptoFieldCurso = document.getElementById("campoDepartamentos");
-
-    // --- Variables Modal CREAR DOCUMENTO ---
-    const modalCrearDocumentoEl = document.getElementById('modalCrearDocumento');
-    const myModalCrearDocumento = new bootstrap.Modal(modalCrearDocumentoEl);
-    const esGeneralCheckDoc = document.getElementById("{{ form_documento.es_general.id_for_label }}");
-    const deptoFieldDoc = document.getElementById("campoDepartamentosDoc");
-
-    // --- Variables Modal EDITAR CURSO ---
-    const modalEditarCursoEl = document.getElementById('modalEditarCurso');
-    const myModalEditarCurso = new bootstrap.Modal(modalEditarCursoEl);
-    const cursoSelector = document.getElementById('select-curso-a-editar');
-    const cursoFormContainer = document.getElementById('curso-form-container');
-    const loadingSpinnerEditarCurso = document.getElementById('loading-spinner-editar');
-
-    // --- Variables Modal EDITAR DOCUMENTO ---
-    const modalEditarDocumentoEl = document.getElementById('modalEditarDocumento');
-    const myModalEditarDocumento = new bootstrap.Modal(modalEditarDocumentoEl);
-    const documentoSelector = document.getElementById('select-documento-a-editar');
-    const documentoFormContainer = document.getElementById('documento-form-container');
-    const loadingSpinnerEditarDocumento = document.getElementById('loading-spinner-editar-documento');
-
-    // --- Lógica modal CREAR CURSO---
-    function toggleDepartamentosCurso() {
-      if (esGeneralCheckCurso && deptoFieldCurso) { 
-        deptoFieldCurso.style.display = esGeneralCheckCurso.checked ? "none" : "block";
+      const modalToReopen = "{{ form_with_errors|default:'none' }}";
+      
+      if (modalToReopen === 'curso') {
+          myModalCrearCurso.show();
+      } else if (modalToReopen === 'documento') {
+          // Esto forzará que el modal de "Crear Documento" se abra
+          // si la variable 'form_with_errors' es 'documento'
+          myModalCrearDocumento.show();
       }
-    }
-    if (esGeneralCheckCurso) {
-        toggleDepartamentosCurso(); // Run on load
-        esGeneralCheckCurso.addEventListener("change", toggleDepartamentosCurso);
-    }
-    
-    // --- Lógica modal CREAR DOCUMENTO ---
-    function toggleDepartamentosDoc() {
-      if (esGeneralCheckDoc && deptoFieldDoc) { 
-        deptoFieldDoc.style.display = esGeneralCheckDoc.checked ? "none" : "block";
+
+      // --- Variables Modal EDITAR CURSO ---
+      const modalEditarCursoEl = document.getElementById('modalEditarCurso');
+      const myModalEditarCurso = new bootstrap.Modal(modalEditarCursoEl);
+      const cursoSelector = document.getElementById('select-curso-a-editar');
+      const cursoFormContainer = document.getElementById('curso-form-container');
+      const loadingSpinnerEditarCurso = document.getElementById('loading-spinner-editar');
+
+      // --- Variables Modal EDITAR DOCUMENTO ---
+      const modalEditarDocumentoEl = document.getElementById('modalEditarDocumento');
+      const myModalEditarDocumento = new bootstrap.Modal(modalEditarDocumentoEl);
+      const documentoSelector = document.getElementById('select-documento-a-editar');
+      const documentoFormContainer = document.getElementById('documento-form-container');
+      const loadingSpinnerEditarDocumento = document.getElementById('loading-spinner-editar-documento');
+
+      // --- Lógica modal CREAR CURSO---
+      function toggleDepartamentosCurso() {
+        if (esGeneralCheckCurso && deptoFieldCurso) { 
+          deptoFieldCurso.style.display = esGeneralCheckCurso.checked ? "none" : "block";
+        }
       }
-    }
-    if (esGeneralCheckDoc) {
+      if (esGeneralCheckCurso) {
+          toggleDepartamentosCurso(); // Run on load
+          esGeneralCheckCurso.addEventListener("change", toggleDepartamentosCurso);
+      }
+      
+      // --- Lógica modal CREAR DOCUMENTO ---
+      function toggleDepartamentosDoc() {
+        if (esGeneralCheckDoc && deptoFieldDoc) { 
+          deptoFieldDoc.style.display = esGeneralCheckDoc.checked ? "none" : "block";
+        }
+      }
+      if (esGeneralCheckDoc) {
         toggleDepartamentosDoc(); // Run on load
         esGeneralCheckDoc.addEventListener("change", toggleDepartamentosDoc);
-    }
-    
-    // --- Inicialización Select2 (Modales de CREAR) ---
-    try {
-      $('#modalCrearCurso #id_create_curso-departamentos_destinados').select2({          
+      }
+      
+      // --- Inicialización Select2 (Modales de CREAR) ---
+      try {
+        $('#modalCrearCurso #id_create_curso-departamentos_destinados').select2({          
           theme: 'bootstrap-5',
           allowClear: true, 
           dropdownParent: $('#modalCrearCurso .modal-content')
-      });
-      $('#modalCrearCurso #id_create_curso-inscritos').select2({          
+        });
+        $('#modalCrearCurso #id_create_curso-inscritos').select2({          
           theme: 'bootstrap-5',
           allowClear: true,
           dropdownParent: $('#modalCrearCurso .modal-content')
-      });
-      console.log("Select2 (Crear Curso) inicializado.");
-    } catch (e) {
-      console.error("Error inicializando Select2 (Crear Curso):", e);
-    }
+        });
+        console.log("Select2 (Crear Curso) inicializado.");
+      } catch (e) {
+        console.error("Error inicializando Select2 (Crear Curso):", e);
+      }
 
-    try {
-      $('#modalCrearDocumento #id_create_doc-departamentos_destinados').select2({          
+      try {
+        $('#modalCrearDocumento #id_create_doc-departamentos_destinados').select2({          
           theme: 'bootstrap-5',
           allowClear: true, 
           dropdownParent: $('#modalCrearDocumento .modal-content')
-      });
-      console.log("Select2 (Crear Documento) inicializado.");
-    } catch (e) {
-      console.error("Error inicializando Select2 (Crear Documento):", e);
-    }
+        });
+        console.log("Select2 (Crear Documento) inicializado.");
+      } catch (e) {
+        console.error("Error inicializando Select2 (Crear Documento):", e);
+      }
 
-    // --- Lógica modal EDITAR CURSO ---
+      // --- Lógica modal EDITAR CURSO ---
 
-    // --- 1. FUNCIÓN REUTILIZABLE PARA CARGAR EL FORMULARIO ---
-    // (Extraemos la lógica de fetch para poder llamarla desde dos sitios)
-    const getFormUrlBase = "{% url 'resources:edit_curso' 0 %}";
+      // --- 1. FUNCIÓN REUTILIZABLE PARA CARGAR EL FORMULARIO ---
+      // (Extraemos la lógica de fetch para poder llamarla desde dos sitios)
+      const getFormUrlBase = "{% url 'resources:edit_curso' 0 %}";
 
-    async function loadCursoEditForm(cursoId) {
-        if (!cursoId) return;
+      async function loadCursoEditForm(cursoId) {
+          if (!cursoId) return;
 
-        // Mostrar spinner, ocultar form
-        if(loadingSpinnerEditarCurso) loadingSpinnerEditarCurso.style.display = "block";
-        if(cursoFormContainer) cursoFormContainer.style.display = "none";
-        if(cursoFormContainer) cursoFormContainer.innerHTML = "";
+          // Mostrar spinner, ocultar form
+          if(loadingSpinnerEditarCurso) loadingSpinnerEditarCurso.style.display = "block";
+          if(cursoFormContainer) cursoFormContainer.style.display = "none";
+          if(cursoFormContainer) cursoFormContainer.innerHTML = "";
 
-        try {
+          try {
             const url = getFormUrlBase.replace('0', cursoId); 
             const response = await fetch(url);
             if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
@@ -938,134 +1015,133 @@
             const html = await response.text();
             
             if(cursoFormContainer) {
-                cursoFormContainer.innerHTML = html;
-                cursoFormContainer.style.display = "block";
+              cursoFormContainer.innerHTML = html;
+              cursoFormContainer.style.display = "block";
 
-                // Inicializar Select2s DENTRO del formulario cargado
-                // Usamos un setTimeout de 0ms para asegurar que el DOM se haya actualizado
-                setTimeout(function() {
-                    console.log("Formulario (Editar Curso) cargado. Inicializando Select2...");
-                    try {
-                        $('#edit-curso-form #id_edit-departamentos_destinados').select2({
-                            theme: 'bootstrap-5',
-                            allowClear: true,
-                            dropdownParent: $('#modalEditarCurso .modal-content') // <-- Corregido
-                        });
-                        console.log("Select2 para Departamentos (Editar) ¡OK!");
+              // Inicializar Select2s DENTRO del formulario cargado
+              // Usamos un setTimeout de 0ms para asegurar que el DOM se haya actualizado
+              setTimeout(function() {
+                console.log("Formulario (Editar Curso) cargado. Inicializando Select2...");
+                try {
+                  $('#edit-curso-form #id_edit-departamentos_destinados').select2({
+                    theme: 'bootstrap-5',
+                    allowClear: true,
+                    dropdownParent: $('#modalEditarCurso .modal-content') // <-- Corregido
+                  });
+                  console.log("Select2 para Departamentos (Editar) ¡OK!");
 
-                        $('#edit-curso-form #id_edit-inscritos').select2({
-                            theme: 'bootstrap-5',
-                            allowClear: true,
-                            dropdownParent: $('#modalEditarCurso .modal-content') // <-- Corregido
-                        });
-                        console.log("Select2 para Inscritos (Editar) ¡OK!");
-
-                    } catch (e) {
-                        console.error("¡Falló la inicialización de Select2 (Editar Curso)!", e);
-                    }
-                }, 0); 
+                  $('#edit-curso-form #id_edit-inscritos').select2({
+                    theme: 'bootstrap-5',
+                    allowClear: true,
+                    dropdownParent: $('#modalEditarCurso .modal-content') // <-- Corregido
+                  });
+                  console.log("Select2 para Inscritos (Editar) ¡OK!");
+                } catch (e) {
+                    console.error("¡Falló la inicialización de Select2 (Editar Curso)!", e);
+                }
+              }, 0); 
             }
-        } catch (error) {
-            console.error("Error cargando el form de editar (curso):", error);
-            if(cursoFormContainer) {
-                cursoFormContainer.innerHTML = `<div class="alert alert-danger">No se pudo cargar el formulario. ${error.message}</div>`;
-                cursoFormContainer.style.display = "block";
-            }
-        } finally {
-            if(loadingSpinnerEditarCurso) loadingSpinnerEditarCurso.style.display = "none";
-        }
-    }
-    // --- FIN DE LA FUNCIÓN REUTILIZABLE ---
-
-
-    // (Este listener detecta QUÉ botón abrió el modal)
-    modalEditarCursoEl.addEventListener('show.bs.modal', function(event) {
-      // event.relatedTarget es el botón que hizo clic (el engranaje o el botón "Modificar")
-      const triggerButton = event.relatedTarget;
-      const selectorContainer = document.getElementById('curso-selector-container');
-
-      // Reseteo base cada vez que se abre
-      if(cursoSelector) cursoSelector.value = "";
-      if(cursoFormContainer) cursoFormContainer.innerHTML = "";
-      if(cursoFormContainer) cursoFormContainer.style.display = "none";
-      if(loadingSpinnerEditarCurso) loadingSpinnerEditarCurso.style.display = "none";
-
-      if (triggerButton && triggerButton.classList.contains('btn-edit-curso')) {
-          // --- CASO 1: Se hizo clic en el ENGRANAJE ---
-          const cursoId = triggerButton.dataset.cursoId;
-          
-          // Ocultamos el dropdown selector y cargamos el form directamente
-          if(selectorContainer) selectorContainer.style.display = "none";
-          loadCursoEditForm(cursoId); // Llamamos a la función con el ID
-          
-      } else {
-        // --- CASO 2: Se hizo clic en el botón genérico "Modificar cursos" ---
-        // Mostramos el dropdown selector para que elija
-        if(selectorContainer) selectorContainer.style.display = "block";
+          } catch (error) {
+              console.error("Error cargando el form de editar (curso):", error);
+              if(cursoFormContainer) {
+                  cursoFormContainer.innerHTML = `<div class="alert alert-danger">No se pudo cargar el formulario. ${error.message}</div>`;
+                  cursoFormContainer.style.display = "block";
+              }
+          } finally {
+              if(loadingSpinnerEditarCurso) loadingSpinnerEditarCurso.style.display = "none";
+          }
       }
-    });
+      // --- FIN DE LA FUNCIÓN REUTILIZABLE ---
 
-    // --- 3. LÓGICA DEL DROPDOWN (AHORA SOLO LLAMA A LA FUNCIÓN) ---
-    // (Esta lógica sigue funcionando para el dropdown)
-    if (cursoSelector) {
-      cursoSelector.addEventListener('change', function() {
-        // El dropdown simplemente llama a la misma función
-        loadCursoEditForm(this.value);
-      });
-    }
 
-    // --- Lógica modal EDITAR DOCUMENTO ---
+      // (Este listener detecta QUÉ botón abrió el modal)
+      modalEditarCursoEl.addEventListener('show.bs.modal', function(event) {
+        // event.relatedTarget es el botón que hizo clic (el engranaje o el botón "Modificar")
+        const triggerButton = event.relatedTarget;
+        const selectorContainer = document.getElementById('curso-selector-container');
 
-// --- 1. FUNCIÓN REUTILIZABLE PARA CARGAR EL FORMULARIO DE DOCUMENTO ---
-    const getDocFormUrlBase = "{% url 'resources:edit_documento' 0 %}";
+        // Reseteo base cada vez que se abre
+        if(cursoSelector) cursoSelector.value = "";
+        if(cursoFormContainer) cursoFormContainer.innerHTML = "";
+        if(cursoFormContainer) cursoFormContainer.style.display = "none";
+        if(loadingSpinnerEditarCurso) loadingSpinnerEditarCurso.style.display = "none";
 
-    async function loadDocumentoEditForm(documentoId) {
-        if (!documentoId) return;
-
-        if(loadingSpinnerEditarDocumento) loadingSpinnerEditarDocumento.style.display = "block";
-        if(documentoFormContainer) documentoFormContainer.style.display = "none";
-        if(documentoFormContainer) documentoFormContainer.innerHTML = "";
-
-        try {
-            const url = getDocFormUrlBase.replace('0', documentoId); 
-            const response = await fetch(url);
-            if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
-            const html = await response.text();
+        if (triggerButton && triggerButton.classList.contains('btn-edit-curso')) {
+            // --- CASO 1: Se hizo clic en el ENGRANAJE ---
+            const cursoId = triggerButton.dataset.cursoId;
             
-            if(documentoFormContainer) {
-                documentoFormContainer.innerHTML = html;
-                documentoFormContainer.style.display = "block";
-
-                setTimeout(function() {
-                    console.log("Formulario (Editar Doc) cargado. Inicializando Select2...");
-                    try {
-                        $('#documento-form-container #id_edit-doc-departamentos_destinados').select2({
-                            placeholder: "Busca y selecciona departamentos",
-                            width: '100%',
-                            theme: "bootstrap-5",
-                            dropdownParent: $('#modalEditarDocumento .modal-content')
-                        });
-                        console.log("Select2 para Departamentos (Editar Doc) ¡OK!");
-                    } catch (e) {
-                        console.error("¡Falló la inicialización de Select2 (Editar Doc)!", e);
-                    }
-                }, 0); 
-            }
-        } catch (error) {
-            console.error("Error cargando el form de editar (documento):", error);
-            if(documentoFormContainer) {
-                documentoFormContainer.innerHTML = `<div class="alert alert-danger">No se pudo cargar el formulario. ${error.message}</div>`;
-                documentoFormContainer.style.display = "block";
-            }
-        } finally {
-            if(loadingSpinnerEditarDocumento) loadingSpinnerEditarDocumento.style.display = "none";
+            // Ocultamos el dropdown selector y cargamos el form directamente
+            if(selectorContainer) selectorContainer.style.display = "none";
+            loadCursoEditForm(cursoId); // Llamamos a la función con el ID
+            
+        } else {
+          // --- CASO 2: Se hizo clic en el botón genérico "Modificar cursos" ---
+          // Mostramos el dropdown selector para que elija
+          if(selectorContainer) selectorContainer.style.display = "block";
         }
-    }
-    // --- FIN FUNCIÓN REUTILIZABLE ---
+      });
+
+      // --- 3. LÓGICA DEL DROPDOWN (AHORA SOLO LLAMA A LA FUNCIÓN) ---
+      // (Esta lógica sigue funcionando para el dropdown)
+      if (cursoSelector) {
+        cursoSelector.addEventListener('change', function() {
+          // El dropdown simplemente llama a la misma función
+          loadCursoEditForm(this.value);
+        });
+      }
+
+      // --- Lógica modal EDITAR DOCUMENTO ---
+
+  // --- 1. FUNCIÓN REUTILIZABLE PARA CARGAR EL FORMULARIO DE DOCUMENTO ---
+      const getDocFormUrlBase = "{% url 'resources:edit_documento' 0 %}";
+
+      async function loadDocumentoEditForm(documentoId) {
+          if (!documentoId) return;
+
+          if(loadingSpinnerEditarDocumento) loadingSpinnerEditarDocumento.style.display = "block";
+          if(documentoFormContainer) documentoFormContainer.style.display = "none";
+          if(documentoFormContainer) documentoFormContainer.innerHTML = "";
+
+          try {
+              const url = getDocFormUrlBase.replace('0', documentoId); 
+              const response = await fetch(url);
+              if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
+              const html = await response.text();
+              
+              if(documentoFormContainer) {
+                  documentoFormContainer.innerHTML = html;
+                  documentoFormContainer.style.display = "block";
+
+                  setTimeout(function() {
+                      console.log("Formulario (Editar Doc) cargado. Inicializando Select2...");
+                      try {
+                          $('#documento-form-container #id_edit-doc-departamentos_destinados').select2({
+                              placeholder: "Busca y selecciona departamentos",
+                              width: '100%',
+                              theme: "bootstrap-5",
+                              dropdownParent: $('#modalEditarDocumento .modal-content')
+                          });
+                          console.log("Select2 para Departamentos (Editar Doc) ¡OK!");
+                      } catch (e) {
+                          console.error("¡Falló la inicialización de Select2 (Editar Doc)!", e);
+                      }
+                  }, 0); 
+              }
+          } catch (error) {
+              console.error("Error cargando el form de editar (documento):", error);
+              if(documentoFormContainer) {
+                  documentoFormContainer.innerHTML = `<div class="alert alert-danger">No se pudo cargar el formulario. ${error.message}</div>`;
+                  documentoFormContainer.style.display = "block";
+              }
+          } finally {
+              if(loadingSpinnerEditarDocumento) loadingSpinnerEditarDocumento.style.display = "none";
+          }
+      }
+      // --- FIN FUNCIÓN REUTILIZABLE ---
 
 
-    // --- 2. LÓGICA MEJORADA PARA ABRIR EL MODAL DE DOCUMENTO ---
-    modalEditarDocumentoEl.addEventListener('show.bs.modal', function(event) {
+      // --- 2. LÓGICA MEJORADA PARA ABRIR EL MODAL DE DOCUMENTO ---
+      modalEditarDocumentoEl.addEventListener('show.bs.modal', function(event) {
         const triggerButton = event.relatedTarget; // El botón que abrió el modal
         const selectorContainerDoc = document.getElementById('documento-selector-container');
 
@@ -1088,143 +1164,188 @@
             // Mostrar el dropdown selector
             if(selectorContainerDoc) selectorContainerDoc.style.display = "block";
         }
-    });
+      });
 
 
-    // --- 3. LÓGICA DEL DROPDOWN DE DOCUMENTO (LLAMA A LA FUNCIÓN) ---
-    if (documentoSelector) {
+      // --- 3. LÓGICA DEL DROPDOWN DE DOCUMENTO (LLAMA A LA FUNCIÓN) ---
+      if (documentoSelector) {
         documentoSelector.addEventListener('change', function() {
             loadDocumentoEditForm(this.value); // El dropdown también usa la función
         });
-    }
-
-  
-
-
-    // --- Lógica Búsqueda de Documentos
-    async function fetchdocumentos(page, query, append = false) { 
-      if (isLoadingDocs) return; 
-      isLoadingDocs = true;
-      if(loadingSpinnerDoc) loadingSpinnerDoc.style.display = 'block';
-      if(loadMoreBtn) loadMoreBtn.style.display = 'none';
-
-      const urlFetch = new URL(searchUrl, window.location.origin);
-      urlFetch.searchParams.set('page', page);
-      urlFetch.searchParams.set('q', query);
-
-      try {
-        const response = await fetch(urlFetch);
-        if (!response.ok) throw new Error('Network response was not ok');
-        const data = await response.json();
-
-        if (listContainer) { 
-            if (append) {
-              listContainer.insertAdjacentHTML('beforeend', data.html);
-            } else {
-              listContainer.innerHTML = data.html;
-            }
-        }
-        currentPage = page; 
-        if(loadMoreBtn) loadMoreBtn.style.display = data.has_next ? 'block' : 'none';
-        
-      } catch (error) {
-        console.error("Error loading documents:", error);
-      } finally {
-        isLoadingDocs = false;
-        if(loadingSpinnerDoc) loadingSpinnerDoc.style.display = 'none';
       }
-    }
 
-    if (loadMoreBtn) {
-        loadMoreBtn.addEventListener('click', () => {
-          fetchdocumentos(currentPage + 1, currentQuery, true);
+      // --- Lógica Búsqueda de Documentos
+      async function fetchDocumentos_Docs(page, query, append = false) { 
+        if (isLoading_Docs) return; 
+        isLoading_Docs = true;
+        if(loadingSpinner_Docs) loadingSpinner_Docs.style.display = 'block';
+        if(loadMoreBtn_Docs) loadMoreBtn_Docs.style.display = 'none';
+
+        const urlFetch = new URL(searchUrl_Docs, window.location.origin);
+        urlFetch.searchParams.set('page', page);
+        urlFetch.searchParams.set('q', query);
+
+        try {
+          const response = await fetch(urlFetch);
+          if (!response.ok) throw new Error('Network response was not ok');
+          const data = await response.json();
+
+          if (listContainer_Docs) { 
+            if (append) {
+              listContainer_Docs.insertAdjacentHTML('beforeend', data.html);
+            } else {
+              listContainer_Docs.innerHTML = data.html;
+            }
+          }
+          currentPage_Docs = page; 
+          if(loadMoreBtn_Docs) loadMoreBtn_Docs.style.display = data.has_next ? 'block' : 'none';
+        } catch (error) {
+          console.error("Error loading documents:", error);
+        } finally {
+          isLoading_Docs = false;
+          if(loadingSpinner_Docs) loadingSpinner_Docs.style.display = 'none';
+        }
+      }
+
+      if (loadMoreBtn_Docs) {
+        loadMoreBtn_Docs.addEventListener('click', () => {
+          fetchDocumentos_Docs(currentPage_Docs + 1, currentQuery_Docs, true);
         });
-    }
-    if (searchInput) {
+      }
+
+      if (searchInput_Docs) {
         let debounceTimer;
-        searchInput.addEventListener('input', (e) => {
+        searchInput_Docs.addEventListener('input', (e) => {
           clearTimeout(debounceTimer);
           debounceTimer = setTimeout(() => {
-            currentQuery = e.target.value;
-            fetchdocumentos(1, currentQuery, false);
+            currentQuery_Docs = e.target.value;
+            fetchDocumentos_Docs(1, currentQuery_Docs, false);
           }, 300);
         });
-    }
+      }
 
-    // --- Lógica Toasts
-    const toastElements = document.querySelectorAll('.toast');
-    if (toastElements.length > 0) {
-      toastElements.forEach(function (toastEl) {
-        const toast = new bootstrap.Toast(toastEl, { autohide: true, delay: 5000 });
-        toast.show();
+      async function fetchDocumentos_Formatos(page, query, append = false) { 
+          if (isLoading_Formatos) return; 
+          isLoading_Formatos = true;
+          if(loadingSpinner_Formatos) loadingSpinner_Formatos.style.display = 'block';
+          if(loadMoreBtn_Formatos) loadMoreBtn_Formatos.style.display = 'none';
+
+          const urlFetch = new URL(searchUrl_Formatos, window.location.origin);
+          urlFetch.searchParams.set('page', page);
+          urlFetch.searchParams.set('q', query);
+
+          try {
+              const response = await fetch(urlFetch);
+              if (!response.ok) throw new Error('Network response was not ok');
+              const data = await response.json();
+
+              if (listContainer_Formatos) { 
+                  if (append) {
+                      listContainer_Formatos.insertAdjacentHTML('beforeend', data.html);
+                  } else {
+                      listContainer_Formatos.innerHTML = data.html;
+                  }
+              }
+              currentPage_Formatos = page; 
+              if(loadMoreBtn_Formatos) loadMoreBtn_Formatos.style.display = data.has_next ? 'block' : 'none';
+          } catch (error) {
+              console.error("Error loading formatos:", error);
+          } finally {
+              isLoading_Formatos = false;
+              if(loadingSpinner_Formatos) loadingSpinner_Formatos.style.display = 'none';
+          }
+      }
+
+      if (loadMoreBtn_Formatos) {
+          loadMoreBtn_Formatos.addEventListener('click', () => {
+              fetchDocumentos_Formatos(currentPage_Formatos + 1, currentQuery_Formatos, true);
+          });
+      }
+      if (searchInput_Formatos) {
+          let debounceTimer;
+          searchInput_Formatos.addEventListener('input', (e) => {
+              clearTimeout(debounceTimer);
+              debounceTimer = setTimeout(() => {
+                  currentQuery_Formatos = e.target.value;
+                  fetchDocumentos_Formatos(1, currentQuery_Formatos, false);
+              }, 300);
+          });
+      }
+
+      // --- Lógica Toasts
+      const toastElements = document.querySelectorAll('.toast');
+      if (toastElements.length > 0) {
+        toastElements.forEach(function (toastEl) {
+          const toast = new bootstrap.Toast(toastEl, { autohide: true, delay: 5000 });
+          toast.show();
+        });
+      }
+
+      // --- Lógica Botón Móvil ---
+      
+      // CREAR CURSO
+      modalCrearCursoEl.addEventListener('show.bs.modal', function () {
+        if (window.location.hash !== '#modalCreateCurso') { // Hash único
+          history.pushState({ modal: 'createCurso' }, '', '#modalCreateCurso');
+        }
       });
-    }
+      modalCrearCursoEl.addEventListener('hide.bs.modal', function () {
+        if (history.state && history.state.modal === 'createCurso') {
+          history.back();
+        }
+      });
 
-    // --- Lógica Botón Móvil (Actualizada para todos los modales) ---
-    
-    // CREAR CURSO
-    modalCrearCursoEl.addEventListener('show.bs.modal', function () {
-      if (window.location.hash !== '#modalCreateCurso') { // Hash único
-        history.pushState({ modal: 'createCurso' }, '', '#modalCreateCurso');
-      }
-    });
-    modalCrearCursoEl.addEventListener('hide.bs.modal', function () {
-      if (history.state && history.state.modal === 'createCurso') {
-        history.back();
-      }
-    });
+      // EDITAR CURSO
+      modalEditarCursoEl.addEventListener('show.bs.modal', function () {
+        if (window.location.hash !== '#modalEditCurso') { // Hash único
+          history.pushState({ modal: 'editCurso' }, '', '#modalEditCurso');
+        }
+      });
+      modalEditarCursoEl.addEventListener('hide.bs.modal', function () {
+        if (history.state && history.state.modal === 'editCurso') {
+          history.back();
+        }
+        if(cursoFormContainer) cursoFormContainer.innerHTML = "";
+        if(cursoFormContainer) cursoFormContainer.style.display = "none";
+        if(cursoSelector) cursoSelector.value = ""; 
+      });
 
-    // EDITAR CURSO
-    modalEditarCursoEl.addEventListener('show.bs.modal', function () {
-      if (window.location.hash !== '#modalEditCurso') { // Hash único
-        history.pushState({ modal: 'editCurso' }, '', '#modalEditCurso');
-      }
-    });
-    modalEditarCursoEl.addEventListener('hide.bs.modal', function () {
-      if (history.state && history.state.modal === 'editCurso') {
-        history.back();
-      }
-      if(cursoFormContainer) cursoFormContainer.innerHTML = "";
-      if(cursoFormContainer) cursoFormContainer.style.display = "none";
-      if(cursoSelector) cursoSelector.value = ""; 
-    });
+      // CREAR DOCUMENTO
+      modalCrearDocumentoEl.addEventListener('show.bs.modal', function () {
+        if (window.location.hash !== '#modalCreateDoc') { // Hash único
+          history.pushState({ modal: 'createDoc' }, '', '#modalCreateDoc');
+        }
+      });
+      modalCrearDocumentoEl.addEventListener('hide.bs.modal', function () {
+        if (history.state && history.state.modal === 'createDoc') {
+          history.back();
+        }
+      });
+      
+      // EDITAR DOCUMENTO
+      modalEditarDocumentoEl.addEventListener('show.bs.modal', function () {
+        if (window.location.hash !== '#modalEditDoc') { // Hash único
+          history.pushState({ modal: 'editDoc' }, '', '#modalEditDoc');
+        }
+      });
+      modalEditarDocumentoEl.addEventListener('hide.bs.modal', function () {
+        if (history.state && history.state.modal === 'editDoc') {
+          history.back();
+        }
+        if(documentoFormContainer) documentoFormContainer.innerHTML = "";
+        if(documentoFormContainer) documentoFormContainer.style.display = "none";
+        if(documentoSelector) documentoSelector.value = ""; 
+      });
 
-    // CREAR DOCUMENTO
-    modalCrearDocumentoEl.addEventListener('show.bs.modal', function () {
-      if (window.location.hash !== '#modalCreateDoc') { // Hash único
-        history.pushState({ modal: 'createDoc' }, '', '#modalCreateDoc');
-      }
+      // Listener de Popstate para cerrar modales
+      window.addEventListener('popstate', function (event) {
+        if (!event.state || !event.state.modal) { 
+            if (modalCrearCursoEl.classList.contains('show')) myModalCrearCurso.hide();
+            if (modalEditarCursoEl.classList.contains('show')) myModalEditarCurso.hide();
+            if (modalCrearDocumentoEl.classList.contains('show')) myModalCrearDocumento.hide();
+            if (modalEditarDocumentoEl.classList.contains('show')) myModalEditarDocumento.hide();
+        }
+      });
     });
-    modalCrearDocumentoEl.addEventListener('hide.bs.modal', function () {
-      if (history.state && history.state.modal === 'createDoc') {
-        history.back();
-      }
-    });
-    
-    // EDITAR DOCUMENTO
-    modalEditarDocumentoEl.addEventListener('show.bs.modal', function () {
-      if (window.location.hash !== '#modalEditDoc') { // Hash único
-        history.pushState({ modal: 'editDoc' }, '', '#modalEditDoc');
-      }
-    });
-    modalEditarDocumentoEl.addEventListener('hide.bs.modal', function () {
-      if (history.state && history.state.modal === 'editDoc') {
-        history.back();
-      }
-      if(documentoFormContainer) documentoFormContainer.innerHTML = "";
-      if(documentoFormContainer) documentoFormContainer.style.display = "none";
-      if(documentoSelector) documentoSelector.value = ""; 
-    });
-
-    // Listener de Popstate para cerrar modales
-    window.addEventListener('popstate', function (event) {
-      if (!event.state || !event.state.modal) { 
-          if (modalCrearCursoEl.classList.contains('show')) myModalCrearCurso.hide();
-          if (modalEditarCursoEl.classList.contains('show')) myModalEditarCurso.hide();
-          if (modalCrearDocumentoEl.classList.contains('show')) myModalCrearDocumento.hide();
-          if (modalEditarDocumentoEl.classList.contains('show')) myModalEditarDocumento.hide();
-      }
-    });
-  });
-</script>
-{% endblock %}
+  </script>
+  {% endblock %}
