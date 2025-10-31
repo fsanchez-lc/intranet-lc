@@ -15,13 +15,13 @@ from django.views.decorators.http import require_POST # <--- 1. IMPORT AÑADIDO
 def ResourcesView(request):
     # USUARIO ES ADMIN?
     is_admin = request.user.groups.filter(name='Administrativo').exists()
-
     # SLIDES
     slides_activos = Slide.objects.filter(is_active=True)
     # CURSOS
     mis_cursos = Curso.objects.none() # Queryset vacío por si no hay empleado
     cursos_disponibles = Curso.objects.none()
     empleado = None
+    user_depto_id = None
 
     # Inicializa ambos formularios como None
     form_curso = CursoForm(prefix='create_curso') 
@@ -70,6 +70,8 @@ def ResourcesView(request):
 
     try:
         empleado = request.user.empleado 
+        if empleado and empleado.departamento: # <--- AÑADIDO
+            user_depto_id = empleado.departamento.id # <--- AÑADIDO: Guardamos el ID
     except (Empleado.DoesNotExist, AttributeError):
         pass
 
@@ -96,12 +98,15 @@ def ResourcesView(request):
     mis_cursos_chunks = [mis_cursos[i:i + chunk_size] for i in range(0, len(mis_cursos), chunk_size)]
     cursos_disponibles_chunks = [cursos_disponibles[i:i + chunk_size] for i in range(0, len(cursos_disponibles), chunk_size)]    
     
-    documentos_dept_query = Q(es_general=True)
-    if empleado and empleado.departamento:
-        documentos_dept_query = Q(es_general=True) | Q(departamentos_destinados=empleado.departamento)
+    if is_admin:
+        documentos_dept_query = Q() # Admin ve todo (filtro vacío)
+    else:
+        # Si no es admin, aplicamos la lógica de permisos normal
+        documentos_dept_query = Q(es_general=True)
+        if empleado and empleado.departamento:
+            documentos_dept_query.add(Q(departamentos_destinados=empleado.departamento), Q.OR)
 
     # 1. CREA LA LISTA DE DOCUMENTOS (Políticas, Manuales, etc.)
-    #    Ajusta los nombres en __in=[...] según tu base de datos
     documentos_generales_list = Documento.objects.filter(
         documentos_dept_query, 
         estado='activo',
@@ -109,7 +114,6 @@ def ResourcesView(request):
     ).distinct().order_by('nombre')
     
     # 2. CREA LA LISTA DE FORMATOS (Formatos, Plantillas)
-    #    Ajusta los nombres en __in=[...] según tu base de datos
     formatos_list = Documento.objects.filter(
         documentos_dept_query, 
         estado='activo',
@@ -125,6 +129,18 @@ def ResourcesView(request):
 
     todos_los_cursos_list = Curso.objects.all().order_by('titulo')
 
+    all_departamentos = Departamento.objects.all().order_by('nombre')
+
+    tipos_para_documentos = TipoDocumento.objects.filter(
+        nombre__in=['Manual', 'Política', 'Guía', 'Anexo', 'Documento de interés']
+    ).order_by('nombre')
+    
+    # Lista de tipos para la sección "Formatos"
+    # (Uso los tipos que mencionaste en tu BuscarFormatosView)
+    tipos_para_formatos = TipoDocumento.objects.filter(
+        nombre__in=['Formato', 'Plantilla', 'Formato de interés']
+    ).order_by('nombre')
+
     context = {
         'form_curso': form_curso,
         'form_documento': form_documento,
@@ -136,7 +152,12 @@ def ResourcesView(request):
         'documentos_generales': documentos_page_1, # Reemplaza a 'documentos'
         'formatos': formatos_page_1,  
         'is_admin': is_admin,                                    # <-- Comprobación si es del grupo Administrador
-        'form_with_errors': form_with_errors
+        'form_with_errors': form_with_errors,
+
+        'all_departamentos': all_departamentos,
+        'tipos_para_documentos': tipos_para_documentos, # <-- NUEVO
+        'tipos_para_formatos': tipos_para_formatos,
+        'user_depto_id': user_depto_id, # ID para preseleccionar el <option>
     }
     return render(request, 'resources.html', context)
 
@@ -144,14 +165,9 @@ def ResourcesView(request):
 def BuscarDocumentosView(request):
     page_number = request.GET.get('page', 1)
     query = request.GET.get('q', '') # El término de búsqueda del input
-
+    depto_id = request.GET.get('departamento', '')
+    tipo_id = request.GET.get('tipo', '')
     is_admin = request.user.groups.filter(name='Administrativo').exists()
-
-    empleado = None
-    try:
-        empleado = request.user.empleado 
-    except (Empleado.DoesNotExist, AttributeError):
-        pass
 
     lookup = (
         Q(nombre__icontains=query) |
@@ -159,17 +175,40 @@ def BuscarDocumentosView(request):
         Q(palabras_clave__icontains=query)
     )
     
-    documentos_dept_query = Q(es_general=True)
-    if empleado and empleado.departamento:
-        documentos_dept_query = Q(es_general=True) | Q(departamentos_destinados=empleado.departamento)
+    empleado = None
+    try:
+        empleado = request.user.empleado
+    except (Empleado.DoesNotExist, AttributeError):
+        pass
 
-    tipo_query = Q(tipo_documento__nombre__in=['Manual', 'Política', 'Guía', 'Anexo', 'Documento de interés'])
+    # El "mundo" de documentos que este usuario tiene permitido ver
+    permission_query = Q(es_general=True)
+    if empleado and empleado.departamento:
+        permission_query.add(Q(departamentos_destinados=empleado.departamento), Q.OR)
+
+    if depto_id:
+        # Si se seleccionó un depto específico ("1", "2", etc.)
+        filter_query = Q(departamentos_destinados__id=depto_id)
+    else:
+        filter_query = Q(es_general=True)    
+        if empleado and empleado.departamento:
+            filter_query.add(Q(departamentos_destinados=empleado.departamento), Q.OR)
+        # --- FIN MODIFICADO ---
+
+    tipo_query_base = Q(tipo_documento__nombre__in=['Manual', 'Política', 'Guía', 'Anexo', 'Documento de interés']) # <--- MODIFICADO
+    
     documentos_list = Documento.objects.filter(
+        permission_query, # <-- 1. APLICAR PERMISOS PRIMERO
+        filter_query,
         lookup, 
-        documentos_dept_query, 
-        tipo_query,
+        tipo_query_base, # <--- MODIFICADO
         estado='activo'
-    ).distinct().order_by('nombre')
+    )
+
+    if tipo_id:
+        documentos_list = documentos_list.filter(tipo_documento__id=tipo_id)
+
+    documentos_list = documentos_list.distinct().order_by('nombre') # <--- MODIFICADO (movido después del filtro de tipo)
 
     paginator = Paginator(documentos_list, 4)
     page_obj = paginator.get_page(page_number)
@@ -187,38 +226,53 @@ def BuscarDocumentosView(request):
         'has_next': page_obj.has_next()
     })
 
-@login_required # <--- ¡AÑADE ESTA LÍNEA!   
+@login_required
 def BuscarFormatosView(request):
     page_number = request.GET.get('page', 1)
     query = request.GET.get('q', '') # El término de búsqueda del input
+    depto_id = request.GET.get('departamento', '')
+    tipo_id = request.GET.get('tipo', '')
 
     is_admin = request.user.groups.filter(name='Administrativo').exists()
-    empleado = None
-
-    try:
-        empleado = request.user.empleado 
-    except (Empleado.DoesNotExist, AttributeError):
-        pass
 
     lookup = (
         Q(nombre__icontains=query) |
         Q(codigo_documento__icontains=query) |
         Q(palabras_clave__icontains=query)
     )
-    
-    documentos_dept_query = Q(es_general=True)
-    if empleado and empleado.departamento:
-        documentos_dept_query = Q(es_general=True) | Q(departamentos_destinados=empleado.departamento)
 
-    tipo_query = Q(tipo_documento__nombre__in=['Formato', 'Plantilla', 'Formato de interés'])    
+    empleado = None
+    try:
+        empleado = request.user.empleado
+    except (Empleado.DoesNotExist, AttributeError):
+        pass
+
+    # El "mundo" de documentos que este usuario tiene permitido ver
+    permission_query = Q(es_general=True)
+    if empleado and empleado.departamento:
+        permission_query.add(Q(departamentos_destinados=empleado.departamento), Q.OR)
+    
+    if depto_id:
+        # REQ 1: Si se selecciona un depto, mostrar SOLO de ese depto.
+        filter_query = Q(departamentos_destinados__id=depto_id)    
+    else:
+        # REQ 2: Si se selecciona "Todos" (depto_id=''), mostrar SOLO 'es_general=True'.
+        filter_query = Q(es_general=True)    
+        # --- FIN MODIFICADO ---
+
+    tipo_query_base = Q(tipo_documento__nombre__in=['Formato', 'Plantilla', ''])
 
     documentos_list = Documento.objects.filter(
+        permission_query, # <-- 1. APLICAR PERMISOS PRIMERO
+        filter_query,
         lookup, 
-        documentos_dept_query, 
-        tipo_query,
+        tipo_query_base,
         estado='activo'
-    ).distinct().order_by('nombre')
+    )
+    if tipo_id:
+        documentos_list = documentos_list.filter(tipo_documento__id=tipo_id)
 
+    documentos_list = documentos_list.distinct().order_by('nombre') # <--- MODIFICADO (movido después del filtro de tipo)
     paginator = Paginator(documentos_list, 4)
     page_obj = paginator.get_page(page_number)
 
@@ -234,8 +288,6 @@ def BuscarFormatosView(request):
         'html': html,
         'has_next': page_obj.has_next()
     })
-
-
 
 
 # Función para verificar si es admin

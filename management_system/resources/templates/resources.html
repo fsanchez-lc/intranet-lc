@@ -481,79 +481,120 @@
         {% endif %}
       </div>
     </div>
+    <hr class="my-1"> 
 
-    <hr class="my-1">
+    <div class="mb-3 p-3" id="Formatos">
+      <h2 class="h4 mb-2">Formatos de interés</h2>
+      <p class="text-muted">
+          Documentos tales como formatos y plantillas.
+      </p>
+
+      <div class="row g-3 mb-4">
+
+          <div class="col-12 col-md-4">
+              <label for="form-filter-departamento" class="form-label">Departamento</label>
+              <select class="form-select" id="form-filter-departamento" aria-label="Filtrar por departamento">
+                  <option value="">Todos los Departamentos</option>
+                  {% for depto in all_departamentos %}
+                      <option value="{{ depto.id }}" {% if depto.id == user_depto_id %}selected{% endif %}>
+                          {{ depto.nombre }}
+                      </option>
+                  {% endfor %}
+              </select>
+          </div>
+
+          <div class="col-12 col-md-4">
+              <label for="form-filter-tipo" class="form-label">Tipo de Documento</label>
+              <select class="form-select" id="form-filter-tipo" aria-label="Filtrar por tipo de documento">
+                  <option selected value="">Todos los Tipos</option>
+                  {% for tipo in tipos_para_formatos %} <option value="{{ tipo.id }}">{{ tipo.nombre }}</option>
+                  {% endfor %}
+              </select>
+          </div>
+
+          <div class="col-12 col-md-4 d-flex align-items-end">
+              <div class="input-group w-100">
+                  <span class="input-group-text bg-body-tertiary border-0" id="search-icon-form">
+                      <i class="bi bi-search"></i>
+                  </span>
+                  <input type="text" 
+                        id="form-search-input" 
+                        class="form-control bg-body-secoda border-0" 
+                        placeholder="Buscar formatos..." 
+                        aria-label="Buscar" 
+                        aria-describedby="search-icon-form">
+              </div>
+          </div>
+      </div>
+      <div id="form-list-container" class="row row-cols-1 row-cols-md-2 g-3">
+          {% include '_documentos_partial.html' with documentos=formatos %}
+      </div>
+
+      <div class="text-center mt-4">
+          <button id="form-load-more-btn"
+                  class="btn btn-color px-4 py-2 fw-medium"
+                  {% if not formatos.has_next %}style="display: none;"{% endif %}>
+              Cargar más
+          </button>
+          
+          <div id="form-loading-spinner" class="spinner-border" role="status" style="display: none;">
+              <span class="visually-hidden">Loading...</span>
+          </div>
+      </div>
+    </div>
 
     <div class="mb-3 p-3" id="Documentos">
       <h2 class="h4 mb-2">Documentos de apoyo</h2>
-        <p class="text-muted">
-          Documentos tales como guías, políticas y anexos.       
-        </p>
+      <p class="text-muted">Documentos tales como guías, políticas y anexos.</p>
       
-      <div class="input-group mb-4">
-        <span class="input-group-text bg-body-tertiary border-0" id="search-icon-doc">
-          <i class="bi bi-search"></i>
-        </span>
-        <input type="text" 
-              id="doc-search-input"
-              class="form-control bg-body-tertiary border-0" 
-              placeholder="Buscar documentos..." 
-              aria-label="Buscar" 
-              aria-describedby="search-icon-doc">
-      </div>
+      <div class="row g-3 mb-4">
+        <div class="col-12 col-md-4">
+            <label for="doc-filter-departamento" class="form-label">Departamento</label>
+            <select class="form-select" id="doc-filter-departamento" aria-label="Filtrar por departamento">
+                <option value="">Todos los Departamentos</option>
+                {% for depto in all_departamentos %}
+                    <option value="{{ depto.id }}" {% if depto.id == user_depto_id %}selected{% endif %}>
+                        {{ depto.nombre }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
 
+        <div class="col-12 col-md-4">
+            <label for="doc-filter-tipo" class="form-label">Tipo de Documento</label>
+            <select class="form-select" id="doc-filter-tipo" aria-label="Filtrar por tipo de documento">
+                <option selected value="">Todos los Tipos</option>
+                {% for tipo in tipos_para_documentos %} <option value="{{ tipo.id }}">{{ tipo.nombre }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-12 col-md-4 d-flex align-items-end">
+            <div class="input-group w-100">
+                <span class="input-group-text bg-body-tertiary border-0" id="search-icon-doc">
+                    <i class="bi bi-search"></i>
+                </span>
+                <input type="text" id="doc-search-input" class="form-control bg-body-secondary border-0" 
+                      placeholder="Buscar documentos..." aria-label="Buscar">
+            </div>
+        </div>
+      </div>
       <div id="doc-list-container" class="row row-cols-1 row-cols-md-2 g-3">
-        {% include '_documentos_partial.html' with documentos=documentos_generales %}
+          {% include '_documentos_partial.html' with documentos=documentos_generales %}
       </div>
 
-      <div id="doc-load-more-container" class="text-center mt-4">
-        <button id="doc-load-more-btn"
-                class="btn btn-color px-4 py-2 fw-medium"
+      <div class="text-center mt-4">
+        <button id="doc-load-more-btn" class="btn btn-color px-4 py-2 fw-medium"
                 {% if not documentos_generales.has_next %}style="display: none;"{% endif %}>
-          Cargar más
+            Cargar más
         </button>
-        
         <div id="doc-loading-spinner" class="spinner-border" role="status" style="display: none;">
-          <span class="visually-hidden">Loading...</span>
+            <span class="visually-hidden">Loading...</span>
         </div>
       </div>
     </div>
   
-    <hr class="my-1"> 
-    <div class="mb-3 p-3" id="Formatos">
-      <h2 class="h4 mb-2">Formatos de interés</h2>
-        <p class="text-muted">
-          Documentos tales como formatos y plantillas.
-        </p>
-      
-      <div class="input-group mb-4">
-        <span class="input-group-text bg-body-tertiary border-0" id="search-icon-formato">
-          <i class="bi bi-search"></i>
-        </span>
-        <input type="text" 
-              id="formato-search-input"
-              class="form-control bg-body-tertiary border-0" 
-              placeholder="Buscar formatos..." 
-              aria-label="Buscar" 
-              aria-describedby="search-icon-formato">
-      </div>
-
-      <div id="formato-list-container" class="row row-cols-1 row-cols-md-2 g-3">
-        {% include '_documentos_partial.html' with documentos=formatos %}
-      </div>
-
-      <div id="formato-load-more-container" class="text-center mt-4">
-        <button id="formato-load-more-btn"
-                class="btn btn-color px-4 py-2 fw-medium"
-                {% if not formatos.has_next %}style="display: none;"{% endif %}>
-          Cargar más
-        </button>
-        
-        <div id="formato-loading-spinner" class="spinner-border" role="status" style="display: none;">
-          <span class="visually-hidden">Loading...</span>
-        </div>
-      </div>
-    </div>
+    
     
 
     <div class="modal fade" id="modalCrearCurso" tabindex="-1" aria-labelledby="modalCrearCursoLabel" aria-hidden="true">
@@ -1345,6 +1386,125 @@
             if (modalCrearDocumentoEl.classList.contains('show')) myModalCrearDocumento.hide();
             if (modalEditarDocumentoEl.classList.contains('show')) myModalEditarDocumento.hide();
         }
+      });
+    });
+
+    /**
+    * Configura una sección de filtrado de documentos (Documentos o Formatos).
+    * @param {object} config - Objeto de configuración con los IDs y la URL de la API.
+    */    
+    function setupFilterSection(config) {
+      // --- Referencias a elementos del DOM específicos ---
+      const deptoFilter = document.getElementById(config.filterDeptoId);
+      const tipoFilter = document.getElementById(config.filterTipoId);
+      const searchInput = document.getElementById(config.searchInputId);
+      
+      const listContainer = document.getElementById(config.listContainerId);
+      const loadMoreBtn = document.getElementById(config.loadMoreBtnId);
+      const loadingSpinner = document.getElementById(config.loadingSpinnerId);
+      
+      let currentPage = 1; // Rastreador de página (local para esta instancia)
+      let debounceTimer;   // Temporizador de búsqueda (local para esta instancia)
+      const API_URL = config.apiUrl; // URL de la API específica
+
+      /**
+       * Función principal para buscar y/o cargar documentos.
+       * @param {boolean} isNewSearch - True resetea la página a 1, False la incrementa.
+       */
+      async function fetchItems(isNewSearch = false) {
+          if (isNewSearch) {
+              currentPage = 1;
+          } else {
+              currentPage++;
+          }
+
+          const deptoId = deptoFilter.value;
+          const tipoId = tipoFilter.value;
+          const searchQuery = searchInput.value;
+
+          const params = new URLSearchParams({
+              page: currentPage,
+              departamento: deptoId,
+              tipo: tipoId,
+              q: searchQuery
+          });
+          const url = `${API_URL}?${params.toString()}`;
+
+          loadingSpinner.style.display = 'block';
+          if (isNewSearch) {
+              listContainer.innerHTML = ''; 
+          }
+          loadMoreBtn.style.display = 'none';
+
+          try {
+              const response = await fetch(url);
+              if (!response.ok) throw new Error('Error en la respuesta de la red');
+              
+              const data = await response.json(); // { "html": "...", "has_next": true }
+
+              if (isNewSearch) {
+                  listContainer.innerHTML = data.html;
+              } else {
+                  listContainer.insertAdjacentHTML('beforeend', data.html);
+              }
+
+              if (data.has_next) {
+                  loadMoreBtn.style.display = 'block';
+              } else {
+                  loadMoreBtn.style.display = 'none';
+              }
+
+          } catch (error) {
+              console.error('Error al cargar items:', error);
+              listContainer.innerHTML = '<p class="text-danger">Error al cargar los resultados.</p>';
+          } finally {
+              loadingSpinner.style.display = 'none';
+          }
+      }
+
+      function debounceFetch(func, delay) {
+          clearTimeout(debounceTimer);
+          debounceTimer = setTimeout(() => {
+              func(true);
+          }, delay);
+      }
+
+      // --- Asignar Event Listeners ---
+      deptoFilter.addEventListener('change', () => fetchItems(true));
+      tipoFilter.addEventListener('change', () => fetchItems(true));
+      searchInput.addEventListener('input', () => debounceFetch(fetchItems, 300));
+      loadMoreBtn.addEventListener('click', () => fetchItems(false));
+      
+      // Si el filtro de depto ya está preseleccionado, disparamos la búsqueda inicial
+      if (deptoFilter.value !== "") {
+          fetchItems(true);
+      }
+    }
+
+    // --- INICIALIZACIÓN ---
+    // Se ejecuta cuando el DOM está listo
+    document.addEventListener('DOMContentLoaded', function() {
+
+      // 1. Configurar la sección de DOCUMENTOS
+      setupFilterSection({
+          filterDeptoId: 'doc-filter-departamento',
+          filterTipoId: 'doc-filter-tipo',
+          searchInputId: 'doc-search-input',
+          listContainerId: 'doc-list-container',
+          loadMoreBtnId: 'doc-load-more-btn',
+          loadingSpinnerId: 'doc-loading-spinner',
+          apiUrl: "{% url 'resources:search_documentos' %}" // URL para Documentos
+      });
+
+      // 2. Configurar la sección de FORMATOS
+      setupFilterSection({
+          filterDeptoId: 'form-filter-departamento',
+          filterTipoId: 'form-filter-tipo',
+          searchInputId: 'form-search-input',
+          listContainerId: 'form-list-container',
+          loadMoreBtnId: 'form-load-more-btn',
+          loadingSpinnerId: 'form-loading-spinner',
+          apiUrl: "{% url 'resources:search_formatos' %}" // URL para Formatos
       });
     });
   </script>
