@@ -196,7 +196,10 @@
               <a class="nav-link" href="#Formatos">Formatos</a>
             </li>
             <li class="nav-item border-lg-end px-lg-2">
-              <a class="nav-link" href="#Documentos">Documentos de interés</a>
+              <a class="nav-link" href="#Documentos">Documentos</a>
+            </li>
+            <li class="nav-item px-lg-2">
+              <a class="nav-link" href="#Biblioteca">Biblioteca</a>
             </li>
             <li class="nav-item px-lg-2">
               <a class="nav-link" href="#DesarrolloProfesional">Desarrollo profesional</a>
@@ -593,10 +596,64 @@
         </div>
       </div>
     </div>
-  
-    
-    
 
+    <hr class="my-1"> 
+
+    <div class="d-flex justify-content-between align-items-center mt-3 mb-3">
+      <h2>Biblioteca Virtual</h2>
+      
+      <div class="d-flex gap-2">
+        {% if is_admin %}
+        <a href="#" class="btn bg-success d-flex align-items-center gap-2 d-none d-md-flex fw-medium text-white"
+                data-bs-toggle="modal" 
+                data-bs-target="#modalAñadirContenido">
+        <i class="bi bi-plus-lg"></i>
+        Añadir un contenido
+        </a>
+        <a href="#" class="btn d-flex bg-warning align-items-center gap-2 d-none d-md-flex fw-medium text-white"
+                data-bs-toggle="modal" 
+                data-bs-target="#modalEditarContenido">
+        <i class="bi bi-pencil"></i>
+        Modificar un contenido
+        </a>
+        {% endif %}
+      </div>
+    </div>
+
+    <hr class="my-1"> 
+    <div class="mb-3 p-3" id="Contenido">
+      <h2 class="h4 mb-2">Contenido digital</h2>
+      <p class="text-muted">Consulta el contenido de cursos, videos de apoyo y sesiones anteriores.</p>
+      
+      <div class="container my-5">
+        <div class="row row-cols-1 row-cols-md-2 g-4">
+        {% for video in videos_videoteca %}
+          <div class="col">
+            <div class="card h-100">
+              <div class="ratio ratio-16x9">
+                  <iframe src="{{ video.get_embed_url }}" title="{{ video.titulo }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+              </div>
+              <div class="card-body">
+                  {% if video.curso %}
+                      <p class="text-muted small mb-1">{{ video.curso.titulo }}</p>
+                  {% endif %}
+                  <h5 class="card-title">{{ video.titulo }}</h5>
+
+                  {% if video.ponente %}
+                      <p class="card-text mb-0">{{ video.ponente }}</p>
+                  {% endif %}
+
+                  {% if video.fecha_grabacion %}
+                      <p class="card-text"><small class="text-muted">{{ video.fecha_grabacion|date:"M j, Y" }}</small></p>
+                  {% endif %}
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+        </div>
+      </div>
+    </div>
+  
     <div class="modal fade" id="modalCrearCurso" tabindex="-1" aria-labelledby="modalCrearCursoLabel" aria-hidden="true">
       <div class="modal-dialog modal-lg">
         <div class="modal-content p-1">

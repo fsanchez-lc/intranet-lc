@@ -1,7 +1,7 @@
 from django.db import models
+from django.utils import timezone
 
 class Curso(models.Model):
-
     class Estado(models.TextChoices):
         ACTIVO = 'activo', 'Activo'
         INACTIVO = 'inactivo', 'Inactivo'
@@ -81,7 +81,6 @@ class Curso(models.Model):
     def __str__(self):
         return self.titulo
     
-
 class Slide(models.Model):
     title = models.CharField(max_length=100, verbose_name="Título")
     description = models.TextField(verbose_name="Descripción", blank=True, null=True)
@@ -196,3 +195,101 @@ class Documento(models.Model):
         if self.codigo_documento:
             return f"[{self.codigo_documento}] {self.nombre}"
         return f"{self.nombre}" 
+    
+class VideoCurso(models.Model):
+
+    ESTADO_CHOICES = (
+        ('activo', 'Activo'),
+        ('inactivo', 'Inactivo'),
+    )
+
+    # RELACIÓN: ¿A qué curso pertenece este video?
+    curso = models.ForeignKey(
+        Curso, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        related_name="videos_grabados",
+        verbose_name="Curso al que pertenece"
+    )
+    
+    # TÍTULO: El título del video
+    titulo = models.CharField(
+        max_length=255, 
+        verbose_name="Título del Video"
+    ) 
+    
+    # URL: El enlace normal de YouTube o Drive
+    video_url = models.URLField(
+        max_length=500, 
+        verbose_name="URL del Video",
+        help_text="Pega el enlace normal de YouTube (watch?v=...) o Google Drive (file/d/.../view)."
+    )
+    
+    # PONENTE: El "autor" (¡Este faltaba!)
+    ponente = models.CharField(
+        max_length=150, 
+        verbose_name="Ponente o Instructor", 
+        blank=True # Es opcional
+    )
+    
+    # FECHA: La fecha de la grabación
+    fecha_grabacion = models.DateField(
+        verbose_name="Fecha de Grabación",
+        blank=True,
+        null=True
+    )
+    
+    # ESTADO: Para activar o desactivar (¡Este también faltaba!)
+    estado = models.CharField(
+        max_length=10, 
+        choices=ESTADO_CHOICES, 
+        default='activo', 
+        verbose_name="Estado"
+    )
+
+    # --- MÉTODO PARA CONVERTIR URL ---
+    @property
+    def get_embed_url(self):
+        
+        # 1. Lógica para YouTube
+        if "youtube.com/watch?v=" in self.video_url:
+            try:
+                # Extrae el ID: '...watch?v=VIDEO_ID&...' -> 'VIDEO_ID'
+                video_id = self.video_url.split('v=')[1].split('&')[0]
+                return f"https://www.youtube.com/embed/{video_id}"
+            except Exception:
+                return None # URL mal formada
+
+        # 2. Lógica para YouTube Corto (youtu.be)
+        if "youtu.be/" in self.video_url:
+            try:
+                # Extrae el ID: '...youtu.be/VIDEO_ID?...' -> 'VIDEO_ID'
+                video_id = self.video_url.split('youtu.be/')[1].split('?')[0]
+                return f"https://www.youtube.com/embed/{video_id}"
+            except Exception:
+                return None # URL mal formada
+
+        # 3. Lógica para Google Drive
+        if "drive.google.com/file/d/" in self.video_url:
+            try:
+                # Extrae el ID: '.../d/FILE_ID/view...' -> 'FILE_ID'
+                file_id = self.video_url.split('/d/')[1].split('/')[0]
+                return f"https://drive.google.com/file/d/{file_id}/preview"
+            except Exception:
+                return None # URL mal formada
+        
+        # 4. Fallback: Si ya es un enlace embed, simplemente devuélvelo
+        if "/embed/" in self.video_url or "/preview" in self.video_url:
+            return self.video_url
+
+        # 5. Si no se reconoce, no se puede mostrar
+        return None
+
+    class Meta:
+        verbose_name = "Video de Curso"
+        verbose_name_plural = "Videoteca de Cursos"
+        ordering = ['-fecha_grabacion', 'titulo']
+
+    def __str__(self):
+        return self.titulo

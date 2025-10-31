@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
-from .models import Slide, Curso, Documento, TipoDocumento
+from .models import Slide, Curso, Documento, TipoDocumento, VideoCurso
 from employees.models import Empleado, Departamento
 from django.db.models import Q
 from django.core.paginator import Paginator
@@ -120,6 +120,25 @@ def ResourcesView(request):
         tipo_documento__nombre__in=['Formato', 'Plantilla', 'Formato de interés']
     ).distinct().order_by('nombre')
 
+    # 3. CREA LA CONSULTA DE PERMISOS PARA VIDEOS
+    #    (La lógica es similar, pero a través del 'curso' relacionado)
+    if is_admin:
+        video_permission_query = Q() # Admin ve todo
+    else:
+        # Un video es visible si:
+        # 1. No tiene curso (es general) O
+        # 2. El curso es general O
+        # 3. El curso es para el departamento del empleado
+        video_permission_query = Q(curso=None) | Q(curso__es_general=True)
+        if empleado and empleado.departamento:
+            video_permission_query.add(Q(curso__departamentos_destinados=empleado.departamento), Q.OR)
+
+    # 4. CREA LA LISTA DE VIDEOS
+    videos_list = VideoCurso.objects.filter(
+        video_permission_query, # Aplicamos los permisos
+        estado='activo'         # Solo mostramos videos activos
+    ).distinct().order_by('-fecha_grabacion') # Orden más reciente primero
+
     # 3. PAGINA AMBAS LISTAS
     paginator_docs = Paginator(documentos_generales_list, 4)
     paginator_formatos = Paginator(formatos_list, 4)
@@ -158,6 +177,8 @@ def ResourcesView(request):
         'tipos_para_documentos': tipos_para_documentos, # <-- NUEVO
         'tipos_para_formatos': tipos_para_formatos,
         'user_depto_id': user_depto_id, # ID para preseleccionar el <option>
+
+        'videos_videoteca': videos_list,
     }
     return render(request, 'resources.html', context)
 

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Curso, Slide, TipoDocumento, Documento
+from .models import Curso, Slide, TipoDocumento, Documento, VideoCurso
 
 @admin.register(Slide)
 class SlideAdmin(admin.ModelAdmin):
@@ -30,6 +30,12 @@ class CursoAdmin(admin.ModelAdmin):
 class TipoDocumentoAdmin(admin.ModelAdmin):
     list_display = ('nombre', 'descripcion')
     search_fields = ('nombre',)
+
+@admin.register(VideoCurso)
+class VideoCursoAdmin(admin.ModelAdmin):
+    list_display = ('titulo', 'curso', 'ponente', 'fecha_grabacion', 'estado')
+    list_filter = ('estado', 'curso', 'ponente')
+    search_fields = ('titulo', 'ponente', 'curso__titulo')
 
 @admin.register(Documento)
 class DocumentoAdmin(admin.ModelAdmin):
