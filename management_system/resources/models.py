@@ -226,7 +226,7 @@ class VideoCurso(models.Model):
         help_text="Pega el enlace normal de YouTube (watch?v=...) o Google Drive (file/d/.../view)."
     )
     
-    # PONENTE: El "autor" (¡Este faltaba!)
+    # PONENTE: El "autor"
     ponente = models.CharField(
         max_length=150, 
         verbose_name="Ponente o Instructor", 
@@ -240,12 +240,19 @@ class VideoCurso(models.Model):
         null=True
     )
     
-    # ESTADO: Para activar o desactivar (¡Este también faltaba!)
+    # ESTADO: Para activar o desactivar
     estado = models.CharField(
         max_length=10, 
         choices=ESTADO_CHOICES, 
         default='activo', 
         verbose_name="Estado"
+    )
+
+    departamentos_destinados = models.ManyToManyField(
+        'employees.Departamento', 
+        related_name="videos_disponibles", 
+        blank=True,
+        help_text="Departamentos que pueden ver este video (si no es 'general')."
     )
 
     # --- MÉTODO PARA CONVERTIR URL ---

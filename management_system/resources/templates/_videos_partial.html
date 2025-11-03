@@ -1,0 +1,33 @@
+{% comment %}
+Ruta: tu_app/templates/tu_app/_videos_partial.html
+{% endcomment %}
+
+{% for video in videos %}
+  <div class="col">
+    <div class="card h-100">
+      <div class="ratio ratio-16x9">
+          <iframe width="560" height="315" src="{{ video.get_embed_url }}" title="{{ video.titulo }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+      </div>
+      <div class="card-body">
+          {% if video.curso %}
+              <p class="text-muted small mb-1">{{ video.curso.titulo }}</p>
+          {% endif %}
+          <h5 class="card-title">{{ video.titulo }}</h5>
+
+          {% if video.ponente %}
+              <p class="card-text mb-0">{{ video.ponente }}</p>
+          {% endif %}
+
+          {% if video.fecha_grabacion %}
+              <p class="card-text"><small class="text-muted">{{ video.fecha_grabacion|date:"M j, Y" }}</small></p>
+          {% endif %}
+      </div>
+    </div>
+  </div>
+{% empty %}
+  <div class="col-12">
+    <div class="alert alert-secondary text-center" role="alert">
+      <i class="bi bi-info-circle me-2"></i> No se encontraron videos que coincidan con tu búsqueda.
+    </div>
+  </div>
+{% endfor %}

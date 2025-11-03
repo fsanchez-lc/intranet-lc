@@ -83,6 +83,11 @@
               Añadir documento
             </a>
           </li>
+          <li>
+            <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#modalCrearContenido">
+              Añadir contenido
+            </a>
+          </li>
         </ul>
       </div>
 
@@ -103,6 +108,11 @@
           <li>
             <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#modalEditarDocumento">
               Modificar documento
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#modalEditarContenido">
+              Modificar contenido
             </a>
           </li>
         </ul>
@@ -625,31 +635,44 @@
       <h2 class="h4 mb-2">Contenido digital</h2>
       <p class="text-muted">Consulta el contenido de cursos, videos de apoyo y sesiones anteriores.</p>
       
+      <div class="row g-3 mb-4">
+        <div class="col-12 col-md-4">
+            <label for="vid-filter-departamento" class="form-label">Departamento</label>
+            <select class="form-select" id="vid-filter-departamento" aria-label="Filtrar por departamento">
+                <option value="">Todos los Departamentos</option>
+                {% for depto in all_departamentos %}
+                    <option value="{{ depto.id }}" {% if depto.id == user_depto_id %}selected{% endif %}>
+                        {{ depto.nombre }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="col-12 col-md-4 d-flex align-items-end">
+            <div class="input-group w-100">
+                <span class="input-group-text bg-body-tertiary border-0" id="search-icon-vid">
+                    <i class="bi bi-search"></i>
+                </span>
+                <input type="text" id="vid-search-input" class="form-control bg-body-secondary border-0" 
+                      placeholder="Buscar contenido..." aria-label="Buscar" aria-describedby="search-icon-vid">
+            </div>
+        </div>
+      </div>
+
       <div class="container my-5">
-        <div class="row row-cols-1 row-cols-md-2 g-4">
-        {% for video in videos_videoteca %}
-          <div class="col">
-            <div class="card h-100">
-              <div class="ratio ratio-16x9">
-                  <iframe src="{{ video.get_embed_url }}" title="{{ video.titulo }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-              </div>
-              <div class="card-body">
-                  {% if video.curso %}
-                      <p class="text-muted small mb-1">{{ video.curso.titulo }}</p>
-                  {% endif %}
-                  <h5 class="card-title">{{ video.titulo }}</h5>
-
-                  {% if video.ponente %}
-                      <p class="card-text mb-0">{{ video.ponente }}</p>
-                  {% endif %}
-
-                  {% if video.fecha_grabacion %}
-                      <p class="card-text"><small class="text-muted">{{ video.fecha_grabacion|date:"M j, Y" }}</small></p>
-                  {% endif %}
-              </div>
+        <div id="vid-list-container" class="row row-cols-1 row-cols-md-2 g-4">
+          {% include '_videos_partial.html' with videos=videos_videoteca %}
+        </div>
+          <div class="text-center mt-4">
+            <button id="vid-load-more-btn" class="btn btn-color px-4 py-2 fw-medium"
+                    {% if not videos_videoteca.has_next %}style="display: none;"{% endif %}>
+                Cargar más
+            </button>
+            <div id="vid-loading-spinner" class="spinner-border" role="status" style="display: none;">
+                <span class="visually-hidden">Loading...</span>
             </div>
           </div>
-        {% endfor %}
+
         </div>
       </div>
     </div>
@@ -1544,24 +1567,36 @@
 
       // 1. Configurar la sección de DOCUMENTOS
       setupFilterSection({
-          filterDeptoId: 'doc-filter-departamento',
-          filterTipoId: 'doc-filter-tipo',
-          searchInputId: 'doc-search-input',
-          listContainerId: 'doc-list-container',
-          loadMoreBtnId: 'doc-load-more-btn',
-          loadingSpinnerId: 'doc-loading-spinner',
-          apiUrl: "{% url 'resources:search_documentos' %}" // URL para Documentos
+        filterDeptoId: 'doc-filter-departamento',
+        filterTipoId: 'doc-filter-tipo',
+        searchInputId: 'doc-search-input',
+        listContainerId: 'doc-list-container',
+        loadMoreBtnId: 'doc-load-more-btn',
+        loadingSpinnerId: 'doc-loading-spinner',
+        apiUrl: "{% url 'resources:search_documentos' %}" // URL para Documentos
       });
 
       // 2. Configurar la sección de FORMATOS
       setupFilterSection({
-          filterDeptoId: 'form-filter-departamento',
-          filterTipoId: 'form-filter-tipo',
-          searchInputId: 'form-search-input',
-          listContainerId: 'form-list-container',
-          loadMoreBtnId: 'form-load-more-btn',
-          loadingSpinnerId: 'form-loading-spinner',
-          apiUrl: "{% url 'resources:search_formatos' %}" // URL para Formatos
+        filterDeptoId: 'form-filter-departamento',
+        filterTipoId: 'form-filter-tipo',
+        searchInputId: 'form-search-input',
+        listContainerId: 'form-list-container',
+        loadMoreBtnId: 'form-load-more-btn',
+        loadingSpinnerId: 'form-loading-spinner',
+        apiUrl: "{% url 'resources:search_formatos' %}" // URL para Formatos
+      });
+
+      // 3. Configurar la sección de VIDEOS
+      setupFilterSection({
+        filterDeptoId: 'vid-filter-departamento',
+        // No hay 'filterTipoId' para esta sección, por eso modificamos la función
+        searchInputId: 'vid-search-input',
+        listContainerId: 'vid-list-container',
+        loadMoreBtnId: 'vid-load-more-btn',
+        loadingSpinnerId: 'vid-loading-spinner',
+        // ¡Tendrás que crear esta URL en tu urls.py!
+        apiUrl: "{% url 'resources:search_videos' %}" 
       });
     });
   </script>

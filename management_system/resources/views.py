@@ -78,7 +78,7 @@ def ResourcesView(request):
     if empleado:
         # Obtenemos los cursos donde el empleado está inscrito
         mis_cursos = empleado.cursos_inscritos.filter(
-            estado=Curso.Estado.ACTIVO  # <-- CAMBIO AQUÍ
+            estado=Curso.Estado.ACTIVO 
         ).order_by('fecha')
     # Empleado con departamento, ve solo sus cursos
     if empleado and empleado.departamento:
@@ -98,8 +98,9 @@ def ResourcesView(request):
     mis_cursos_chunks = [mis_cursos[i:i + chunk_size] for i in range(0, len(mis_cursos), chunk_size)]
     cursos_disponibles_chunks = [cursos_disponibles[i:i + chunk_size] for i in range(0, len(cursos_disponibles), chunk_size)]    
     
+    # CONSULTA PARA DOCUMENTOS
     if is_admin:
-        documentos_dept_query = Q() # Admin ve todo (filtro vacío)
+        documentos_dept_query = Q()
     else:
         # Si no es admin, aplicamos la lógica de permisos normal
         documentos_dept_query = Q(es_general=True)
@@ -121,7 +122,6 @@ def ResourcesView(request):
     ).distinct().order_by('nombre')
 
     # 3. CREA LA CONSULTA DE PERMISOS PARA VIDEOS
-    #    (La lógica es similar, pero a través del 'curso' relacionado)
     if is_admin:
         video_permission_query = Q() # Admin ve todo
     else:
@@ -142,9 +142,11 @@ def ResourcesView(request):
     # 3. PAGINA AMBAS LISTAS
     paginator_docs = Paginator(documentos_generales_list, 4)
     paginator_formatos = Paginator(formatos_list, 4)
+    paginator_videos = Paginator(videos_list, 4) # <--- AÑADIDO
     
     documentos_page_1 = paginator_docs.get_page(1)
     formatos_page_1 = paginator_formatos.get_page(1)
+    videos_page_1 = paginator_videos.get_page(1) # <--- AÑADIDO
 
     todos_los_cursos_list = Curso.objects.all().order_by('titulo')
 
@@ -168,17 +170,17 @@ def ResourcesView(request):
         'cursos_disponibles_chunks': cursos_disponibles_chunks,  # <-- Lista 2 (Cursos disponibles) 
         'todos_los_cursos': todos_los_cursos_list,               # <-- Lista 3 (Todos los cursos)
         'todos_los_documentos': Documento.objects.filter(documentos_dept_query).distinct().order_by('nombre'),        
-        'documentos_generales': documentos_page_1, # Reemplaza a 'documentos'
+        'documentos_generales': documentos_page_1,
         'formatos': formatos_page_1,  
-        'is_admin': is_admin,                                    # <-- Comprobación si es del grupo Administrador
+        'is_admin': is_admin,
         'form_with_errors': form_with_errors,
 
         'all_departamentos': all_departamentos,
-        'tipos_para_documentos': tipos_para_documentos, # <-- NUEVO
+        'tipos_para_documentos': tipos_para_documentos,
         'tipos_para_formatos': tipos_para_formatos,
-        'user_depto_id': user_depto_id, # ID para preseleccionar el <option>
+        'user_depto_id': user_depto_id,
 
-        'videos_videoteca': videos_list,
+        'videos_videoteca': videos_page_1,
     }
     return render(request, 'resources.html', context)
 
@@ -311,11 +313,76 @@ def BuscarFormatosView(request):
     })
 
 
+@login_required
+def BuscarVideosView(request):
+    """
+    Maneja las solicitudes AJAX para buscar y paginar la videoteca.
+    """
+    page_number = request.GET.get('page', 1)
+    query = request.GET.get('q', '') # El término de búsqueda
+    depto_id = request.GET.get('departamento', '')
+    # No hay 'tipo_id' para videos
+
+    is_admin = request.user.groups.filter(name='Administrativo').exists()
+
+    # Búsqueda por Título, Ponente, o Título del Curso
+    lookup = (
+        Q(titulo__icontains=query) |
+        Q(ponente__icontains=query) |
+        Q(curso__titulo__icontains=query) # Búsqueda en el curso relacionado
+    )
+    
+    empleado = None
+    try:
+        empleado = request.user.empleado
+    except (Empleado.DoesNotExist, AttributeError):
+        pass
+
+    # 1. PERMISOS: El "mundo" de videos que este usuario puede ver
+    if is_admin:
+        permission_query = Q() # Admin ve todo
+    else:
+        permission_query = Q(es_general=True)
+        if empleado and empleado.departamento:
+            permission_query.add(Q(departamentos_destinados=empleado.departamento), Q.OR)
+    
+    # 2. FILTRO: El filtro de departamento seleccionado
+    if depto_id:
+        # Si se seleccionó un depto específico ("1", "2", etc.)
+        filter_query = Q(departamentos_destinados__id=depto_id)
+    else:
+        # "Todos los Departamentos"
+        # Muestra todo lo que está en el scope de permisos
+        filter_query = permission_query 
+    
+    videos_list = VideoCurso.objects.filter(
+        permission_query, # Permisos base (si no es admin)
+        filter_query,   # Filtro del dropdown
+        lookup,         # Filtro de búsqueda
+        estado='activo'
+    ).distinct().order_by('-fecha_grabacion')
+
+    paginator = Paginator(videos_list, 4) # Paginar por 4
+    page_obj = paginator.get_page(page_number)
+
+    html = render_to_string(
+        template_name='_videos_partial.html', # <-- Usar el partial de video
+        context={
+            'videos': page_obj, # <-- Pasar 'videos'
+            'is_admin': is_admin
+        }    
+    )
+
+    return JsonResponse({
+        'html': html,
+        'has_next': page_obj.has_next()
+    })
+
 # Función para verificar si es admin
 def is_admin_check(user):
     return user.is_authenticated and user.groups.filter(name='Administrativo').exists()
 
-@user_passes_test(is_admin_check) # Protege la vista para que solo admins entren
+@user_passes_test(is_admin_check)
 def CursoEditView(request, curso_id):
     # Obtenemos el curso que se quiere editar
     curso = get_object_or_404(Curso, id=curso_id)
