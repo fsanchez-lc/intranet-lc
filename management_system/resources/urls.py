@@ -10,5 +10,5 @@ urlpatterns = [
     path('search/videos/', views.BuscarVideosView, name='search_videos'),
     path('cursos/edit/<int:curso_id>/', views.CursoEditView, name='edit_curso'),
     path('documento/<int:documento_id>/edit/', views.edit_documento, name='edit_documento'),
-    
+    path('edit/video/<int:video_id>/', views.VideoEditView, name='edit_video'),
 ]

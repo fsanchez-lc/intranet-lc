@@ -543,7 +543,7 @@
           {% include '_documentos_partial.html' with documentos=formatos %}
       </div>
 
-      <div class="text-center mt-4">
+      <div class="d-flex justify-content-center align-items-center mt-4">
           <button id="form-load-more-btn"
                   class="btn btn-color px-4 py-2 fw-medium"
                   {% if not formatos.has_next %}style="display: none;"{% endif %}>
@@ -596,7 +596,7 @@
           {% include '_documentos_partial.html' with documentos=documentos_generales %}
       </div>
 
-      <div class="text-center mt-4">
+      <div class="d-flex justify-content-center align-items-center mt-4">
         <button id="doc-load-more-btn" class="btn btn-color px-4 py-2 fw-medium"
                 {% if not documentos_generales.has_next %}style="display: none;"{% endif %}>
             Cargar más
@@ -616,7 +616,7 @@
         {% if is_admin %}
         <a href="#" class="btn bg-success d-flex align-items-center gap-2 d-none d-md-flex fw-medium text-white"
                 data-bs-toggle="modal" 
-                data-bs-target="#modalAñadirContenido">
+                data-bs-target="#modalCrearContenido">
         <i class="bi bi-plus-lg"></i>
         Añadir un contenido
         </a>
@@ -663,7 +663,7 @@
         <div id="vid-list-container" class="row row-cols-1 row-cols-md-2 g-4">
           {% include '_videos_partial.html' with videos=videos_videoteca %}
         </div>
-          <div class="text-center mt-4">
+          <div class="d-flex justify-content-center align-items-center mt-4">
             <button id="vid-load-more-btn" class="btn btn-color px-4 py-2 fw-medium"
                     {% if not videos_videoteca.has_next %}style="display: none;"{% endif %}>
                 Cargar más
@@ -1005,599 +1005,673 @@
       </div>
     </div>
 
-  <script>
+    <div class="modal fade" id="modalCrearContenido" tabindex="-1" aria-labelledby="modalCrearContenidoLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+          <div class="modal-content p-1">
+          
+              <div class="modal-header">
+                  <div>
+                      <h5 class="modal-title fw-bold" id="modalCrearContenidoLabel">Añadir un Contenido</h5>
+                      <p class="mb-0 text-muted small">Sube un nuevo video (YouTube, Drive) a la videoteca.</p>
+                  </div>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+
+              <div class="modal-body">
+                  <form action="" method="POST" enctype="multipart/form-data">
+                      {% csrf_token %}
+                      <input type="hidden" name="form_type" value="video"> 
+
+                      <p class="text-muted small">
+                          Completa los detalles. Los campos con (<span class="text-danger">*</span>) son obligatorios.
+                      </p>
+
+                      <div class="mb-3">
+                          <label for="{{ form_video.titulo.id_for_label }}" class="form-label">
+                              {{ form_video.titulo.label }}<span class="text-danger"> *</span>
+                          </label>
+                          {{ form_video.titulo }}
+                      </div>
+                      
+                      <div class="mb-3">
+                          <label for="{{ form_video.video_url.id_for_label }}" class="form-label">
+                              {{ form_video.video_url.label }}<span class="text-danger"> *</span>
+                          </label>
+                          {{ form_video.video_url }}
+                          <div class="form-text">{{ form_video.video_url.help_text }}</div>
+                      </div>
+
+                      <div class="row">
+                          <div class="col-md-6 mb-3">
+                              <label for="{{ form_video.ponente.id_for_label }}" class="form-label">
+                                  {{ form_video.ponente.label }}
+                              </label>
+                              {{ form_video.ponente }}
+                          </div>
+                          <div class="col-md-6 mb-3">
+                              <label for="{{ form_video.fecha_grabacion.id_for_label }}" class="form-label">
+                                  {{ form_video.fecha_grabacion.label }}
+                              </label>
+                              {{ form_video.fecha_grabacion }}
+                          </div>
+                      </div>
+
+                      <div class="row">
+                          <div class="col-md-6 mb-3">
+                              <label for="{{ form_video.curso.id_for_label }}" class="form-label">
+                                  {{ form_video.curso.label }}
+                              </label>
+                              {{ form_video.curso }}
+                              <div class="form-text">Opcional: Asocia este video a un curso existente.</div>
+                          </div>
+                          <div class="col-md-6 mb-3">
+                              <label for="{{ form_video.estado.id_for_label }}" class="form-label">
+                                  {{ form_video.estado.label }}<span class="text-danger"> *</span>
+                              </label>
+                              {{ form_video.estado }}
+                          </div>
+                      </div>
+                      
+                      <hr class="my-4">
+
+                      <div class="form-check mb-3">
+                          {{ form_video.es_general }}
+                          <label class="form-check-label" for="{{ form_video.es_general.id_for_label }}">
+                              {{ form_video.es_general.label_tag }}
+                          </label>
+                          <div class="form-text">{{ form_video.es_general.help_text }}</div>
+                      </div>
+
+                      <div class="mb-3" id="campoDepartamentosVideo">
+                          <label for="{{ form_video.departamentos_destinados.id_for_label }}" class="form-label">
+                              {{ form_video.departamentos_destinados.label }}
+                          </label>
+                          {{ form_video.departamentos_destinados }}
+                          <div class="form-text">{{ form_video.departamentos_destinados.help_text }}</div>
+                      </div>
+
+                  </div>
+                  <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                      <button type="submit" class="btn btn-primary">Guardar Contenido</button>
+                  </div>
+              </form>
+          </div>
+      </div>
+  </div>
+
+
+<div class="modal fade" id="modalEditarContenido" tabindex="-1" aria-labelledby="modalEditarContenidoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content p-1">
+        
+            <div class="modal-header">
+                <div>
+                    <h5 class="modal-title fw-bold" id="modalEditarContenidoLabel">Modificar un Contenido</h5>
+                    <p class="mb-0 text-muted small">Selecciona un video para editar sus detalles.</p>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <div id="video-selector-container">
+                    <select class="form-select" id="select-video-a-editar">
+                        <option value="" selected disabled>Elige un video...</option>
+                        
+                        {% for video in todos_los_videos %}
+                            <option value="{{ video.id }}">{{ video.titulo }}</option>
+                        {% endfor %}
+
+                    </select>
+                </div>
+
+                <div id="video-form-container" class="mt-4" style="display: none;">
+                    </div>
+
+                <div id="loading-spinner-editar-video" class="text-center mt-4" style="display: none;">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p>Cargando datos del video...</p>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+    <script>
     document.addEventListener("DOMContentLoaded", () => {
-      let formIsSubmitting = false;
+        // --- Variables Modales ---
+        const modalCrearCursoEl = document.getElementById('modalCrearCurso');
+        const myModalCrearCurso = new bootstrap.Modal(modalCrearCursoEl);
+        const esGeneralCheckCurso = document.getElementById("{{ form_curso.es_general.id_for_label }}");
+        const deptoFieldCurso = document.getElementById("campoDepartamentos");
 
-      // --- Variables Búsqueda Documentos ---
-      const searchInput_Docs = document.getElementById('doc-search-input');
-      const listContainer_Docs = document.getElementById('doc-list-container');
-      const loadMoreBtn_Docs = document.getElementById('doc-load-more-btn');
-      const loadingSpinner_Docs = document.getElementById('doc-loading-spinner');
-      let currentPage_Docs = 1;
-      let currentQuery_Docs = '';
-      let isLoading_Docs = false;
-      const searchUrl_Docs = "{% url 'resources:search_documentos' %}"; // URL de búsqueda de Documentos
-      
-      const searchInput_Formatos = document.getElementById('formato-search-input');
-      const listContainer_Formatos = document.getElementById('formato-list-container');
-      const loadMoreBtn_Formatos = document.getElementById('formato-load-more-btn');
-      const loadingSpinner_Formatos = document.getElementById('formato-loading-spinner');
-      let currentPage_Formatos = 1;
-      let currentQuery_Formatos = '';
-      let isLoading_Formatos = false;
-      const searchUrl_Formatos = "{% url 'resources:search_formatos' %}"; // URL de búsqueda de Formatos
+        const modalCrearDocumentoEl = document.getElementById('modalCrearDocumento');
+        const myModalCrearDocumento = new bootstrap.Modal(modalCrearDocumentoEl);
+        const esGeneralCheckDoc = document.getElementById("{{ form_documento.es_general.id_for_label }}");
+        const deptoFieldDoc = document.getElementById("campoDepartamentosDoc");
 
-      // --- Variables Modal CREAR CURSO ---
-      const modalCrearCursoEl = document.getElementById('modalCrearCurso');
-      const myModalCrearCurso = new bootstrap.Modal(modalCrearCursoEl);
-      const esGeneralCheckCurso = document.getElementById("{{ form_curso.es_general.id_for_label }}");
-      const deptoFieldCurso = document.getElementById("campoDepartamentos");
+        const modalCrearContenidoEl = document.getElementById('modalCrearContenido');
+        const myModalCrearContenido = new bootstrap.Modal(modalCrearContenidoEl);
+        const esGeneralCheckVideo = document.getElementById("{{ form_video.es_general.id_for_label }}");
+        const deptoFieldVideo = document.getElementById("campoDepartamentosVideo");
 
-      // --- Variables Modal CREAR DOCUMENTO ---
-      const modalCrearDocumentoEl = document.getElementById('modalCrearDocumento');
-      const myModalCrearDocumento = new bootstrap.Modal(modalCrearDocumentoEl);
-      const esGeneralCheckDoc = document.getElementById("{{ form_documento.es_general.id_for_label }}");
-      const deptoFieldDoc = document.getElementById("campoDepartamentosDoc");
+        const modalEditarContenidoEl = document.getElementById('modalEditarContenido');
+        const myModalEditarContenido = new bootstrap.Modal(modalEditarContenidoEl);
+        const videoSelector = document.getElementById('select-video-a-editar');
+        const videoFormContainer = document.getElementById('video-form-container');
+        const loadingSpinnerEditarVideo = document.getElementById('loading-spinner-editar-video');
 
-      const modalToReopen = "{{ form_with_errors|default:'none' }}";
-      
-      if (modalToReopen === 'curso') {
-          myModalCrearCurso.show();
-      } else if (modalToReopen === 'documento') {
-          // Esto forzará que el modal de "Crear Documento" se abra
-          // si la variable 'form_with_errors' es 'documento'
-          myModalCrearDocumento.show();
-      }
+        const modalEditarCursoEl = document.getElementById('modalEditarCurso');
+        const myModalEditarCurso = new bootstrap.Modal(modalEditarCursoEl);
+        const cursoSelector = document.getElementById('select-curso-a-editar');
+        const cursoFormContainer = document.getElementById('curso-form-container');
+        const loadingSpinnerEditarCurso = document.getElementById('loading-spinner-editar');
 
-      // --- Variables Modal EDITAR CURSO ---
-      const modalEditarCursoEl = document.getElementById('modalEditarCurso');
-      const myModalEditarCurso = new bootstrap.Modal(modalEditarCursoEl);
-      const cursoSelector = document.getElementById('select-curso-a-editar');
-      const cursoFormContainer = document.getElementById('curso-form-container');
-      const loadingSpinnerEditarCurso = document.getElementById('loading-spinner-editar');
+        const modalEditarDocumentoEl = document.getElementById('modalEditarDocumento');
+        const myModalEditarDocumento = new bootstrap.Modal(modalEditarDocumentoEl);
+        const documentoSelector = document.getElementById('select-documento-a-editar');
+        const documentoFormContainer = document.getElementById('documento-form-container');
+        const loadingSpinnerEditarDocumento = document.getElementById('loading-spinner-editar-documento');
 
-      // --- Variables Modal EDITAR DOCUMENTO ---
-      const modalEditarDocumentoEl = document.getElementById('modalEditarDocumento');
-      const myModalEditarDocumento = new bootstrap.Modal(modalEditarDocumentoEl);
-      const documentoSelector = document.getElementById('select-documento-a-editar');
-      const documentoFormContainer = document.getElementById('documento-form-container');
-      const loadingSpinnerEditarDocumento = document.getElementById('loading-spinner-editar-documento');
-
-      // --- Lógica modal CREAR CURSO---
-      function toggleDepartamentosCurso() {
-        if (esGeneralCheckCurso && deptoFieldCurso) { 
-          deptoFieldCurso.style.display = esGeneralCheckCurso.checked ? "none" : "block";
+        // --- Lógica para reabrir modal con errores ---
+        const modalToReopen = "{{ form_with_errors|default:'none' }}";
+        if (modalToReopen === 'curso') {
+            myModalCrearCurso.show();
+        } else if (modalToReopen === 'documento') {
+            myModalCrearDocumento.show();
+        } else if (modalToReopen === 'video') { // <-- AÑADE ESTE 'else if'
+            myModalCrearContenido.show();
         }
-      }
-      if (esGeneralCheckCurso) {
-          toggleDepartamentosCurso(); // Run on load
-          esGeneralCheckCurso.addEventListener("change", toggleDepartamentosCurso);
-      }
-      
-      // --- Lógica modal CREAR DOCUMENTO ---
-      function toggleDepartamentosDoc() {
-        if (esGeneralCheckDoc && deptoFieldDoc) { 
-          deptoFieldDoc.style.display = esGeneralCheckDoc.checked ? "none" : "block";
-        }
-      }
-      if (esGeneralCheckDoc) {
-        toggleDepartamentosDoc(); // Run on load
-        esGeneralCheckDoc.addEventListener("change", toggleDepartamentosDoc);
-      }
-      
-      // --- Inicialización Select2 (Modales de CREAR) ---
-      try {
-        $('#modalCrearCurso #id_create_curso-departamentos_destinados').select2({          
-          theme: 'bootstrap-5',
-          allowClear: true, 
-          dropdownParent: $('#modalCrearCurso .modal-content')
-        });
-        $('#modalCrearCurso #id_create_curso-inscritos').select2({          
-          theme: 'bootstrap-5',
-          allowClear: true,
-          dropdownParent: $('#modalCrearCurso .modal-content')
-        });
-        console.log("Select2 (Crear Curso) inicializado.");
-      } catch (e) {
-        console.error("Error inicializando Select2 (Crear Curso):", e);
-      }
 
-      try {
-        $('#modalCrearDocumento #id_create_doc-departamentos_destinados').select2({          
-          theme: 'bootstrap-5',
-          allowClear: true, 
-          dropdownParent: $('#modalCrearDocumento .modal-content')
-        });
-        console.log("Select2 (Crear Documento) inicializado.");
-      } catch (e) {
-        console.error("Error inicializando Select2 (Crear Documento):", e);
-      }
-
-      // --- Lógica modal EDITAR CURSO ---
-
-      // --- 1. FUNCIÓN REUTILIZABLE PARA CARGAR EL FORMULARIO ---
-      // (Extraemos la lógica de fetch para poder llamarla desde dos sitios)
-      const getFormUrlBase = "{% url 'resources:edit_curso' 0 %}";
-
-      async function loadCursoEditForm(cursoId) {
-          if (!cursoId) return;
-
-          // Mostrar spinner, ocultar form
-          if(loadingSpinnerEditarCurso) loadingSpinnerEditarCurso.style.display = "block";
-          if(cursoFormContainer) cursoFormContainer.style.display = "none";
-          if(cursoFormContainer) cursoFormContainer.innerHTML = "";
-
-          try {
-            const url = getFormUrlBase.replace('0', cursoId); 
-            const response = await fetch(url);
-            if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
-            
-            const html = await response.text();
-            
-            if(cursoFormContainer) {
-              cursoFormContainer.innerHTML = html;
-              cursoFormContainer.style.display = "block";
-
-              // Inicializar Select2s DENTRO del formulario cargado
-              // Usamos un setTimeout de 0ms para asegurar que el DOM se haya actualizado
-              setTimeout(function() {
-                console.log("Formulario (Editar Curso) cargado. Inicializando Select2...");
-                try {
-                  $('#edit-curso-form #id_edit-departamentos_destinados').select2({
-                    theme: 'bootstrap-5',
-                    allowClear: true,
-                    dropdownParent: $('#modalEditarCurso .modal-content') // <-- Corregido
-                  });
-                  console.log("Select2 para Departamentos (Editar) ¡OK!");
-
-                  $('#edit-curso-form #id_edit-inscritos').select2({
-                    theme: 'bootstrap-5',
-                    allowClear: true,
-                    dropdownParent: $('#modalEditarCurso .modal-content') // <-- Corregido
-                  });
-                  console.log("Select2 para Inscritos (Editar) ¡OK!");
-                } catch (e) {
-                    console.error("¡Falló la inicialización de Select2 (Editar Curso)!", e);
-                }
-              }, 0); 
+        // --- Lógica modal CREAR CURSO (Toggle Deptos) ---
+        function toggleDepartamentosCurso() {
+            if (esGeneralCheckCurso && deptoFieldCurso) { 
+                deptoFieldCurso.style.display = esGeneralCheckCurso.checked ? "none" : "block";
             }
-          } catch (error) {
-              console.error("Error cargando el form de editar (curso):", error);
-              if(cursoFormContainer) {
-                  cursoFormContainer.innerHTML = `<div class="alert alert-danger">No se pudo cargar el formulario. ${error.message}</div>`;
-                  cursoFormContainer.style.display = "block";
-              }
-          } finally {
-              if(loadingSpinnerEditarCurso) loadingSpinnerEditarCurso.style.display = "none";
-          }
-      }
-      // --- FIN DE LA FUNCIÓN REUTILIZABLE ---
-
-
-      // (Este listener detecta QUÉ botón abrió el modal)
-      modalEditarCursoEl.addEventListener('show.bs.modal', function(event) {
-        // event.relatedTarget es el botón que hizo clic (el engranaje o el botón "Modificar")
-        const triggerButton = event.relatedTarget;
-        const selectorContainer = document.getElementById('curso-selector-container');
-
-        // Reseteo base cada vez que se abre
-        if(cursoSelector) cursoSelector.value = "";
-        if(cursoFormContainer) cursoFormContainer.innerHTML = "";
-        if(cursoFormContainer) cursoFormContainer.style.display = "none";
-        if(loadingSpinnerEditarCurso) loadingSpinnerEditarCurso.style.display = "none";
-
-        if (triggerButton && triggerButton.classList.contains('btn-edit-curso')) {
-            // --- CASO 1: Se hizo clic en el ENGRANAJE ---
-            const cursoId = triggerButton.dataset.cursoId;
-            
-            // Ocultamos el dropdown selector y cargamos el form directamente
-            if(selectorContainer) selectorContainer.style.display = "none";
-            loadCursoEditForm(cursoId); // Llamamos a la función con el ID
-            
-        } else {
-          // --- CASO 2: Se hizo clic en el botón genérico "Modificar cursos" ---
-          // Mostramos el dropdown selector para que elija
-          if(selectorContainer) selectorContainer.style.display = "block";
         }
-      });
-
-      // --- 3. LÓGICA DEL DROPDOWN (AHORA SOLO LLAMA A LA FUNCIÓN) ---
-      // (Esta lógica sigue funcionando para el dropdown)
-      if (cursoSelector) {
-        cursoSelector.addEventListener('change', function() {
-          // El dropdown simplemente llama a la misma función
-          loadCursoEditForm(this.value);
-        });
-      }
-
-      // --- Lógica modal EDITAR DOCUMENTO ---
-
-  // --- 1. FUNCIÓN REUTILIZABLE PARA CARGAR EL FORMULARIO DE DOCUMENTO ---
-      const getDocFormUrlBase = "{% url 'resources:edit_documento' 0 %}";
-
-      async function loadDocumentoEditForm(documentoId) {
-          if (!documentoId) return;
-
-          if(loadingSpinnerEditarDocumento) loadingSpinnerEditarDocumento.style.display = "block";
-          if(documentoFormContainer) documentoFormContainer.style.display = "none";
-          if(documentoFormContainer) documentoFormContainer.innerHTML = "";
-
-          try {
-              const url = getDocFormUrlBase.replace('0', documentoId); 
-              const response = await fetch(url);
-              if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
-              const html = await response.text();
-              
-              if(documentoFormContainer) {
-                  documentoFormContainer.innerHTML = html;
-                  documentoFormContainer.style.display = "block";
-
-                  setTimeout(function() {
-                      console.log("Formulario (Editar Doc) cargado. Inicializando Select2...");
-                      try {
-                          $('#documento-form-container #id_edit-doc-departamentos_destinados').select2({
-                              placeholder: "Busca y selecciona departamentos",
-                              width: '100%',
-                              theme: "bootstrap-5",
-                              dropdownParent: $('#modalEditarDocumento .modal-content')
-                          });
-                          console.log("Select2 para Departamentos (Editar Doc) ¡OK!");
-                      } catch (e) {
-                          console.error("¡Falló la inicialización de Select2 (Editar Doc)!", e);
-                      }
-                  }, 0); 
-              }
-          } catch (error) {
-              console.error("Error cargando el form de editar (documento):", error);
-              if(documentoFormContainer) {
-                  documentoFormContainer.innerHTML = `<div class="alert alert-danger">No se pudo cargar el formulario. ${error.message}</div>`;
-                  documentoFormContainer.style.display = "block";
-              }
-          } finally {
-              if(loadingSpinnerEditarDocumento) loadingSpinnerEditarDocumento.style.display = "none";
-          }
-      }
-      // --- FIN FUNCIÓN REUTILIZABLE ---
-
-
-      // --- 2. LÓGICA MEJORADA PARA ABRIR EL MODAL DE DOCUMENTO ---
-      modalEditarDocumentoEl.addEventListener('show.bs.modal', function(event) {
-        const triggerButton = event.relatedTarget; // El botón que abrió el modal
-        const selectorContainerDoc = document.getElementById('documento-selector-container');
-
-        // Reseteo base
-        if(documentoSelector) documentoSelector.value = ""; 
-        if(documentoFormContainer) documentoFormContainer.innerHTML = "";
-        if(documentoFormContainer) documentoFormContainer.style.display = "none";
-        if(loadingSpinnerEditarDocumento) loadingSpinnerEditarDocumento.style.display = "none";
-
-        if (triggerButton && triggerButton.classList.contains('btn-edit-documento')) {
-            // --- CASO 1: Se hizo clic en el ENGRANAJE ---
-            const documentoId = triggerButton.dataset.documentoId; // Obtener ID del botón
-            
-            // Ocultar el dropdown y cargar el form directamente
-            if(selectorContainerDoc) selectorContainerDoc.style.display = "none";
-            loadDocumentoEditForm(documentoId); // Llamar a la función
-            
-        } else {
-            // --- CASO 2: Se hizo clic en el botón genérico "Modificar documento" ---
-            // Mostrar el dropdown selector
-            if(selectorContainerDoc) selectorContainerDoc.style.display = "block";
+        if (esGeneralCheckCurso) {
+            toggleDepartamentosCurso(); // Run on load
+            esGeneralCheckCurso.addEventListener("change", toggleDepartamentosCurso);
         }
-      });
+        
+        // --- Lógica modal CREAR DOCUMENTO (Toggle Deptos) ---
+        function toggleDepartamentosDoc() {
+            if (esGeneralCheckDoc && deptoFieldDoc) { 
+                deptoFieldDoc.style.display = esGeneralCheckDoc.checked ? "none" : "block";
+            }
+        }
+        if (esGeneralCheckDoc) {
+            toggleDepartamentosDoc(); // Run on load
+            esGeneralCheckDoc.addEventListener("change", toggleDepartamentosDoc);
+        }
 
-
-      // --- 3. LÓGICA DEL DROPDOWN DE DOCUMENTO (LLAMA A LA FUNCIÓN) ---
-      if (documentoSelector) {
-        documentoSelector.addEventListener('change', function() {
-            loadDocumentoEditForm(this.value); // El dropdown también usa la función
-        });
-      }
-
-      // --- Lógica Búsqueda de Documentos
-      async function fetchDocumentos_Docs(page, query, append = false) { 
-        if (isLoading_Docs) return; 
-        isLoading_Docs = true;
-        if(loadingSpinner_Docs) loadingSpinner_Docs.style.display = 'block';
-        if(loadMoreBtn_Docs) loadMoreBtn_Docs.style.display = 'none';
-
-        const urlFetch = new URL(searchUrl_Docs, window.location.origin);
-        urlFetch.searchParams.set('page', page);
-        urlFetch.searchParams.set('q', query);
+        // --- 3. AÑADE LA LÓGICA 'TOGGLE' PARA EL MODAL DE CREAR VIDEO ---
+        function toggleDepartamentosVideo() {
+            if (esGeneralCheckVideo && deptoFieldVideo) { 
+                deptoFieldVideo.style.display = esGeneralCheckVideo.checked ? "none" : "block";
+            }
+        }
+        if (esGeneralCheckVideo) {
+            toggleDepartamentosVideo(); // Run on load
+            esGeneralCheckVideo.addEventListener("change", toggleDepartamentosVideo);
+        }
+        
+        // --- Inicialización Select2 (Modales de CREAR) ---
+        try {
+            $('#modalCrearCurso #id_create_curso-departamentos_destinados').select2({       
+                theme: 'bootstrap-5',
+                allowClear: true, 
+                dropdownParent: $('#modalCrearCurso .modal-content')
+            });
+            $('#modalCrearCurso #id_create_curso-inscritos').select2({       
+                theme: 'bootstrap-5',
+                allowClear: true,
+                dropdownParent: $('#modalCrearCurso .modal-content')
+            });
+        } catch (e) {
+            console.error("Error inicializando Select2 (Crear Curso):", e);
+        }
 
         try {
-          const response = await fetch(urlFetch);
-          if (!response.ok) throw new Error('Network response was not ok');
-          const data = await response.json();
+            $('#modalCrearDocumento #id_create_doc-departamentos_destinados').select2({       
+                theme: 'bootstrap-5',
+                allowClear: true, 
+                dropdownParent: $('#modalCrearDocumento .modal-content')
+            });
+        } catch (e) {
+            console.error("Error inicializando Select2 (Crear Documento):", e);
+        }
 
-          if (listContainer_Docs) { 
-            if (append) {
-              listContainer_Docs.insertAdjacentHTML('beforeend', data.html);
-            } else {
-              listContainer_Docs.innerHTML = data.html;
+        // --- Lógica modal EDITAR CURSO ---
+        const getFormUrlBase = "{% url 'resources:edit_curso' 0 %}";
+        async function loadCursoEditForm(cursoId) {
+            if (!cursoId) return;
+            if(loadingSpinnerEditarCurso) loadingSpinnerEditarCurso.style.display = "block";
+            if(cursoFormContainer) cursoFormContainer.style.display = "none";
+            if(cursoFormContainer) cursoFormContainer.innerHTML = "";
+            try {
+                const url = getFormUrlBase.replace('0', cursoId); 
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
+                const html = await response.text();
+                if(cursoFormContainer) {
+                    cursoFormContainer.innerHTML = html;
+                    cursoFormContainer.style.display = "block";
+                    setTimeout(function() {
+                        try {
+                            $('#edit-curso-form #id_edit-departamentos_destinados').select2({
+                                theme: 'bootstrap-5',
+                                allowClear: true,
+                                dropdownParent: $('#modalEditarCurso .modal-content')
+                            });
+                            $('#edit-curso-form #id_edit-inscritos').select2({
+                                theme: 'bootstrap-5',
+                                allowClear: true,
+                                dropdownParent: $('#modalEditarCurso .modal-content')
+                            });
+                        } catch (e) {
+                            console.error("¡Falló la inicialización de Select2 (Editar Curso)!", e);
+                        }
+                    }, 0); 
+                }
+            } catch (error) {
+                console.error("Error cargando el form de editar (curso):", error);
+                if(cursoFormContainer) {
+                    cursoFormContainer.innerHTML = `<div class="alert alert-danger">No se pudo cargar el formulario. ${error.message}</div>`;
+                    cursoFormContainer.style.display = "block";
+                }
+            } finally {
+                if(loadingSpinnerEditarCurso) loadingSpinnerEditarCurso.style.display = "none";
             }
-          }
-          currentPage_Docs = page; 
-          if(loadMoreBtn_Docs) loadMoreBtn_Docs.style.display = data.has_next ? 'block' : 'none';
-        } catch (error) {
-          console.error("Error loading documents:", error);
-        } finally {
-          isLoading_Docs = false;
-          if(loadingSpinner_Docs) loadingSpinner_Docs.style.display = 'none';
         }
-      }
-
-      if (loadMoreBtn_Docs) {
-        loadMoreBtn_Docs.addEventListener('click', () => {
-          fetchDocumentos_Docs(currentPage_Docs + 1, currentQuery_Docs, true);
+        modalEditarCursoEl.addEventListener('show.bs.modal', function(event) {
+            const triggerButton = event.relatedTarget;
+            const selectorContainer = document.getElementById('curso-selector-container');
+            if(cursoSelector) cursoSelector.value = "";
+            if(cursoFormContainer) cursoFormContainer.innerHTML = "";
+            if(cursoFormContainer) cursoFormContainer.style.display = "none";
+            if(loadingSpinnerEditarCurso) loadingSpinnerEditarCurso.style.display = "none";
+            if (triggerButton && triggerButton.classList.contains('btn-edit-curso')) {
+                const cursoId = triggerButton.dataset.cursoId;
+                if(selectorContainer) selectorContainer.style.display = "none";
+                loadCursoEditForm(cursoId);
+            } else {
+                if(selectorContainer) selectorContainer.style.display = "block";
+            }
         });
-      }
+        if (cursoSelector) {
+            cursoSelector.addEventListener('change', function() {
+                loadCursoEditForm(this.value);
+            });
+        }
 
-      if (searchInput_Docs) {
-        let debounceTimer;
-        searchInput_Docs.addEventListener('input', (e) => {
-          clearTimeout(debounceTimer);
-          debounceTimer = setTimeout(() => {
-            currentQuery_Docs = e.target.value;
-            fetchDocumentos_Docs(1, currentQuery_Docs, false);
-          }, 300);
+        // --- Lógica modal EDITAR DOCUMENTO ---
+        const getDocFormUrlBase = "{% url 'resources:edit_documento' 0 %}";
+        async function loadDocumentoEditForm(documentoId) {
+            if (!documentoId) return;
+            if(loadingSpinnerEditarDocumento) loadingSpinnerEditarDocumento.style.display = "block";
+            if(documentoFormContainer) documentoFormContainer.style.display = "none";
+            if(documentoFormContainer) documentoFormContainer.innerHTML = "";
+            try {
+                const url = getDocFormUrlBase.replace('0', documentoId); 
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
+                const html = await response.text();
+                if(documentoFormContainer) {
+                    documentoFormContainer.innerHTML = html;
+                    documentoFormContainer.style.display = "block";
+                    setTimeout(function() {
+                        try {
+                            $('#documento-form-container #id_edit-doc-departamentos_destinados').select2({
+                                placeholder: "Busca y selecciona departamentos",
+                                width: '100%',
+                                theme: "bootstrap-5",
+                                dropdownParent: $('#modalEditarDocumento .modal-content')
+                            });
+                        } catch (e) {
+                            console.error("¡Falló la inicialización de Select2 (Editar Doc)!", e);
+                        }
+                    }, 0); 
+                }
+            } catch (error) {
+                console.error("Error cargando el form de editar (documento):", error);
+                if(documentoFormContainer) {
+                    documentoFormContainer.innerHTML = `<div class="alert alert-danger">No se pudo cargar el formulario. ${error.message}</div>`;
+                    documentoFormContainer.style.display = "block";
+                }
+            } finally {
+                if(loadingSpinnerEditarDocumento) loadingSpinnerEditarDocumento.style.display = "none";
+            }
+        }
+        modalEditarDocumentoEl.addEventListener('show.bs.modal', function(event) {
+            const triggerButton = event.relatedTarget;
+            const selectorContainerDoc = document.getElementById('documento-selector-container');
+            if(documentoSelector) documentoSelector.value = ""; 
+            if(documentoFormContainer) documentoFormContainer.innerHTML = "";
+            if(documentoFormContainer) documentoFormContainer.style.display = "none";
+            if(loadingSpinnerEditarDocumento) loadingSpinnerEditarDocumento.style.display = "none";
+            if (triggerButton && triggerButton.classList.contains('btn-edit-documento')) {
+                const documentoId = triggerButton.dataset.documentoId;
+                if(selectorContainerDoc) selectorContainerDoc.style.display = "none";
+                loadDocumentoEditForm(documentoId);
+            } else {
+                if(selectorContainerDoc) selectorContainerDoc.style.display = "block";
+            }
         });
-      }
+        if (documentoSelector) {
+            documentoSelector.addEventListener('change', function() {
+                loadDocumentoEditForm(this.value);
+            });
+        }
 
-      async function fetchDocumentos_Formatos(page, query, append = false) { 
-          if (isLoading_Formatos) return; 
-          isLoading_Formatos = true;
-          if(loadingSpinner_Formatos) loadingSpinner_Formatos.style.display = 'block';
-          if(loadMoreBtn_Formatos) loadMoreBtn_Formatos.style.display = 'none';
+        const getVideoFormUrlBase = "{% url 'resources:edit_video' 0 %}";
+        async function loadVideoEditForm(videoId) {
+            if (!videoId) return;
 
-          const urlFetch = new URL(searchUrl_Formatos, window.location.origin);
-          urlFetch.searchParams.set('page', page);
-          urlFetch.searchParams.set('q', query);
+            if(loadingSpinnerEditarVideo) loadingSpinnerEditarVideo.style.display = "block";
+            if(videoFormContainer) videoFormContainer.style.display = "none";
+            if(videoFormContainer) videoFormContainer.innerHTML = "";
 
-          try {
-              const response = await fetch(urlFetch);
-              if (!response.ok) throw new Error('Network response was not ok');
-              const data = await response.json();
+            try {
+                const url = getVideoFormUrlBase.replace('0', videoId); 
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
+                
+                const html = await response.text();
+                
+                if(videoFormContainer) {
+                    videoFormContainer.innerHTML = html;
+                    videoFormContainer.style.display = "block";
 
-              if (listContainer_Formatos) { 
-                  if (append) {
-                      listContainer_Formatos.insertAdjacentHTML('beforeend', data.html);
-                  } else {
-                      listContainer_Formatos.innerHTML = data.html;
-                  }
-              }
-              currentPage_Formatos = page; 
-              if(loadMoreBtn_Formatos) loadMoreBtn_Formatos.style.display = data.has_next ? 'block' : 'none';
-          } catch (error) {
-              console.error("Error loading formatos:", error);
-          } finally {
-              isLoading_Formatos = false;
-              if(loadingSpinner_Formatos) loadingSpinner_Formatos.style.display = 'none';
-          }
-      }
+                    // Inicializar Select2s DENTRO del formulario cargado
+                    setTimeout(function() {
+                        try {
+                            // JS para el toggle 'es_general' DENTRO del modal de editar
+                            const esGeneralCheckEdit = document.querySelector('#edit-video-form #id_edit-video-es_general');
+                            const deptoFieldEdit = document.getElementById('campoDepartamentosVideo-edit');
+                            
+                            function toggleDeptosEdit() {
+                                if(deptoFieldEdit) deptoFieldEdit.style.display = esGeneralCheckEdit.checked ? 'none' : 'block';
+                            }
+                            if(esGeneralCheckEdit) {
+                                toggleDeptosEdit(); // Run on load
+                                esGeneralCheckEdit.addEventListener('change', toggleDeptosEdit);
+                            }
 
-      if (loadMoreBtn_Formatos) {
-          loadMoreBtn_Formatos.addEventListener('click', () => {
-              fetchDocumentos_Formatos(currentPage_Formatos + 1, currentQuery_Formatos, true);
-          });
-      }
-      if (searchInput_Formatos) {
-          let debounceTimer;
-          searchInput_Formatos.addEventListener('input', (e) => {
-              clearTimeout(debounceTimer);
-              debounceTimer = setTimeout(() => {
-                  currentQuery_Formatos = e.target.value;
-                  fetchDocumentos_Formatos(1, currentQuery_Formatos, false);
-              }, 300);
-          });
-      }
+                            // JS para Select2 DENTRO del modal de editar
+                            $('#edit-video-form #id_edit-video-departamentos_destinados').select2({
+                                theme: 'bootstrap-5',
+                                allowClear: true,
+                                dropdownParent: $('#modalEditarContenido .modal-content') 
+                            });
+                             $('#edit-video-form #id_edit-video-curso').select2({
+                                theme: 'bootstrap-5',
+                                allowClear: true,
+                                placeholder: "Opcional: asociar a un curso",
+                                dropdownParent: $('#modalEditarContenido .modal-content') 
+                            });
+                        } catch (e) {
+                            console.error("¡Falló la inicialización de Select2 (Editar Contenido)!", e);
+                        }
+                    }, 0); 
+                }
+            } catch (error) {
+                console.error("Error cargando el form de editar (video):", error);
+                if(videoFormContainer) {
+                    videoFormContainer.innerHTML = `<div class="alert alert-danger">No se pudo cargar el formulario. ${error.message}</div>`;
+                    videoFormContainer.style.display = "block";
+                }
+            } finally {
+                if(loadingSpinnerEditarVideo) loadingSpinnerEditarVideo.style.display = "none";
+            }
+        }
+        // Listener para el modal de Editar Contenido
+        modalEditarContenidoEl.addEventListener('show.bs.modal', function(event) {
+            const triggerButton = event.relatedTarget;
+            const selectorContainer = document.getElementById('video-selector-container');
 
-      // --- Lógica Toasts
-      const toastElements = document.querySelectorAll('.toast');
-      if (toastElements.length > 0) {
-        toastElements.forEach(function (toastEl) {
-          const toast = new bootstrap.Toast(toastEl, { autohide: true, delay: 5000 });
-          toast.show();
+            if(videoSelector) videoSelector.value = "";
+            if(videoFormContainer) videoFormContainer.innerHTML = "";
+            if(videoFormContainer) videoFormContainer.style.display = "none";
+            if(loadingSpinnerEditarVideo) loadingSpinnerEditarVideo.style.display = "none";
+
+            // NOTA: Aún necesitas añadir la clase 'btn-edit-video' y 'data-video-id' 
+            // a un botón de engranaje en tus tarjetas de video si quieres esta funcionalidad.
+            if (triggerButton && triggerButton.classList.contains('btn-edit-video')) {
+                const videoId = triggerButton.dataset.videoId;
+                if(selectorContainer) selectorContainer.style.display = "none";
+                loadVideoEditForm(videoId); 
+            } else {
+                if(selectorContainer) selectorContainer.style.display = "block";
+            }
         });
-      }
-
-      // --- Lógica Botón Móvil ---
-      
-      // CREAR CURSO
-      modalCrearCursoEl.addEventListener('show.bs.modal', function () {
-        if (window.location.hash !== '#modalCreateCurso') { // Hash único
-          history.pushState({ modal: 'createCurso' }, '', '#modalCreateCurso');
+        // Listener para el dropdown de Editar Contenido
+        if (videoSelector) {
+            videoSelector.addEventListener('change', function() {
+                loadVideoEditForm(this.value);
+            });
         }
-      });
-      modalCrearCursoEl.addEventListener('hide.bs.modal', function () {
-        if (history.state && history.state.modal === 'createCurso') {
-          history.back();
+
+        // --- Lógica Toasts ---
+        const toastElements = document.querySelectorAll('.toast');
+        if (toastElements.length > 0) {
+            toastElements.forEach(function (toastEl) {
+                const toast = new bootstrap.Toast(toastEl, { autohide: true, delay: 5000 });
+                toast.show();
+            });
         }
-      });
 
-      // EDITAR CURSO
-      modalEditarCursoEl.addEventListener('show.bs.modal', function () {
-        if (window.location.hash !== '#modalEditCurso') { // Hash único
-          history.pushState({ modal: 'editCurso' }, '', '#modalEditCurso');
+        // EDITAR CONTENIDO
+        modalEditarContenidoEl.addEventListener('show.bs.modal', function () {
+            if (window.location.hash !== '#modalEditVideo') {
+                history.pushState({ modal: 'editVideo' }, '', '#modalEditVideo');
+            }
+        });
+        modalEditarContenidoEl.addEventListener('hide.bs.modal', function () {
+            if (history.state && history.state.modal === 'editVideo') {
+                history.back();
+            }
+            if(videoFormContainer) videoFormContainer.innerHTML = "";
+            if(videoFormContainer) videoFormContainer.style.display = "none";
+            if(videoSelector) videoSelector.value = ""; 
+        });
+
+        // --- Lógica Botón Móvil (Historial) ---
+        modalCrearCursoEl.addEventListener('show.bs.modal', function () {
+            if (window.location.hash !== '#modalCreateCurso') {
+                history.pushState({ modal: 'createCurso' }, '', '#modalCreateCurso');
+            }
+        });
+        modalCrearCursoEl.addEventListener('hide.bs.modal', function () {
+            if (history.state && history.state.modal === 'createCurso') {
+                history.back();
+            }
+        });
+        modalEditarCursoEl.addEventListener('show.bs.modal', function () {
+            if (window.location.hash !== '#modalEditCurso') {
+                history.pushState({ modal: 'editCurso' }, '', '#modalEditCurso');
+            }
+        });
+        modalEditarCursoEl.addEventListener('hide.bs.modal', function () {
+            if (history.state && history.state.modal === 'editCurso') {
+                history.back();
+            }
+            if(cursoFormContainer) cursoFormContainer.innerHTML = "";
+            if(cursoFormContainer) cursoFormContainer.style.display = "none";
+            if(cursoSelector) cursoSelector.value = ""; 
+        });
+        modalCrearDocumentoEl.addEventListener('show.bs.modal', function () {
+            if (window.location.hash !== '#modalCreateDoc') {
+                history.pushState({ modal: 'createDoc' }, '', '#modalCreateDoc');
+            }
+        });
+        modalCrearDocumentoEl.addEventListener('hide.bs.modal', function () {
+            if (history.state && history.state.modal === 'createDoc') {
+                history.back();
+            }
+        });
+        modalEditarDocumentoEl.addEventListener('show.bs.modal', function () {
+            if (window.location.hash !== '#modalEditDoc') {
+                history.pushState({ modal: 'editDoc' }, '', '#modalEditDoc');
+            }
+        });
+        modalEditarDocumentoEl.addEventListener('hide.bs.modal', function () {
+            if (history.state && history.state.modal === 'editDoc') {
+                history.back();
+            }
+            if(documentoFormContainer) documentoFormContainer.innerHTML = "";
+            if(documentoFormContainer) documentoFormContainer.style.display = "none";
+            if(documentoSelector) documentoSelector.value = ""; 
+        });
+        window.addEventListener('popstate', function (event) {
+            if (!event.state || !event.state.modal) { 
+                if (modalCrearCursoEl.classList.contains('show')) myModalCrearCurso.hide();
+                if (modalEditarCursoEl.classList.contains('show')) myModalEditarCurso.hide();
+                if (modalCrearDocumentoEl.classList.contains('show')) myModalCrearDocumento.hide();
+                if (modalEditarDocumentoEl.classList.contains('show')) myModalEditarDocumento.hide();
+                if (modalCrearContenidoEl.classList.contains('show')) myModalCrearContenido.hide();
+                if (modalEditarContenidoEl.classList.contains('show')) myModalEditarContenido.hide();
+            }
+        });
+
+        // -----------------------------------------------------------------
+        // --- NUEVA LÓGICA DE FILTRADO (REEMPLAZA TODO LO ANTERIOR) ---
+        // -----------------------------------------------------------------
+
+        /**
+        * Configura una sección de filtrado genérica.
+        * @param {object} config - Objeto de configuración con los IDs y la URL de la API.
+        */
+        function setupFilterSection(config) {
+            const deptoFilter = document.getElementById(config.filterDeptoId);
+            // --- CORRECCIÓN: 'tipoFilter' ahora es opcional ---
+            const tipoFilter = config.filterTipoId ? document.getElementById(config.filterTipoId) : null;
+            const searchInput = document.getElementById(config.searchInputId);
+            const listContainer = document.getElementById(config.listContainerId);
+            const loadMoreBtn = document.getElementById(config.loadMoreBtnId);
+            const loadingSpinner = document.getElementById(config.loadingSpinnerId);
+            
+            let currentPage = 1;
+            let debounceTimer;
+            const API_URL = config.apiUrl;
+
+            async function fetchItems(isNewSearch = false) {
+                if (isNewSearch) {
+                    currentPage = 1;
+                } else {
+                    currentPage++;
+                }
+
+                const deptoId = deptoFilter.value;
+                // --- CORRECCIÓN: Solo obtiene el valor si el filtro existe ---
+                const tipoId = tipoFilter ? tipoFilter.value : '';
+                const searchQuery = searchInput.value;
+
+                const params = new URLSearchParams({
+                    page: currentPage,
+                    departamento: deptoId,
+                    q: searchQuery
+                });
+
+                // --- CORRECCIÓN: Solo añade 'tipo' si es relevante ---
+                if (tipoId) {
+                    params.set('tipo', tipoId);
+                }
+                
+                const url = `${API_URL}?${params.toString()}`;
+
+                loadingSpinner.style.display = 'block';
+                if (isNewSearch) {
+                    listContainer.innerHTML = ''; 
+                }
+                loadMoreBtn.style.display = 'none';
+
+                try {
+                    const response = await fetch(url);
+                    if (!response.ok) throw new Error('Error en la respuesta de la red');
+                    
+                    const data = await response.json(); // { "html": "...", "has_next": true }
+
+                    if (isNewSearch) {
+                        listContainer.innerHTML = data.html;
+                    } else {
+                        listContainer.insertAdjacentHTML('beforeend', data.html);
+                    }
+
+                    loadMoreBtn.style.display = data.has_next ? 'block' : 'none';
+
+                } catch (error) {
+                    console.error('Error al cargar items:', error);
+                    listContainer.innerHTML = '<p class="text-danger">Error al cargar los resultados.</p>';
+                } finally {
+                    loadingSpinner.style.display = 'none';
+                }
+            }
+
+            function debounceFetch(func, delay) {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => {
+                    func(true);
+                }, delay);
+            }
+
+            // --- Asignar Event Listeners ---
+            deptoFilter.addEventListener('change', () => fetchItems(true));
+            // --- CORRECCIÓN: Solo añade listener si el filtro existe ---
+            if (tipoFilter) {
+                tipoFilter.addEventListener('change', () => fetchItems(true));
+            }
+            searchInput.addEventListener('input', () => debounceFetch(fetchItems, 300));
+            loadMoreBtn.addEventListener('click', () => fetchItems(false));
+            
+            // Si el filtro de depto ya está preseleccionado, disparamos la búsqueda inicial
+            if (deptoFilter.value !== "") {
+                fetchItems(true);
+            }
         }
-      });
-      modalEditarCursoEl.addEventListener('hide.bs.modal', function () {
-        if (history.state && history.state.modal === 'editCurso') {
-          history.back();
-        }
-        if(cursoFormContainer) cursoFormContainer.innerHTML = "";
-        if(cursoFormContainer) cursoFormContainer.style.display = "none";
-        if(cursoSelector) cursoSelector.value = ""; 
-      });
 
-      // CREAR DOCUMENTO
-      modalCrearDocumentoEl.addEventListener('show.bs.modal', function () {
-        if (window.location.hash !== '#modalCreateDoc') { // Hash único
-          history.pushState({ modal: 'createDoc' }, '', '#modalCreateDoc');
-        }
-      });
-      modalCrearDocumentoEl.addEventListener('hide.bs.modal', function () {
-        if (history.state && history.state.modal === 'createDoc') {
-          history.back();
-        }
-      });
-      
-      // EDITAR DOCUMENTO
-      modalEditarDocumentoEl.addEventListener('show.bs.modal', function () {
-        if (window.location.hash !== '#modalEditDoc') { // Hash único
-          history.pushState({ modal: 'editDoc' }, '', '#modalEditDoc');
-        }
-      });
-      modalEditarDocumentoEl.addEventListener('hide.bs.modal', function () {
-        if (history.state && history.state.modal === 'editDoc') {
-          history.back();
-        }
-        if(documentoFormContainer) documentoFormContainer.innerHTML = "";
-        if(documentoFormContainer) documentoFormContainer.style.display = "none";
-        if(documentoSelector) documentoSelector.value = ""; 
-      });
+        // --- INICIALIZACIÓN DE LAS 3 SECCIONES ---
+        
+        // 1. Configurar la sección de DOCUMENTOS
+        setupFilterSection({
+            filterDeptoId: 'doc-filter-departamento',
+            filterTipoId: 'doc-filter-tipo',
+            searchInputId: 'doc-search-input',
+            listContainerId: 'doc-list-container',
+            loadMoreBtnId: 'doc-load-more-btn',
+            loadingSpinnerId: 'doc-loading-spinner',
+            apiUrl: "{% url 'resources:search_documentos' %}"
+        });
 
-      // Listener de Popstate para cerrar modales
-      window.addEventListener('popstate', function (event) {
-        if (!event.state || !event.state.modal) { 
-            if (modalCrearCursoEl.classList.contains('show')) myModalCrearCurso.hide();
-            if (modalEditarCursoEl.classList.contains('show')) myModalEditarCurso.hide();
-            if (modalCrearDocumentoEl.classList.contains('show')) myModalCrearDocumento.hide();
-            if (modalEditarDocumentoEl.classList.contains('show')) myModalEditarDocumento.hide();
-        }
-      });
-    });
+        // 2. Configurar la sección de FORMATOS
+        setupFilterSection({
+            filterDeptoId: 'form-filter-departamento',
+            filterTipoId: 'form-filter-tipo',
+            searchInputId: 'form-search-input',
+            listContainerId: 'form-list-container',
+            loadMoreBtnId: 'form-load-more-btn',
+            loadingSpinnerId: 'form-loading-spinner',
+            apiUrl: "{% url 'resources:search_formatos' %}"
+        });
 
-    /**
-    * Configura una sección de filtrado de documentos (Documentos o Formatos).
-    * @param {object} config - Objeto de configuración con los IDs y la URL de la API.
-    */    
-    function setupFilterSection(config) {
-      // --- Referencias a elementos del DOM específicos ---
-      const deptoFilter = document.getElementById(config.filterDeptoId);
-      const tipoFilter = document.getElementById(config.filterTipoId);
-      const searchInput = document.getElementById(config.searchInputId);
-      
-      const listContainer = document.getElementById(config.listContainerId);
-      const loadMoreBtn = document.getElementById(config.loadMoreBtnId);
-      const loadingSpinner = document.getElementById(config.loadingSpinnerId);
-      
-      let currentPage = 1; // Rastreador de página (local para esta instancia)
-      let debounceTimer;   // Temporizador de búsqueda (local para esta instancia)
-      const API_URL = config.apiUrl; // URL de la API específica
+        // 3. Configurar la sección de VIDEOS (Contenido)
+        setupFilterSection({
+            filterDeptoId: 'vid-filter-departamento',
+            filterTipoId: null, // <-- Se omite el filtro de tipo
+            searchInputId: 'vid-search-input',
+            listContainerId: 'vid-list-container',
+            loadMoreBtnId: 'vid-load-more-btn',
+            loadingSpinnerId: 'vid-loading-spinner',
+            apiUrl: "{% url 'resources:search_videos' %}" 
+        });
 
-      /**
-       * Función principal para buscar y/o cargar documentos.
-       * @param {boolean} isNewSearch - True resetea la página a 1, False la incrementa.
-       */
-      async function fetchItems(isNewSearch = false) {
-          if (isNewSearch) {
-              currentPage = 1;
-          } else {
-              currentPage++;
-          }
-
-          const deptoId = deptoFilter.value;
-          const tipoId = tipoFilter.value;
-          const searchQuery = searchInput.value;
-
-          const params = new URLSearchParams({
-              page: currentPage,
-              departamento: deptoId,
-              tipo: tipoId,
-              q: searchQuery
-          });
-          const url = `${API_URL}?${params.toString()}`;
-
-          loadingSpinner.style.display = 'block';
-          if (isNewSearch) {
-              listContainer.innerHTML = ''; 
-          }
-          loadMoreBtn.style.display = 'none';
-
-          try {
-              const response = await fetch(url);
-              if (!response.ok) throw new Error('Error en la respuesta de la red');
-              
-              const data = await response.json(); // { "html": "...", "has_next": true }
-
-              if (isNewSearch) {
-                  listContainer.innerHTML = data.html;
-              } else {
-                  listContainer.insertAdjacentHTML('beforeend', data.html);
-              }
-
-              if (data.has_next) {
-                  loadMoreBtn.style.display = 'block';
-              } else {
-                  loadMoreBtn.style.display = 'none';
-              }
-
-          } catch (error) {
-              console.error('Error al cargar items:', error);
-              listContainer.innerHTML = '<p class="text-danger">Error al cargar los resultados.</p>';
-          } finally {
-              loadingSpinner.style.display = 'none';
-          }
-      }
-
-      function debounceFetch(func, delay) {
-          clearTimeout(debounceTimer);
-          debounceTimer = setTimeout(() => {
-              func(true);
-          }, delay);
-      }
-
-      // --- Asignar Event Listeners ---
-      deptoFilter.addEventListener('change', () => fetchItems(true));
-      tipoFilter.addEventListener('change', () => fetchItems(true));
-      searchInput.addEventListener('input', () => debounceFetch(fetchItems, 300));
-      loadMoreBtn.addEventListener('click', () => fetchItems(false));
-      
-      // Si el filtro de depto ya está preseleccionado, disparamos la búsqueda inicial
-      if (deptoFilter.value !== "") {
-          fetchItems(true);
-      }
-    }
-
-    // --- INICIALIZACIÓN ---
-    // Se ejecuta cuando el DOM está listo
-    document.addEventListener('DOMContentLoaded', function() {
-
-      // 1. Configurar la sección de DOCUMENTOS
-      setupFilterSection({
-        filterDeptoId: 'doc-filter-departamento',
-        filterTipoId: 'doc-filter-tipo',
-        searchInputId: 'doc-search-input',
-        listContainerId: 'doc-list-container',
-        loadMoreBtnId: 'doc-load-more-btn',
-        loadingSpinnerId: 'doc-loading-spinner',
-        apiUrl: "{% url 'resources:search_documentos' %}" // URL para Documentos
-      });
-
-      // 2. Configurar la sección de FORMATOS
-      setupFilterSection({
-        filterDeptoId: 'form-filter-departamento',
-        filterTipoId: 'form-filter-tipo',
-        searchInputId: 'form-search-input',
-        listContainerId: 'form-list-container',
-        loadMoreBtnId: 'form-load-more-btn',
-        loadingSpinnerId: 'form-loading-spinner',
-        apiUrl: "{% url 'resources:search_formatos' %}" // URL para Formatos
-      });
-
-      // 3. Configurar la sección de VIDEOS
-      setupFilterSection({
-        filterDeptoId: 'vid-filter-departamento',
-        // No hay 'filterTipoId' para esta sección, por eso modificamos la función
-        searchInputId: 'vid-search-input',
-        listContainerId: 'vid-list-container',
-        loadMoreBtnId: 'vid-load-more-btn',
-        loadingSpinnerId: 'vid-loading-spinner',
-        // ¡Tendrás que crear esta URL en tu urls.py!
-        apiUrl: "{% url 'resources:search_videos' %}" 
-      });
-    });
-  </script>
+    }); // <-- FIN DEL ÚNICO DOMCONTENTLOADED
+</script>
   {% endblock %}

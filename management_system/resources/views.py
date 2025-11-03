@@ -7,7 +7,7 @@ from django.db.models import Q
 from django.core.paginator import Paginator
 from django.template.loader import render_to_string
 from django.http import JsonResponse
-from .forms import CursoForm, DocumentoForm
+from .forms import CursoForm, DocumentoForm, VideoCursoForm
 from django.contrib.auth.models import Group
 from django.views.decorators.http import require_POST # <--- 1. IMPORT AÑADIDO
 
@@ -26,6 +26,7 @@ def ResourcesView(request):
     # Inicializa ambos formularios como None
     form_curso = CursoForm(prefix='create_curso') 
     form_documento = DocumentoForm(prefix='create_doc')
+    form_video = VideoCursoForm(prefix='create_video')
 
     form_with_errors = None
 
@@ -56,16 +57,30 @@ def ResourcesView(request):
             else:
                 messages.error(request, 'Error al guardar el documento. Revisa los campos.')
                 form_with_errors = 'documento'
+
+        elif form_type == 'video':
+            form_video = VideoCursoForm(request.POST, prefix='create_video')
+
+            if form_video.is_valid():
+                video_guardado = form_video.save()
+                messages.success(request, f'¡Nuevo contenido "{video_guardado.titulo}" guardado exitosamente! 📹')
+                return redirect('resources:resources')
+            else:
+                messages.error(request, 'Error al guardar el contenido. Revisa los campos.')
+                form_with_errors = 'video' # <-- IMPORTANTE
+        
         else:
             # Fallback por si no se identifica el form
             messages.error(request, 'Error desconocido al enviar el formulario.')
             form_curso = CursoForm(prefix='create_curso')
             form_documento = DocumentoForm(prefix='create_doc')
+            form_video = VideoCursoForm(prefix='create_video') # <-- AÑADE ESTO
 
     else:
         # Lógica para el GET (cuando se carga la página)
         form_curso = CursoForm(prefix='create_curso')
         form_documento = DocumentoForm(prefix='create_doc')
+        form_video = VideoCursoForm(prefix='create_video') # <-- AÑADE ESTO
     # --- FIN: LÓGICA DE FORMULARIOS MODIFICADA ---
 
     try:
@@ -149,7 +164,8 @@ def ResourcesView(request):
     videos_page_1 = paginator_videos.get_page(1) # <--- AÑADIDO
 
     todos_los_cursos_list = Curso.objects.all().order_by('titulo')
-
+    todos_los_documentos_list = Documento.objects.filter(documentos_dept_query).distinct().order_by('nombre')
+    todos_los_videos_list = VideoCurso.objects.filter(video_permission_query).distinct().order_by('titulo') # <-- AÑADE ESTO
     all_departamentos = Departamento.objects.all().order_by('nombre')
 
     tipos_para_documentos = TipoDocumento.objects.filter(
@@ -165,11 +181,13 @@ def ResourcesView(request):
     context = {
         'form_curso': form_curso,
         'form_documento': form_documento,
+        'form_video': form_video,
         'slides': slides_activos,
         'mis_cursos_chunks': mis_cursos_chunks,                  # <-- Lista 1 (Cursos registrados)
         'cursos_disponibles_chunks': cursos_disponibles_chunks,  # <-- Lista 2 (Cursos disponibles) 
         'todos_los_cursos': todos_los_cursos_list,               # <-- Lista 3 (Todos los cursos)
-        'todos_los_documentos': Documento.objects.filter(documentos_dept_query).distinct().order_by('nombre'),        
+        'todos_los_documentos': todos_los_documentos_list, # <-- Actualizado        
+        'todos_los_videos': todos_los_videos_list, # <-- AÑADE ESTO
         'documentos_generales': documentos_page_1,
         'formatos': formatos_page_1,  
         'is_admin': is_admin,
@@ -443,4 +461,35 @@ def edit_documento(request, documento_id):
     return render(request, '_edit_documento_form.html', {
         'form_documento': form,
         'documento': documento
+    })
+
+@user_passes_test(is_admin_check)
+def VideoEditView(request, video_id):
+    """
+    Maneja el GET (cargar formulario parcial) y POST (actualizar)
+    para el modal de edición de videos/contenido.
+    """
+    video = get_object_or_404(VideoCurso, id=video_id)
+    
+    if request.method == 'POST':
+        # El usuario está enviando el formulario actualizado
+        form = VideoCursoForm(request.POST, request.FILES, instance=video, prefix="edit-video")
+        
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'Contenido "{video.titulo}" actualizado con éxito.')
+            return redirect('resources:resources')
+        else:
+            # Si el formulario no es válido, re-renderizamos el parcial con errores
+            messages.error(request, 'Error al actualizar el contenido. Revisa los campos.')
+            pass # Continúa para renderizar el form con errores abajo
+
+    else:
+        # El usuario está pidiendo el formulario por primera vez (AJAX/Fetch)
+        form = VideoCursoForm(instance=video, prefix="edit-video")
+    
+    # Para GET o POST fallido, renderizamos el formulario parcial
+    return render(request, '_video_edit_form.html', {
+        'form_video': form, # <-- Nombre de variable 'form_video'
+        'video': video
     })

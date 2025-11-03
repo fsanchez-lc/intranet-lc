@@ -212,6 +212,12 @@ class VideoCurso(models.Model):
         related_name="videos_grabados",
         verbose_name="Curso al que pertenece"
     )
+
+    es_general = models.BooleanField(
+        default=True,
+        verbose_name="Formato General",
+        help_text="Desmarcar si este formato NO es para TODOS los departamentos."
+    )
     
     # TÍTULO: El título del video
     titulo = models.CharField(

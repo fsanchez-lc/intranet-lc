@@ -1,5 +1,5 @@
 from django import forms
-from .models import Curso, Documento
+from .models import Curso, Documento, VideoCurso
 from employees.models import Empleado, Departamento
 from django.core.exceptions import ValidationError
 
@@ -143,3 +143,33 @@ class DocumentoForm(forms.ModelForm):
             
         # Si al menos uno tiene valor, la validación es correcta
         return cleaned_data
+    
+class VideoCursoForm(forms.ModelForm):
+    class Meta:
+        model = VideoCurso
+        fields = [
+            'titulo', 
+            'video_url', 
+            'ponente', 
+            'fecha_grabacion', 
+            'curso', 
+            'estado', 
+            'es_general', 
+            'departamentos_destinados'
+        ]
+        widgets = {
+            'titulo': forms.TextInput(attrs={'class': 'form-control'}),
+            'video_url': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'https://www.youtube.com/watch?v=...'}),
+            'ponente': forms.TextInput(attrs={'class': 'form-control'}),
+            'fecha_grabacion': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'curso': forms.Select(attrs={'class': 'form-select'}),
+            'estado': forms.Select(attrs={'class': 'form-select'}),
+            'es_general': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'departamentos_destinados': forms.SelectMultiple(attrs={'class': 'form-select', 'size': '5'}),
+        }
+        labels = {
+            'video_url': 'URL del Video',
+            'fecha_grabacion': 'Fecha de Grabación',
+            'es_general': 'Contenido General',
+            'departamentos_destinados': 'Departamentos Destinados (si no es general)',
+        }
