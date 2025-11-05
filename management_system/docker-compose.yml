@@ -1,0 +1,44 @@
+# Versión de la sintaxis de Docker Compose
+version: '3.8'
+
+services:
+  # 1. El servicio de la base de datos (PostgreSQL)
+  db:
+    image: postgres:15-alpine  # Usa una imagen oficial y ligera de Postgres
+    volumes:
+      # Este "volumen" guarda los datos de tu BD en tu disco duro
+      # para que no se borren cada vez que reinicias el contenedor
+      - postgres_data:/var/lib/postgresql/data/
+      
+    environment:
+      # Variables para crear la base de datos
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=sistemas_lc
+      - POSTGRES_PASSWORD=sistemas_lc_pass
+
+  # 2. El servicio de tu aplicación Django
+  web:
+    build: .  # Le dice que construya la imagen usando el Dockerfile de esta carpeta
+    command: python manage.py runserver 0.0.0.0:8000 # El comando para iniciar
+    volumes:
+      # ¡IMPORTANTE! Esto sincroniza tu código local con el contenedor.
+      # Puedes editar tu código en tu PC y el servidor se reiniciará
+      # automáticamente. Perfecto para desarrollo.
+      - .:/management-system
+    ports:
+      # Mapea el puerto 8000 de tu PC al puerto 8000 del contenedor
+      - "8000:8000"
+    environment:
+      # Pasa las mismas variables de la BD a Django
+      - DB_NAME=postgres
+      - DB_USER=sistemas_lc
+      - DB_PASS=sistemas_lc_pass
+      - DB_HOST=db  # El nombre del host es el nombre del servicio 'db'
+      - DB_PORT=5432
+    depends_on:
+      # Le dice a Docker que inicie el servicio 'db' ANTES que el 'web'
+      - db
+
+# Define el volumen que usará la base de datos
+volumes:
+  postgres_data:

@@ -58,7 +58,7 @@
     <div class="d-flex justify-content-between align-items-start">
       <div>
         <h2 class="h3 fw-bold mb-2">Repositorio de conocimiento</h2>
-        <h3 class="h5 fw-italic text-muted">Gestión de empleados y expedientes</h3>
+        <h3 class="h5 fw-italic text-muted">Gestión de cursos y documentos de interés</h3>
       </div>
     </div>
 
@@ -101,6 +101,11 @@
         </button>
         <ul class="dropdown-menu">
           <li>
+            <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#modalEditarSlide">
+              Modificar slide
+            </a>
+          </li>
+          <li>
             <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#modalEditarCurso">
               Modificar curso
             </a>
@@ -124,43 +129,65 @@
     <hr class="my-4">
 
     {% if slides %}
-    <div id="carouselCaptions" class="carousel slide carousel-fade carousel-bienvenida shadow-lg rounded-3" data-bs-ride="carousel" data-bs-interval="4000">
-      
-      <div class="carousel-indicators">
-        {% for slide in slides %}
-          <button type="button" 
-                  data-bs-target="#carouselCaptions" 
-                  data-bs-slide-to="{{ forloop.counter0 }}"
-                  {% if forloop.first %}class="active" aria-current="true"{% endif %}
-                  aria-label="Slide {{ forloop.counter }}">
+    <div class="position-relative">
+
+      {% if is_admin %}
+      <div class="position-absolute top-0 start-0 p-3" style="z-index: 10;">
+          <button class="btn btn-success btn-sm shadow" data-bs-toggle="modal" data-bs-target="#modalCrearSlide">
+              <i class="bi bi-plus-lg"></i> Añadir slide
           </button>
-        {% endfor %}
       </div>
+      {% endif %}    
 
-      <div class="carousel-inner">
-        {% for slide in slides %}
-          <div class="carousel-item {% if forloop.first %}active{% endif %}">
-            
-          <a href="#" data-bs-toggle="modal" data-bs-target="#modalSlide{{ forloop.counter0 }}">
-            <img src="{{ slide.image.url }}" class="d-block w-100" alt="{{ slide.alt_text }}" style="cursor: pointer;">
-          </a>          
-            <div class="carousel-caption d-md-block">
-              <h5 class="">{{ slide.title }}</h5>
-              <p>{{ slide.description }}</p>
+      <div id="carouselCaptions" class="carousel slide carousel-fade carousel-bienvenida shadow-lg rounded-3" data-bs-ride="carousel" data-bs-interval="4000">
+      
+        <div class="carousel-indicators">
+          {% for slide in slides %}
+            <button type="button" 
+                    data-bs-target="#carouselCaptions" 
+                    data-bs-slide-to="{{ forloop.counter0 }}"
+                    {% if forloop.first %}class="active" aria-current="true"{% endif %}
+                    aria-label="Slide {{ forloop.counter }}">
+            </button>
+          {% endfor %}
+        </div>
+
+        <div class="carousel-inner">
+          {% for slide in slides %}
+            <div class="carousel-item {% if forloop.first %}active{% endif %}">
+              
+              {% if is_admin %}
+              <div class="position-absolute top-0 end-0 p-4" style="z-index: 5;">
+                  <button class="btn btn-warning btn-sm shadow btn-edit-slide" 
+                          data-bs-toggle="modal" 
+                          data-bs-target="#modalEditarSlide" 
+                          data-slide-id="{{ slide.id }}">
+                      <i class="bi bi-pencil"></i> Modificar slide
+                  </button>
+              </div>
+              {% endif %}
+
+              <a href="#" data-bs-toggle="modal" data-bs-target="#modalSlide{{ forloop.counter0 }}">
+                <img src="{{ slide.image.url }}" class="d-block w-100" alt="{{ slide.alt_text }}" style="cursor: pointer;">
+              </a>          
+              <div class="carousel-caption d-md-block">
+                <h5 class="">{{ slide.title }}</h5>
+                <p>{{ slide.description }}</p>
+              </div>
             </div>
-          </div>
-        {% endfor %}
-      </div>
+          {% endfor %}
+        </div>
 
-      <button class="carousel-control-prev" type="button" data-bs-target="#carouselCaptions" data-bs-slide="prev">
-        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-        <span class="visually-hidden">Previous</span>
-      </button>
-      <button class="carousel-control-next" type="button" data-bs-target="#carouselCaptions" data-bs-slide="next">
-        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-        <span class="visually-hidden">Next</span>
-      </button>
-    </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#carouselCaptions" data-bs-slide="prev">
+          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#carouselCaptions" data-bs-slide="next">
+          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Next</span>
+        </button>
+      </div>
+    </div> {% endif %}
 
     {% for slide in slides %}
     <div class="modal fade" id="modalSlide{{ forloop.counter0 }}" tabindex="-1" aria-labelledby="modalLabel{{ forloop.counter0 }}" aria-hidden="true">
@@ -180,7 +207,6 @@
       </div>
     </div>
     {% endfor %}
-    {% endif %}
 
     <nav class="navbar navbar-expand-lg bg-body-tertiary mt-3">
       <div class="container-fluid">
@@ -209,7 +235,7 @@
               <a class="nav-link" href="#Documentos">Documentos</a>
             </li>
             <li class="nav-item px-lg-2">
-              <a class="nav-link" href="#Biblioteca">Biblioteca</a>
+              <a class="nav-link" href="#Contenido">Biblioteca</a>
             </li>
             <li class="nav-item px-lg-2">
               <a class="nav-link" href="#DesarrolloProfesional">Desarrollo profesional</a>
@@ -312,7 +338,6 @@
                           {% if curso.plataforma %}
                             <p class="small mb-3"><i class="bi bi-geo-alt"></i> {{ curso.plataforma }}</p>
                           {% endif %}
-
                           {% if curso.link %}
                             <a href="{{ curso.link }}" target="_blank" class="btn btn-sm mt-auto btn-color">
                               Ir al Curso <i class="bi bi-box-arrow-up-right"></i>
@@ -402,7 +427,6 @@
                       
                       <div class="card-body text-white" style="background-color: #12255B;">
                         <h5 class="card-title h6">{{ curso.titulo }}</h5>
-                        
                         <p class="card-text small mb-0">
                           Fecha: {{ curso.fecha|date:"d/m/Y"|default:"No definida" }}
                         </p>
@@ -428,9 +452,20 @@
                         {% endif %}
 
                         {% if curso.link %}
-                          <a href="{{ curso.link }}" target="_blank" class="btn btn-sm mt-auto btn-color">
-                            Auto-inscribirse <i class="bi bi-box-arrow-up-right"></i>
-                          </a>
+                          {% if curso.modalidad == 'auto' %}
+                            <form action="{% url 'resources:inscribir_curso' curso.id %}" method="POST" class="d-inline">
+                              {% csrf_token %}
+                              <button type="submit" class="btn btn-sm mt-auto btn-color w-100">
+                                  Auto-inscribirse <i class="bi bi-plus-circle ms-1"></i>
+                              </button>
+                            </form>
+                          {% else %}
+                            <a href="#"
+                              class="btn btn-sm mt-auto btn-color btn-solicitar-inscripcion"
+                              data-mailto="mailto:fsanchez@lopez-castro.com.mx?cc=franksnchz@outlook.es&subject=Solicitud%20de%20Inscripción:%20{{ curso.titulo|urlencode }}&body=Hola,%0D%0A%0D%0AMe%20gustaría%20solicitar%20mi%20inscripción%20al%20siguiente%20curso:%0D%0A%0D%0A--- DETALLES DEL CURSO ---%0D%0ACurso:%20{{ curso.titulo|urlencode }}%0D%0AFecha:%20{{ curso.fecha|date:'d/m/Y' }}%0D%0AHorario:%20{{ curso.horario|time:'H:i' }}%0D%0A%0D%0A--- DATOS DEL SOLICITANTE ---%0D%0ANombre:%20{{ user.empleado.nombre|urlencode }}%20{{ user.empleado.apellidos|urlencode }}%0D%0ADepartamento:%20{{ user.empleado.departamento.nombre|default:'No definido'|urlencode }}%0D%0AEmail:%20{{ user.email|urlencode }}%0D%0A%0D%0AQuedo%20a%20la%20espera%20de%20su%20confirmación.%0D%0ASaludos.">
+                              Solicitar inscripción <i class="bi bi-envelope-fill ms-1"></i>
+                            </a>
+                          {% endif %}
                         {% else %}
                           <span class="text-white-50 small mt-auto">Enlace no disponible</span>
                         {% endif %}
@@ -458,8 +493,8 @@
       </div>
     </div>
     {% else %}
-    <div class="mb-5" id="CursosDisponibles">
-      <h2 class="h4 p-3 mb-2">Cursos disponibles</h2>
+    <div class="mb-5 p-3" id="CursosDisponibles">
+      <h2 class="h4 mb-2">Cursos disponibles</h2>
       <p class="text-muted">
         Los cursos disponibles para tu área y generales.    
       </p>
@@ -663,6 +698,7 @@
         <div id="vid-list-container" class="row row-cols-1 row-cols-md-2 g-4">
           {% include '_videos_partial.html' with videos=videos_videoteca %}
         </div>
+        <div>
           <div class="d-flex justify-content-center align-items-center mt-4">
             <button id="vid-load-more-btn" class="btn btn-color px-4 py-2 fw-medium"
                     {% if not videos_videoteca.has_next %}style="display: none;"{% endif %}>
@@ -672,7 +708,104 @@
                 <span class="visually-hidden">Loading...</span>
             </div>
           </div>
+        </div>
+      </div>
+    </div>
 
+    <div class="modal fade" id="modalCrearSlide" tabindex="-1" aria-labelledby="modalCrearSlideLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content p-1">
+          
+          <div class="modal-header">
+            <div>
+              <h5 class="modal-title fw-bold" id="modalCrearSlideLabel">Añadir un Slide</h5>
+              <p class="mb-0 text-muted small">Agrega una nueva imagen al carrusel de bienvenida.</p>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+
+          <div class="modal-body">
+            <form method="POST" enctype="multipart/form-data" novalidate>
+              {% csrf_token %}
+              <input type="hidden" name="form_type" value="slide">
+              
+              <p class="text-muted small">
+                Completa los detalles del nuevo slide. Los campos con (<span class="text-danger">*</span>) son obligatorios.
+              </p>
+
+              <div class="mb-3">
+                <label for="{{ form_slide.title.id_for_label }}" class="form-label fw-bold">
+                    {{ form_slide.title.label }}<span class="text-danger"> *</span>
+                </label>
+                {{ form_slide.title }}
+                {% if form_slide.title.errors %}
+                    <div class="text-danger small">{{ form_slide.title.errors.0 }}</div>
+                {% endif %}
+              </div>
+
+              <div class="mb-3">
+                <label for="{{ form_slide.image.id_for_label }}" class="form-label fw-bold">
+                    {{ form_slide.image.label }}<span class="text-danger"> *</span>
+                </label>
+                {{ form_slide.image }}
+                <div class="form-text">Se recomienda una imagen horizontal de alta resolución (ej. 1920x600).</div>
+                {% if form_slide.image.errors %}
+                    <div class="text-danger small">{{ form_slide.image.errors.0 }}</div>
+                {% endif %}
+              </div>
+
+              <div class="mb-3">
+                <label for="{{ form_slide.description.id_for_label }}" class="form-label fw-bold">
+                    {{ form_slide.description.label }}
+                </label>
+                {{ form_slide.description }}
+                {% if form_slide.description.errors %}
+                    <div class="text-danger small">{{ form_slide.description.errors.0 }}</div>
+                {% endif %}
+              </div>
+
+              <div class="row">
+                <div class="col-md-8 mb-3">
+                  <label for="{{ form_slide.alt_text.id_for_label }}" class="form-label fw-bold">
+                      {{ form_slide.alt_text.label }}<span class="text-danger"> *</span>
+                  </label>
+                  {{ form_slide.alt_text }}
+                  {% if form_slide.alt_text.errors %}
+                      <div class="text-danger small">{{ form_slide.alt_text.errors.0 }}</div>
+                  {% endif %}
+                </div>
+                <div class="col-md-4 mb-3">
+                  <label for="{{ form_slide.order.id_for_label }}" class="form-label fw-bold">
+                      {{ form_slide.order.label }}
+                  </label>
+                  {{ form_slide.order }}
+                  {% if form_slide.order.errors %}
+                      <div class="text-danger small">{{ form_slide.order.errors.0 }}</div>
+                  {% endif %}
+                </div>
+              </div>
+
+              <hr class="my-4">
+
+              <div class="form-check mb-3">
+                {{ form_slide.is_active }}
+                <label class="form-check-label" for="{{ form_slide.is_active.id_for_label }}">
+                    ¿Mostrar este slide inmediatamente?
+                </label>
+              </div>
+
+              {% if form_slide.non_field_errors %}
+                <div class="alert alert-danger">
+                    {{ form_slide.non_field_errors }}
+                </div>
+              {% endif %}
+
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+              <button type="submit" class="btn btn-primary">Guardar Slide</button>
+            </div>
+            </form>
+          </div>
         </div>
       </div>
     </div>
@@ -924,6 +1057,148 @@
       </div>
     </div>
 
+    <div class="modal fade" id="modalCrearContenido" tabindex="-1" aria-labelledby="modalCrearContenidoLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content p-1">
+          <div class="modal-header">
+            <div>
+              <h5 class="modal-title fw-bold" id="modalCrearContenidoLabel">Añadir un Contenido</h5>
+              <p class="mb-0 text-muted small">Sube un nuevo video (YouTube, Drive) a la videoteca.</p>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+
+          <div class="modal-body">
+            <form action="" method="POST" enctype="multipart/form-data">
+              {% csrf_token %}
+              <input type="hidden" name="form_type" value="video"> 
+
+              <p class="text-muted small">
+                Completa los detalles. Los campos con (<span class="text-danger">*</span>) son obligatorios.
+              </p>
+
+              <div class="mb-3">
+                <label for="{{ form_video.titulo.id_for_label }}" class="form-label">
+                  {{ form_video.titulo.label }}<span class="text-danger"> *</span>
+                </label>
+                {{ form_video.titulo }}
+              </div>
+                  
+              <div class="mb-3">
+                <label for="{{ form_video.video_url.id_for_label }}" class="form-label">
+                    {{ form_video.video_url.label }}<span class="text-danger"> *</span>
+                </label>
+                {{ form_video.video_url }}
+                <div class="form-text">
+                  {{ form_video.video_url.help_text }}
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="{{ form_video.ponente.id_for_label }}" class="form-label">
+                      {{ form_video.ponente.label }}
+                  </label>
+                  {{ form_video.ponente }}
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="{{ form_video.fecha_grabacion.id_for_label }}" class="form-label">
+                      {{ form_video.fecha_grabacion.label }}
+                  </label>
+                  {{ form_video.fecha_grabacion }}
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="{{ form_video.curso.id_for_label }}" class="form-label">
+                      {{ form_video.curso.label }}
+                  </label>
+                  {{ form_video.curso }}
+                  <div class="form-text">
+                    Opcional: Asocia este video a un curso existente.
+                  </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="{{ form_video.estado.id_for_label }}" class="form-label">
+                      {{ form_video.estado.label }}<span class="text-danger"> *</span>
+                  </label>
+                  {{ form_video.estado }}
+                </div>
+              </div>
+                  
+              <hr class="my-4">
+
+              <div class="form-check mb-3">
+                {{ form_video.es_general }}
+                <label class="form-check-label" for="{{ form_video.es_general.id_for_label }}">
+                    {{ form_video.es_general.label_tag }}
+                </label>
+                <div class="form-text">
+                  {{ form_video.es_general.help_text }}
+                </div>
+              </div>
+
+              <div class="mb-3" id="campoDepartamentosVideo">
+                <label for="{{ form_video.departamentos_destinados.id_for_label }}" class="form-label">
+                    {{ form_video.departamentos_destinados.label }}
+                </label>
+                {{ form_video.departamentos_destinados }}
+                <div class="form-text">
+                  {{ form_video.departamentos_destinados.help_text }}
+                </div>
+              </div>
+            
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Guardar Contenido</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="modalEditarSlide" tabindex="-1" aria-labelledby="modalEditarSlideLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content p-1">
+          
+          <div class="modal-header">
+            <div>
+              <h5 class="modal-title fw-bold" id="modalEditarSlideLabel">Modificar un slide</h5>
+              <p class="mb-0 text-muted small">Selecciona un slide para editar sus detalles.</p>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+
+          <div class="modal-body">
+            <div id="slide-selector-container">
+              <select class="form-select" id="select-slide-a-editar">
+                <option value="" selected disabled>Elige un slide...</option>
+                {% for slide in slides %}
+                  <option value="{{ slide.id }}">{{ slide.title }} (Orden: {{ slide.order }})</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div id="slide-form-container" class="mt-4" style="display: none;"></div>
+
+            <div id="loading-spinner-editar-slide" class="text-center mt-4" style="display: none;">
+              <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+              <p>Cargando datos del slide...</p>
+            </div>
+          </div>
+          
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
     <div class="modal fade" id="modalEditarCurso" tabindex="-1" aria-labelledby="modalEditarCursoLabel" aria-hidden="true">
       <div class="modal-dialog modal-lg">
         <div class="modal-content p-1">
@@ -1005,148 +1280,67 @@
       </div>
     </div>
 
-    <div class="modal fade" id="modalCrearContenido" tabindex="-1" aria-labelledby="modalCrearContenidoLabel" aria-hidden="true">
+    <div class="modal fade" id="modalEditarContenido" tabindex="-1" aria-labelledby="modalEditarContenidoLabel" aria-hidden="true">
       <div class="modal-dialog modal-lg">
-          <div class="modal-content p-1">
-          
-              <div class="modal-header">
-                  <div>
-                      <h5 class="modal-title fw-bold" id="modalCrearContenidoLabel">Añadir un Contenido</h5>
-                      <p class="mb-0 text-muted small">Sube un nuevo video (YouTube, Drive) a la videoteca.</p>
-                  </div>
-                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-              </div>
-
-              <div class="modal-body">
-                  <form action="" method="POST" enctype="multipart/form-data">
-                      {% csrf_token %}
-                      <input type="hidden" name="form_type" value="video"> 
-
-                      <p class="text-muted small">
-                          Completa los detalles. Los campos con (<span class="text-danger">*</span>) son obligatorios.
-                      </p>
-
-                      <div class="mb-3">
-                          <label for="{{ form_video.titulo.id_for_label }}" class="form-label">
-                              {{ form_video.titulo.label }}<span class="text-danger"> *</span>
-                          </label>
-                          {{ form_video.titulo }}
-                      </div>
-                      
-                      <div class="mb-3">
-                          <label for="{{ form_video.video_url.id_for_label }}" class="form-label">
-                              {{ form_video.video_url.label }}<span class="text-danger"> *</span>
-                          </label>
-                          {{ form_video.video_url }}
-                          <div class="form-text">{{ form_video.video_url.help_text }}</div>
-                      </div>
-
-                      <div class="row">
-                          <div class="col-md-6 mb-3">
-                              <label for="{{ form_video.ponente.id_for_label }}" class="form-label">
-                                  {{ form_video.ponente.label }}
-                              </label>
-                              {{ form_video.ponente }}
-                          </div>
-                          <div class="col-md-6 mb-3">
-                              <label for="{{ form_video.fecha_grabacion.id_for_label }}" class="form-label">
-                                  {{ form_video.fecha_grabacion.label }}
-                              </label>
-                              {{ form_video.fecha_grabacion }}
-                          </div>
-                      </div>
-
-                      <div class="row">
-                          <div class="col-md-6 mb-3">
-                              <label for="{{ form_video.curso.id_for_label }}" class="form-label">
-                                  {{ form_video.curso.label }}
-                              </label>
-                              {{ form_video.curso }}
-                              <div class="form-text">Opcional: Asocia este video a un curso existente.</div>
-                          </div>
-                          <div class="col-md-6 mb-3">
-                              <label for="{{ form_video.estado.id_for_label }}" class="form-label">
-                                  {{ form_video.estado.label }}<span class="text-danger"> *</span>
-                              </label>
-                              {{ form_video.estado }}
-                          </div>
-                      </div>
-                      
-                      <hr class="my-4">
-
-                      <div class="form-check mb-3">
-                          {{ form_video.es_general }}
-                          <label class="form-check-label" for="{{ form_video.es_general.id_for_label }}">
-                              {{ form_video.es_general.label_tag }}
-                          </label>
-                          <div class="form-text">{{ form_video.es_general.help_text }}</div>
-                      </div>
-
-                      <div class="mb-3" id="campoDepartamentosVideo">
-                          <label for="{{ form_video.departamentos_destinados.id_for_label }}" class="form-label">
-                              {{ form_video.departamentos_destinados.label }}
-                          </label>
-                          {{ form_video.departamentos_destinados }}
-                          <div class="form-text">{{ form_video.departamentos_destinados.help_text }}</div>
-                      </div>
-
-                  </div>
-                  <div class="modal-footer">
-                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                      <button type="submit" class="btn btn-primary">Guardar Contenido</button>
-                  </div>
-              </form>
-          </div>
-      </div>
-  </div>
-
-
-<div class="modal fade" id="modalEditarContenido" tabindex="-1" aria-labelledby="modalEditarContenidoLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
         <div class="modal-content p-1">
-        
-            <div class="modal-header">
-                <div>
-                    <h5 class="modal-title fw-bold" id="modalEditarContenidoLabel">Modificar un Contenido</h5>
-                    <p class="mb-0 text-muted small">Selecciona un video para editar sus detalles.</p>
-                </div>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <div class="modal-header">
+            <div>
+              <h5 class="modal-title fw-bold" id="modalEditarContenidoLabel">Modificar un Contenido</h5>
+              <p class="mb-0 text-muted small">Selecciona un video para editar sus detalles.</p>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+
+          <div class="modal-body">
+            <div id="video-selector-container">
+              <select class="form-select" id="select-video-a-editar">
+                <option value="" selected disabled>Elige un video...</option>
+                
+                {% for video in todos_los_videos %}
+                    <option value="{{ video.id }}">{{ video.titulo }}</option>
+                {% endfor %}
+              </select>
             </div>
 
-            <div class="modal-body">
-                <div id="video-selector-container">
-                    <select class="form-select" id="select-video-a-editar">
-                        <option value="" selected disabled>Elige un video...</option>
-                        
-                        {% for video in todos_los_videos %}
-                            <option value="{{ video.id }}">{{ video.titulo }}</option>
-                        {% endfor %}
+            <div id="video-form-container" class="mt-4" style="display: none;"></div>
 
-                    </select>
-                </div>
-
-                <div id="video-form-container" class="mt-4" style="display: none;">
-                    </div>
-
-                <div id="loading-spinner-editar-video" class="text-center mt-4" style="display: none;">
-                    <div class="spinner-border" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                    <p>Cargando datos del video...</p>
-                </div>
+            <div id="loading-spinner-editar-video" class="text-center mt-4" style="display: none;">
+              <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+              <p>Cargando datos del video...</p>
             </div>
+          </div>
 
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            </div>
-
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          </div>
         </div>
+      </div>
     </div>
-</div>
 
     <script>
     document.addEventListener("DOMContentLoaded", () => {
+        const solicitarBotones = document.querySelectorAll('.btn-solicitar-inscripcion');
+
+        solicitarBotones.forEach(boton => {
+            boton.addEventListener('click', function(e) {
+                e.preventDefault(); // Evita que el enlace navegue inmediatamente
+
+                const mailtoLink = this.getAttribute('data-mailto');
+                const confirmacion = confirm("Se abrirá tu aplicación de correo con un mensaje pre-redactado.\n\nPor favor, revisa la información y haz clic en 'Enviar' para completar tu solicitud.\n\n¿Deseas continuar?");
+
+                if (confirmacion) {
+                    window.location.href = mailtoLink;
+                }
+            });
+        });
+
+
         // --- Variables Modales ---
+        const modalCrearSlideEl = document.getElementById('modalCrearSlide');
+        const myModalCrearSlide = new bootstrap.Modal(modalCrearSlideEl);
+
         const modalCrearCursoEl = document.getElementById('modalCrearCurso');
         const myModalCrearCurso = new bootstrap.Modal(modalCrearCursoEl);
         const esGeneralCheckCurso = document.getElementById("{{ form_curso.es_general.id_for_label }}");
@@ -1162,17 +1356,17 @@
         const esGeneralCheckVideo = document.getElementById("{{ form_video.es_general.id_for_label }}");
         const deptoFieldVideo = document.getElementById("campoDepartamentosVideo");
 
-        const modalEditarContenidoEl = document.getElementById('modalEditarContenido');
-        const myModalEditarContenido = new bootstrap.Modal(modalEditarContenidoEl);
-        const videoSelector = document.getElementById('select-video-a-editar');
-        const videoFormContainer = document.getElementById('video-form-container');
-        const loadingSpinnerEditarVideo = document.getElementById('loading-spinner-editar-video');
+        const modalEditarSlideEl = document.getElementById('modalEditarSlide');
+        // const myModalEditarSlide = new bootstrap.Modal(modalEditarSlideEl); // Opcional si necesitas control manual
+        const slideSelector = document.getElementById('select-slide-a-editar');
+        const slideFormContainer = document.getElementById('slide-form-container');
+        const loadingSpinnerEditarSlide = document.getElementById('loading-spinner-editar-slide');
 
         const modalEditarCursoEl = document.getElementById('modalEditarCurso');
         const myModalEditarCurso = new bootstrap.Modal(modalEditarCursoEl);
         const cursoSelector = document.getElementById('select-curso-a-editar');
         const cursoFormContainer = document.getElementById('curso-form-container');
-        const loadingSpinnerEditarCurso = document.getElementById('loading-spinner-editar');
+        const loadingSpinnerEditarCurso = document.getElementById('loading-spinner-editar');  
 
         const modalEditarDocumentoEl = document.getElementById('modalEditarDocumento');
         const myModalEditarDocumento = new bootstrap.Modal(modalEditarDocumentoEl);
@@ -1180,43 +1374,51 @@
         const documentoFormContainer = document.getElementById('documento-form-container');
         const loadingSpinnerEditarDocumento = document.getElementById('loading-spinner-editar-documento');
 
+        const modalEditarContenidoEl = document.getElementById('modalEditarContenido');
+        const myModalEditarContenido = new bootstrap.Modal(modalEditarContenidoEl);
+        const videoSelector = document.getElementById('select-video-a-editar');
+        const videoFormContainer = document.getElementById('video-form-container');
+        const loadingSpinnerEditarVideo = document.getElementById('loading-spinner-editar-video');
+
         // --- Lógica para reabrir modal con errores ---
         const modalToReopen = "{{ form_with_errors|default:'none' }}";
         if (modalToReopen === 'curso') {
             myModalCrearCurso.show();
         } else if (modalToReopen === 'documento') {
             myModalCrearDocumento.show();
-        } else if (modalToReopen === 'video') { // <-- AÑADE ESTE 'else if'
+        } else if (modalToReopen === 'video') {
             myModalCrearContenido.show();
+        } else if (modalToReopen === 'slide') {
+            myModalCrearSlide.show();
         }
 
         // --- Lógica modal CREAR CURSO (Toggle Deptos) ---
         function toggleDepartamentosCurso() {
-            if (esGeneralCheckCurso && deptoFieldCurso) { 
-                deptoFieldCurso.style.display = esGeneralCheckCurso.checked ? "none" : "block";
-            }
+          if (esGeneralCheckCurso && deptoFieldCurso) { 
+            deptoFieldCurso.style.display = esGeneralCheckCurso.checked ? "none" : "block";
+          }
         }
         if (esGeneralCheckCurso) {
-            toggleDepartamentosCurso(); // Run on load
-            esGeneralCheckCurso.addEventListener("change", toggleDepartamentosCurso);
+          toggleDepartamentosCurso(); // Run on load
+          esGeneralCheckCurso.addEventListener("change", toggleDepartamentosCurso);
         }
         
         // --- Lógica modal CREAR DOCUMENTO (Toggle Deptos) ---
         function toggleDepartamentosDoc() {
-            if (esGeneralCheckDoc && deptoFieldDoc) { 
-                deptoFieldDoc.style.display = esGeneralCheckDoc.checked ? "none" : "block";
-            }
+          if (esGeneralCheckDoc && deptoFieldDoc) { 
+            deptoFieldDoc.style.display = esGeneralCheckDoc.checked ? "none" : "block";
+          }
         }
         if (esGeneralCheckDoc) {
-            toggleDepartamentosDoc(); // Run on load
-            esGeneralCheckDoc.addEventListener("change", toggleDepartamentosDoc);
+          toggleDepartamentosDoc(); // Run on load
+          esGeneralCheckDoc.addEventListener("change", toggleDepartamentosDoc);
         }
 
         // --- 3. AÑADE LA LÓGICA 'TOGGLE' PARA EL MODAL DE CREAR VIDEO ---
         function toggleDepartamentosVideo() {
-            if (esGeneralCheckVideo && deptoFieldVideo) { 
-                deptoFieldVideo.style.display = esGeneralCheckVideo.checked ? "none" : "block";
-            }
+          if (esGeneralCheckVideo && deptoFieldVideo) { 
+            deptoFieldVideo.style.display = esGeneralCheckVideo.checked ? "none" : "block";
+          }
         }
         if (esGeneralCheckVideo) {
             toggleDepartamentosVideo(); // Run on load
@@ -1249,6 +1451,64 @@
             console.error("Error inicializando Select2 (Crear Documento):", e);
         }
 
+        // --- Lógica modal EDITAR SLIDE ---
+        const getSlideFormUrlBase = "{% url 'resources:edit_slide' 0 %}"; // Asegúrate de que esta URL exista en urls.py
+        async function loadSlideEditForm(slideId) {
+          if (!slideId) return;
+
+          if (loadingSpinnerEditarSlide) loadingSpinnerEditarSlide.style.display = "block";
+          if (slideFormContainer) slideFormContainer.style.display = "none";
+          if (slideFormContainer) slideFormContainer.innerHTML = "";
+
+          try {
+              const url = getSlideFormUrlBase.replace('0', slideId);
+              const response = await fetch(url);
+
+              if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
+
+              const html = await response.text();
+
+              if (slideFormContainer) {
+                  slideFormContainer.innerHTML = html;
+                  slideFormContainer.style.display = "block";
+                  // Si tus slides NO usan Select2 u otros plugins complejos, no necesitas el setTimeout aquí.
+              }
+
+          } catch (error) {
+              console.error("Error cargando el form de editar (slide):", error);
+              if (slideFormContainer) {
+                  slideFormContainer.innerHTML = `<div class="alert alert-danger">No se pudo cargar el formulario. ${error.message}</div>`;
+                  slideFormContainer.style.display = "block";
+              }
+          } finally {
+              if (loadingSpinnerEditarSlide) loadingSpinnerEditarSlide.style.display = "none";
+          }
+        }
+        modalEditarSlideEl.addEventListener('show.bs.modal', function(event) {
+            const triggerButton = event.relatedTarget;
+            const selectorContainer = document.getElementById('slide-selector-container');
+
+            // Resetear estado inicial
+            if (slideSelector) slideSelector.value = "";
+            if (slideFormContainer) slideFormContainer.style.display = "none";
+            if (loadingSpinnerEditarSlide) loadingSpinnerEditarSlide.style.display = "none";
+
+            // Si se abre desde un botón específico (ej. engranaje en el carrusel)
+            if (triggerButton && triggerButton.classList.contains('btn-edit-slide')) {
+                const slideId = triggerButton.dataset.slideId;
+                if (selectorContainer) selectorContainer.style.display = "none"; // Oculta el selector
+                loadSlideEditForm(slideId);
+            } else {
+                // Si se abre desde el menú general
+                if (selectorContainer) selectorContainer.style.display = "block"; // Muestra el selector
+            }
+        });
+        if (slideSelector) {
+            slideSelector.addEventListener('change', function() {
+                loadSlideEditForm(this.value);
+            });
+        }
+        
         // --- Lógica modal EDITAR CURSO ---
         const getFormUrlBase = "{% url 'resources:edit_curso' 0 %}";
         async function loadCursoEditForm(cursoId) {
@@ -1371,6 +1631,7 @@
             });
         }
 
+        // --- Lógica modal EDITAR VIDEO ---
         const getVideoFormUrlBase = "{% url 'resources:edit_video' 0 %}";
         async function loadVideoEditForm(videoId) {
             if (!videoId) return;
@@ -1432,7 +1693,6 @@
                 if(loadingSpinnerEditarVideo) loadingSpinnerEditarVideo.style.display = "none";
             }
         }
-        // Listener para el modal de Editar Contenido
         modalEditarContenidoEl.addEventListener('show.bs.modal', function(event) {
             const triggerButton = event.relatedTarget;
             const selectorContainer = document.getElementById('video-selector-container');
@@ -1452,12 +1712,16 @@
                 if(selectorContainer) selectorContainer.style.display = "block";
             }
         });
-        // Listener para el dropdown de Editar Contenido
         if (videoSelector) {
             videoSelector.addEventListener('change', function() {
                 loadVideoEditForm(this.value);
             });
         }
+
+
+        
+
+
 
         // --- Lógica Toasts ---
         const toastElements = document.querySelectorAll('.toast');

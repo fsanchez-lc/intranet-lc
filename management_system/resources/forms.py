@@ -1,7 +1,27 @@
 from django import forms
-from .models import Curso, Documento, VideoCurso
+from .models import Curso, Documento, VideoCurso, Slide
 from employees.models import Empleado, Departamento
 from django.core.exceptions import ValidationError
+
+class SlideForm(forms.ModelForm):
+    class Meta:
+        model = Slide
+        # Lista los campos que quieres que aparezcan en el formulario
+        fields = ['title', 'description', 'image', 'alt_text', 'order', 'is_active']
+        # Opcional: Personaliza los widgets (los elementos HTML) para que se vean mejor con Bootstrap
+        widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Título del slide'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Descripción (opcional)'}),
+            'image': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+            'alt_text': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Texto alternativo para accesibilidad'}),
+            'order': forms.NumberInput(attrs={'class': 'form-control'}),
+            'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
+        # Opcional: Personaliza las etiquetas (labels) si quieres que sean diferentes a las verbose_name del modelo
+        labels = {
+            'title': 'Título Principal',
+            # ...
+        }
 
 class CursoForm(forms.ModelForm):
 

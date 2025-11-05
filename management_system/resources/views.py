@@ -7,7 +7,7 @@ from django.db.models import Q
 from django.core.paginator import Paginator
 from django.template.loader import render_to_string
 from django.http import JsonResponse
-from .forms import CursoForm, DocumentoForm, VideoCursoForm
+from .forms import CursoForm, DocumentoForm, VideoCursoForm, SlideForm
 from django.contrib.auth.models import Group
 from django.views.decorators.http import require_POST # <--- 1. IMPORT AÑADIDO
 
@@ -27,6 +27,7 @@ def ResourcesView(request):
     form_curso = CursoForm(prefix='create_curso') 
     form_documento = DocumentoForm(prefix='create_doc')
     form_video = VideoCursoForm(prefix='create_video')
+    form_slide = SlideForm(prefix='create_slide')  # <--- IMPORTANTE: Inicializar SlideForm
 
     form_with_errors = None
 
@@ -69,6 +70,16 @@ def ResourcesView(request):
                 messages.error(request, 'Error al guardar el contenido. Revisa los campos.')
                 form_with_errors = 'video' # <-- IMPORTANTE
         
+        elif form_type == 'slide':  # <--- IMPORTANTE: Lógica para slide
+            form_slide = SlideForm(request.POST, request.FILES, prefix='create_slide')
+            if form_slide.is_valid():
+                form_slide.save()
+                messages.success(request, '¡Nuevo slide añadido correctamente!')
+                return redirect('resources:resources')
+            else:
+                messages.error(request, 'Error al añadir el slide. Revisa los campos.')
+                form_with_errors = 'slide'
+        
         else:
             # Fallback por si no se identifica el form
             messages.error(request, 'Error desconocido al enviar el formulario.')
@@ -106,7 +117,7 @@ def ResourcesView(request):
         # Empleado sin departamento, solo ve generales
         cursos_disponibles = Curso.objects.filter(
             es_general=True,
-            estado=Curso.Estado.ACTIVO  # <-- CAMBIO AQUÍ
+            estado=Curso.Estado.ACTIVO
         ).exclude(inscritos=empleado).distinct().order_by('fecha')
 
     chunk_size = 3
@@ -173,7 +184,6 @@ def ResourcesView(request):
     ).order_by('nombre')
     
     # Lista de tipos para la sección "Formatos"
-    # (Uso los tipos que mencionaste en tu BuscarFormatosView)
     tipos_para_formatos = TipoDocumento.objects.filter(
         nombre__in=['Formato', 'Plantilla', 'Formato de interés']
     ).order_by('nombre')
@@ -182,6 +192,7 @@ def ResourcesView(request):
         'form_curso': form_curso,
         'form_documento': form_documento,
         'form_video': form_video,
+        'form_slide': form_slide,
         'slides': slides_activos,
         'mis_cursos_chunks': mis_cursos_chunks,                  # <-- Lista 1 (Cursos registrados)
         'cursos_disponibles_chunks': cursos_disponibles_chunks,  # <-- Lista 2 (Cursos disponibles) 
@@ -330,6 +341,28 @@ def BuscarFormatosView(request):
         'has_next': page_obj.has_next()
     })
 
+@login_required
+def InscribirCursoView(request, curso_id):
+    curso = get_object_or_404(Curso, id=curso_id)
+    
+    try:
+        empleado = request.user.empleado
+    except Empleado.DoesNotExist:
+        messages.error(request, "No tienes un perfil de empleado asociado para inscribirte.")
+        return redirect('resources:resources')
+
+    # Verificar si ya está inscrito
+    if curso.inscritos.filter(id=empleado.id).exists():
+        messages.info(request, f"Ya estás inscrito en el curso '{curso.titulo}'.")
+    elif curso.modalidad == Curso.Modalidad.AUTOINSCRIPCION:
+        # Realizar la inscripción
+        curso.inscritos.add(empleado)
+        messages.success(request, f"¡Te has inscrito correctamente al curso '{curso.titulo}'! 🎉")
+    else:
+        messages.error(request, "Este curso requiere solicitud de inscripción.")
+
+    # Redirigir de vuelta a la página de recursos (o donde estabas)
+    return redirect('resources:resources')
 
 @login_required
 def BuscarVideosView(request):
@@ -432,6 +465,8 @@ def CursoEditView(request, curso_id):
         'form': form
     })
 
+
+
 @user_passes_test(is_admin_check)
 def edit_documento(request, documento_id):
     """
@@ -493,3 +528,26 @@ def VideoEditView(request, video_id):
         'form_video': form, # <-- Nombre de variable 'form_video'
         'video': video
     })
+
+@user_passes_test(is_admin_check)
+def SlideEditView(request, slide_id):
+    slide = get_object_or_404(Slide, id=slide_id)
+    
+    if request.method == 'POST':
+        form = SlideForm(request.POST, request.FILES, instance=slide)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'Slide "{slide.title}" actualizado correctamente. 👍')
+            return redirect('resources:resources') # Redirige tras guardar
+        else:
+            # Si hay error en POST, podrías devolver el parcial con errores
+            # Para simplificar, por ahora redirigimos con mensaje de error
+             messages.error(request, 'Error al actualizar el slide. Verifica los datos.')
+             return redirect('resources:resources')
+
+    else:
+        # GET request: Devolver SOLO el formulario parcial
+        form = SlideForm(instance=slide)
+        return render(request, '_slide_edit_form.html', { # <--- USAR LA PLANTILLA PARCIAL
+            'form': form
+        })

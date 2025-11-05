@@ -1,0 +1,48 @@
+<form id="edit-slide-form" action="{% url 'resources:edit_slide' form.instance.id %}" method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="modal-body text-start"> 
+        <div class="mb-3">
+            <label class="form-label fw-bold">Título</label>
+            {{ form.title }}
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label fw-bold">Descripción</label>
+            {{ form.description }}
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                 <label class="form-label fw-bold">Imagen Actual</label>
+                 {% if form.instance.image %}
+                    <img src="{{ form.instance.image.url }}" class="img-thumbnail d-block" style="max-height: 150px;">
+                 {% endif %}
+            </div>
+            <div class="col-md-6">
+                <label class="form-label fw-bold">Cambiar Imagen (Opcional)</label>
+                <input type="file" name="image" class="form-control">
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8 mb-3">
+                <label class="form-label fw-bold">Texto Alternativo (Alt)</label>
+                {{ form.alt_text }}
+            </div>
+            <div class="col-md-4 mb-3">
+                 <label class="form-label fw-bold">Orden</label>
+                 {{ form.order }}
+            </div>
+        </div>
+
+        <div class="form-check">
+            {{ form.is_active }}
+            <label class="form-check-label" for="{{ form.is_active.id_for_label }}">Activo</label>
+        </div>
+    </div>
+
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="submit" class="btn btn-warning">Guardar Cambios</button>
+    </div>
+</form>

@@ -1,0 +1,7 @@
+asgiref==3.8.1
+Django==5.2.7
+pillow
+sqlparse==0.5.2
+tzdata==2024.2
+django_browser_reload==1.17.0
+psycopg2-binary

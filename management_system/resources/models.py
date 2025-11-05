@@ -5,7 +5,10 @@ class Curso(models.Model):
     class Estado(models.TextChoices):
         ACTIVO = 'activo', 'Activo'
         INACTIVO = 'inactivo', 'Inactivo'
-    #
+    
+    class Modalidad(models.TextChoices):
+        AUTOINSCRIPCION = 'auto', 'Autoinscripción'
+        SOLICITUD = 'solicitud', 'Pedir inscribirse'
 
     titulo = models.CharField(max_length=200, help_text="Título oficial del curso")
     descripcion = models.TextField(blank=True, null=True, help_text="Descripción detallada del curso")
@@ -18,6 +21,13 @@ class Curso(models.Model):
         help_text="Define si el curso está activo o inactivo."
     )
 
+    modalidad = models.CharField(
+        max_length=10,
+        choices=Modalidad.choices,
+        default=Modalidad.AUTOINSCRIPCION,
+        verbose_name="Modalidad de Inscripción",
+        help_text="Define si el usuario puede inscribirse directamente o debe solicitarlo."
+    )
     fecha = models.DateField(
         help_text="Fecha programada para el curso (YYYY-MM-DD)"
     )

@@ -17,8 +17,8 @@ class SlideAdmin(admin.ModelAdmin):
 
 @admin.register(Curso)
 class CursoAdmin(admin.ModelAdmin):
-    list_display = ('titulo', 'fecha', 'plataforma', 'duracion_horas', 'estado')
-    list_filter = ('estado','plataforma', 'departamentos_destinados')
+    list_display = ('titulo', 'fecha', 'plataforma', 'duracion_horas', 'modalidad' ,'estado')
+    list_filter = ('estado','plataforma', 'modalidad', 'departamentos_destinados')
 
     list_editable = ('fecha', 'estado',)
     search_fields = ('titulo', 'descripcion', 'plataforma')
@@ -36,6 +36,7 @@ class VideoCursoAdmin(admin.ModelAdmin):
     list_display = ('titulo', 'curso', 'ponente', 'fecha_grabacion', 'estado')
     list_filter = ('estado', 'curso', 'ponente')
     search_fields = ('titulo', 'ponente', 'curso__titulo')
+    filter_horizontal = ('departamentos_destinados',)
 
 @admin.register(Documento)
 class DocumentoAdmin(admin.ModelAdmin):

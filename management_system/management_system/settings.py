@@ -13,6 +13,7 @@ DEBUG = True
 ALLOWED_HOSTS = [
     '127.0.0.1',
     '192.168.10.90',
+    'localhost'
 ]
 
 LOGIN_URL = 'login'
@@ -78,19 +79,31 @@ WSGI_APPLICATION = 'management_system.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'postgres',           # Nombre de la DB creada
+#         'USER': 'sistemas_lc',           # Usuario creado
+#         'PASSWORD': 'sistemas_lc_pass', # Contraseña del usuario
+#         'HOST': 'localhost',                # Usar servidor local
+#         'PORT': '5432',                     # Puerto por defecto
+#     },
+#      # --- CONFIGURACIÓN TEMPORAL DE SQLITE ---
+#     'sqlite_original': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3', # Asegúrate que la ruta sea correcta
+#     }
+# }
+
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',           # Nombre de la DB creada
-        'USER': 'sistemas_lc',           # Usuario creado
-        'PASSWORD': 'sistemas_lc_pass', # Contraseña del usuario
-        'HOST': 'localhost',                # Usar servidor local
-        'PORT': '5432',                     # Puerto por defecto
-    },
-     # --- CONFIGURACIÓN TEMPORAL DE SQLITE ---
-    'sqlite_original': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3', # Asegúrate que la ruta sea correcta
+        'NAME': os.environ.get('DB_NAME'),
+        'USER': os.environ.get('DB_USER'),
+        'PASSWORD': os.environ.get('DB_PASS'),
+        'HOST': os.environ.get('DB_HOST'), # Esto será 'db'
+        'PORT': os.environ.get('DB_PORT'), # Esto será '5432'
     }
 }
 
