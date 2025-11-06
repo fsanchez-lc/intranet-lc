@@ -235,7 +235,7 @@
               <a class="nav-link" href="#Documentos">Documentos</a>
             </li>
             <li class="nav-item px-lg-2">
-              <a class="nav-link" href="#Contenido">Biblioteca</a>
+              <a class="nav-link" href="#Contenido">Biblioteca Virtual</a>
             </li>
             <li class="nav-item px-lg-2">
               <a class="nav-link" href="#DesarrolloProfesional">Desarrollo profesional</a>
@@ -666,6 +666,7 @@
     </div>
 
     <hr class="my-1"> 
+
     <div class="mb-3 p-3" id="Contenido">
       <h2 class="h4 mb-2">Contenido digital</h2>
       <p class="text-muted">Consulta el contenido de cursos, videos de apoyo y sesiones anteriores.</p>
@@ -712,6 +713,71 @@
       </div>
     </div>
 
+    <hr class="my-1"> 
+
+    <div class="d-flex justify-content-between align-items-center mt-3 mb-3">
+      <h2>Desarrollo profesional</h2>
+      
+      <div class="d-flex gap-2">
+        {% if is_admin %}
+        <a href="#" class="btn bg-success d-flex align-items-center gap-2 d-none d-md-flex fw-medium text-white"
+                data-bs-toggle="modal" 
+                data-bs-target="#modalCrearCertificado">
+        <i class="bi bi-plus-lg"></i>
+        Añadir un certificado
+        </a>
+        <a href="#" class="btn d-flex bg-warning align-items-center gap-2 d-none d-md-flex fw-medium text-white"
+                data-bs-toggle="modal" 
+                data-bs-target="#modalEditarCertificado">
+        <i class="bi bi-pencil"></i>
+        Modificar un certificado
+        </a>
+        {% endif %}
+      </div>
+    </div>
+
+    <hr class="my-1"> 
+
+    <div class="mb-3 p-3" id="DesarrolloProfesional">
+      <h2 class="h4 mb-2">Cursos completados y certificaciones</h2>
+      <p class="text-muted">Consulta el contenido y certificaciones de tus cursos finalizados.</p>
+
+      <div class="row g-3 mb-4">
+        <div class="col-3 col-md-4">
+          <label for="cert-filter-departamento" class="form-label">Departamento</label>
+          <select class="form-select" id="cert-filter-departamento" aria-label="Filtrar por departamento">
+            <option value="">Todos los Departamentos</option>
+            {% for depto in all_departamentos %}
+              <option value="{{ depto.id }}" {% if depto.id == user_depto_id %}selected{% endif %}>
+                {{ depto.nombre }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+        
+        <div class="col-3 col-md-3">
+          <label for="completed-filter-fecha-inicio" class="form-label">Desde</label>
+          <input type="date" class="form-control" id="completed-filter-fecha-inicio" aria-label="Fecha inicio">
+        </div>
+
+        <div class="col-3 col-md-3">
+          <label for="completed-filter-fecha-fin" class="form-label">Hasta</label>
+          <input type="date" class="form-control" id="completed-filter-fecha-fin" aria-label="Fecha fin">
+        </div>
+
+        <div class="col-3 col-md-4 d-flex align-items-end">
+          <div class="input-group w-100">
+            <span class="input-group-text bg-body-tertiary border-0" id="search-icon-cert">
+              <i class="bi bi-search"></i>
+            </span>
+            <input type="text" id="cert-search-input" class="form-control bg-body-secondary border-0" 
+                  placeholder="Buscar contenido..." aria-label="Buscar" aria-describedby="search-icon-cert">
+          </div>
+        </div>
+      </div>
+    </div>
+
+
     <div class="modal fade" id="modalCrearSlide" tabindex="-1" aria-labelledby="modalCrearSlideLabel" aria-hidden="true">
       <div class="modal-dialog modal-lg">
         <div class="modal-content p-1">
@@ -719,7 +785,7 @@
           <div class="modal-header">
             <div>
               <h5 class="modal-title fw-bold" id="modalCrearSlideLabel">Añadir un Slide</h5>
-              <p class="mb-0 text-muted small">Agrega una nueva imagen al carrusel de bienvenida.</p>
+              <p class="mb-0 text-muted small">Agregar un nuevo banner al carrusel.</p>
             </div>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
@@ -730,7 +796,7 @@
               <input type="hidden" name="form_type" value="slide">
               
               <p class="text-muted small">
-                Completa los detalles del nuevo slide. Los campos con (<span class="text-danger">*</span>) son obligatorios.
+                Los campos con (<span class="text-danger">*</span>) son obligatorios.
               </p>
 
               <div class="mb-3">
@@ -767,7 +833,7 @@
               <div class="row">
                 <div class="col-md-8 mb-3">
                   <label for="{{ form_slide.alt_text.id_for_label }}" class="form-label fw-bold">
-                      {{ form_slide.alt_text.label }}<span class="text-danger"> *</span>
+                      {{ form_slide.alt_text.label }}
                   </label>
                   {{ form_slide.alt_text }}
                   {% if form_slide.alt_text.errors %}
@@ -827,18 +893,18 @@
               {% csrf_token %}
               <input type="hidden" name="form_type" value="curso">
               <p class="text-muted small">
-                Completa los detalles del nuevo curso. Los campos con (<span class="text-danger">*</span>) son obligatorios.
+                Los campos con (<span class="text-danger">*</span>) son obligatorios.
               </p>
 
               <div class="mb-3">
-                <label for="{{ form_curso.titulo.id_for_label }}" class="form-label">
+                <label for="{{ form_curso.titulo.id_for_label }}" class="form-label fw-bold">
                   {{ form_curso.titulo.label }}<span class="text-danger"> *</span>
                 </label>
                 {{ form_curso.titulo }}
               </div>
               
               <div class="mb-3">
-                <label for="{{ form_curso.descripcion.id_for_label }}" class="form-label">
+                <label for="{{ form_curso.descripcion.id_for_label }}" class="form-label fw-bold">
                   {{ form_curso.descripcion.label }}
                 </label>
                 {{ form_curso.descripcion }}
@@ -846,13 +912,13 @@
 
               <div class="row">
                 <div class="col-md-6 mb-3">
-                  <label for="{{ form_curso.fecha.id_for_label }}" class="form-label">
+                  <label for="{{ form_curso.fecha.id_for_label }}" class="form-label fw-bold">
                     {{ form_curso.fecha.label }}<span class="text-danger"> *</span>
                   </label>
                   {{ form_curso.fecha }}
                 </div>
                 <div class="col-md-6 mb-3">
-                  <label for="{{ form_curso.horario.id_for_label }}" class="form-label">
+                  <label for="{{ form_curso.horario.id_for_label }}" class="form-label fw-bold">
                     {{ form_curso.horario.label }}<span class="text-danger"> *</span>
                   </label>
                   {{ form_curso.horario }}
@@ -860,13 +926,13 @@
               </div>
               <div class="row">
                 <div class="col-md-6 mb-3">
-                  <label for="{{ form_curso.duracion_horas.id_for_label }}" class="form-label">
+                  <label for="{{ form_curso.duracion_horas.id_for_label }}" class="form-label fw-bold">
                     {{ form_curso.duracion_horas.label }}
                   </label>
                   {{ form_curso.duracion_horas }}
                 </div>
                 <div class="col-md-6 mb-3">
-                  <label for="{{ form_curso.plataforma.id_for_label }}" class="form-label">
+                  <label for="{{ form_curso.plataforma.id_for_label }}" class="form-label fw-bold">
                     {{ form_curso.plataforma.label }}
                   </label>
                   {{ form_curso.plataforma }}
@@ -874,20 +940,20 @@
               </div>
 
               <div class="mb-3">
-                <label for="{{ form_curso.link.id_for_label }}" class="form-label">
-                  {{ form_curso.link.label }}<span class="text-danger"> *</span>
+                <label for="{{ form_curso.link.id_for_label }}" class="form-label fw-bold">
+                  {{ form_curso.link.label }}
                 </label>
                 {{ form_curso.link }}
               </div>
               <div class="mb-3">
-                <label for="{{ form_curso.imagen.id_for_label }}" class="form-label">
+                <label for="{{ form_curso.imagen.id_for_label }}" class="form-label fw-bold">
                   {{ form_curso.imagen.label }}
                 </label>
                 {{ form_curso.imagen }}
               </div>
 
               <div class="col-md-6 mb-3">
-                <label for="{{ form_curso.estado.id_for_label }}" class="form-label">
+                <label for="{{ form_curso.estado.id_for_label }}" class="form-label fw-bold">
                   {{ form_curso.estado.label }}
                 </label>
                 {{ form_curso.estado }}
@@ -899,14 +965,14 @@
 
               <div class="form-check mb-3">
                 {{ form_curso.es_general }}
-                <label class="form-check-label" for="{{ form_curso.es_general.id_for_label }}">
+                <label class="form-check-label fw-bold" for="{{ form_curso.es_general.id_for_label }}">
                   {{ form_curso.es_general.label }}
                 </label>
                 <div class="form-text">{{ form_curso.es_general.help_text }}</div>
               </div>
 
               <div class="mb-3" id="campoDepartamentos">
-                <label for="{{ form_curso.departamentos_destinados.id_for_label }}" class="form-label">
+                <label for="{{ form_curso.departamentos_destinados.id_for_label }}" class="form-label fw-bold">
                   {{ form_curso.departamentos_destinados.label }}
                 </label>
                 {{ form_curso.departamentos_destinados }}
@@ -914,7 +980,7 @@
               </div>
 
               <div class="mb-3">
-                <label for="{{ form_curso.inscritos.id_for_label }}" class="form-label">
+                <label for="{{ form_curso.inscritos.id_for_label }}" class="form-label fw-bold">
                   {{ form_curso.inscritos.label }}
                 </label>
                 {{ form_curso.inscritos }}
@@ -958,11 +1024,11 @@
               {% endif %}
 
               <p class="text-muted small">
-                Completa los detalles. Los campos con (<span class="text-danger">*</span>) son obligatorios.
+                Los campos con (<span class="text-danger">*</span>) son obligatorios.
               </p>
 
               <div class="mb-3">
-                <label for="{{ form_documento.nombre.id_for_label }}" class="form-label">
+                <label for="{{ form_documento.nombre.id_for_label }}" class="form-label fw-bold">
                   {{ form_documento.nombre.label }}<span class="text-danger"> *</span>
                 </label>
                 {{ form_documento.nombre }}
@@ -971,7 +1037,7 @@
               </div>
               
               <div class="mb-3">
-                <label for="{{ form_documento.descripcion.id_for_label }}" class="form-label">
+                <label for="{{ form_documento.descripcion.id_for_label }}" class="form-label fw-bold">
                   {{ form_documento.descripcion.label }}
                 </label>
                 {{ form_documento.descripcion }}
@@ -980,14 +1046,14 @@
 
               <div class="row">
                 <div class="col-md-6 mb-3">
-                  <label for="{{ form_documento.codigo_documento.id_for_label }}" class="form-label">
+                  <label for="{{ form_documento.codigo_documento.id_for_label }}" class="form-label fw-bold">
                     {{ form_documento.codigo_documento.label }}
                   </label>
                   {{ form_documento.codigo_documento }}
                   <div class="form-text">{{ form_documento.codigo_documento.help_text }}</div>
                 </div>
                 <div class="col-md-6 mb-3">
-                  <label for="{{ form_documento.tipo_documento.id_for_label }}" class="form-label">
+                  <label for="{{ form_documento.tipo_documento.id_for_label }}" class="form-label fw-bold">
                     {{ form_documento.tipo_documento.label }}<span class="text-danger"> *</span>
                   </label>
                   {{ form_documento.tipo_documento }}
@@ -998,14 +1064,14 @@
 
               <div class="row">
                 <div class="col-md-6 mb-3">
-                  <label for="{{ form_documento.archivo.id_for_label }}" class="form-label">
+                  <label for="{{ form_documento.archivo.id_for_label }}" class="form-label fw-bold">
                     {{ form_documento.archivo.label }} <span class="text-danger">* *</span>
                   </label>
                   {{ form_documento.archivo }} 
                   <div class="form-text">{{ form_documento.archivo.help_text }}</div>
                 </div>
                 <div class="col-md-6 mb-3">
-                  <label for="{{ form_documento.enlace_externo.id_for_label }}" class="form-label">
+                  <label for="{{ form_documento.enlace_externo.id_for_label }}" class="form-label fw-bold">
                     {{ form_documento.enlace_externo.label }} <span class="text-danger">* *</span>
                   </label>
                   {{ form_documento.enlace_externo }}
@@ -1016,14 +1082,14 @@
 
               <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label for="{{ form_documento.palabras_clave.id_for_label }}" class="form-label">
+                    <label for="{{ form_documento.palabras_clave.id_for_label }}" class="form-label fw-bold">
                       {{ form_documento.palabras_clave.label }}
                     </label>
                     {{ form_documento.palabras_clave }}
                     <div class="form-text">{{ form_documento.palabras_clave.help_text }}</div>
                   </div>
                 <div class="col-md-6 mb-3">
-                    <label for="{{ form_documento.estado.id_for_label }}" class="form-label">
+                    <label for="{{ form_documento.estado.id_for_label }}" class="form-label fw-bold">
                       {{ form_documento.estado.label }}<span class="text-danger"> *</span>
                     </label>
                     {{ form_documento.estado }}
@@ -1035,13 +1101,13 @@
 
               <div class="form-check mb-3">
                 {{ form_documento.es_general }}
-                <label class="form-check-label" for="{{ form_documento.es_general.id_for_label }}">
+                <label class="form-check-label fw-bold" for="{{ form_documento.es_general.id_for_label }}">
                   {{ form_documento.es_general.label_tag }}
                 </label>
                 <div class="form-text">{{ form_documento.es_general.help_text }}</div>
               </div>
 
-              <div class="mb-3" id="campoDepartamentosDoc"> <label for="{{ form_documento.departamentos_destinados.id_for_label }}" class="form-label">
+              <div class="mb-3" id="campoDepartamentosDoc"> <label for="{{ form_documento.departamentos_destinados.id_for_label }}" class="form-label fw-bold">
                   {{ form_documento.departamentos_destinados.label }}
                 </label>
                 {{ form_documento.departamentos_destinados }}
@@ -1078,14 +1144,14 @@
               </p>
 
               <div class="mb-3">
-                <label for="{{ form_video.titulo.id_for_label }}" class="form-label">
+                <label for="{{ form_video.titulo.id_for_label }}" class="form-label fw-bold">
                   {{ form_video.titulo.label }}<span class="text-danger"> *</span>
                 </label>
                 {{ form_video.titulo }}
               </div>
                   
               <div class="mb-3">
-                <label for="{{ form_video.video_url.id_for_label }}" class="form-label">
+                <label for="{{ form_video.video_url.id_for_label }}" class="form-label fw-bold">
                     {{ form_video.video_url.label }}<span class="text-danger"> *</span>
                 </label>
                 {{ form_video.video_url }}
@@ -1096,13 +1162,13 @@
 
               <div class="row">
                 <div class="col-md-6 mb-3">
-                  <label for="{{ form_video.ponente.id_for_label }}" class="form-label">
+                  <label for="{{ form_video.ponente.id_for_label }}" class="form-label fw-bold">
                       {{ form_video.ponente.label }}
                   </label>
                   {{ form_video.ponente }}
                 </div>
                 <div class="col-md-6 mb-3">
-                  <label for="{{ form_video.fecha_grabacion.id_for_label }}" class="form-label">
+                  <label for="{{ form_video.fecha_grabacion.id_for_label }}" class="form-label fw-bold">
                       {{ form_video.fecha_grabacion.label }}
                   </label>
                   {{ form_video.fecha_grabacion }}
@@ -1111,7 +1177,7 @@
 
               <div class="row">
                 <div class="col-md-6 mb-3">
-                  <label for="{{ form_video.curso.id_for_label }}" class="form-label">
+                  <label for="{{ form_video.curso.id_for_label }}" class="form-label fw-bold">
                       {{ form_video.curso.label }}
                   </label>
                   {{ form_video.curso }}
@@ -1120,7 +1186,7 @@
                   </div>
                 </div>
                 <div class="col-md-6 mb-3">
-                  <label for="{{ form_video.estado.id_for_label }}" class="form-label">
+                  <label for="{{ form_video.estado.id_for_label }}" class="form-label fw-bold">
                       {{ form_video.estado.label }}<span class="text-danger"> *</span>
                   </label>
                   {{ form_video.estado }}
@@ -1131,7 +1197,7 @@
 
               <div class="form-check mb-3">
                 {{ form_video.es_general }}
-                <label class="form-check-label" for="{{ form_video.es_general.id_for_label }}">
+                <label class="form-check-label fw-bold" for="{{ form_video.es_general.id_for_label }}">
                     {{ form_video.es_general.label_tag }}
                 </label>
                 <div class="form-text">
@@ -1140,7 +1206,7 @@
               </div>
 
               <div class="mb-3" id="campoDepartamentosVideo">
-                <label for="{{ form_video.departamentos_destinados.id_for_label }}" class="form-label">
+                <label for="{{ form_video.departamentos_destinados.id_for_label }}" class="form-label fw-bold">
                     {{ form_video.departamentos_destinados.label }}
                 </label>
                 {{ form_video.departamentos_destinados }}
@@ -1168,33 +1234,11 @@
               <h5 class="modal-title fw-bold" id="modalEditarSlideLabel">Modificar un slide</h5>
               <p class="mb-0 text-muted small">Selecciona un slide para editar sus detalles.</p>
             </div>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
 
           <div class="modal-body">
-            <div id="slide-selector-container">
-              <select class="form-select" id="select-slide-a-editar">
-                <option value="" selected disabled>Elige un slide...</option>
-                {% for slide in slides %}
-                  <option value="{{ slide.id }}">{{ slide.title }} (Orden: {{ slide.order }})</option>
-                {% endfor %}
-              </select>
-            </div>
-
-            <div id="slide-form-container" class="mt-4" style="display: none;"></div>
-
-            <div id="loading-spinner-editar-slide" class="text-center mt-4" style="display: none;">
-              <div class="spinner-border" role="status">
-                <span class="visually-hidden">Loading...</span>
-              </div>
-              <p>Cargando datos del slide...</p>
-            </div>
+            <div id="slide-form-container" style="display: none;"></div>
           </div>
-          
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          </div>
-
         </div>
       </div>
     </div>
@@ -1271,11 +1315,6 @@
               <p>Cargando datos del documento...</p>
             </div>
           </div>
-
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          </div>
-
         </div>
       </div>
     </div>
@@ -1311,29 +1350,63 @@
               <p>Cargando datos del video...</p>
             </div>
           </div>
-
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          </div>
         </div>
       </div>
     </div>
 
+    <div class="modal fade" id="previewModal" tabindex="-1" aria-labelledby="previewModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="previewModalLabel">Vista Previa</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body p-0" style="height: 80vh;">
+            
+            <iframe id="previewIframe" src="" width="100%" height="100%" frameborder="0">
+                Tu navegador no soporta esta opción.
+            </iframe>
+          </div>
+        </div>
+      </div>
+    </div>  
+
     <script>
-    document.addEventListener("DOMContentLoaded", () => {
+      document.addEventListener("DOMContentLoaded", () => {
+        const previewModal = document.getElementById('previewModal');
+        if (previewModal) {
+          const iframe = document.getElementById('previewIframe');
+          const modalTitle = document.getElementById('previewModalLabel');
+
+          previewModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const fileUrl = button.getAttribute('data-src');
+            const fileTitle = button.getAttribute('data-title');
+            
+            if (fileUrl) {
+              modalTitle.textContent = fileTitle;
+              iframe.src = fileUrl;
+            }
+          });
+
+          previewModal.addEventListener('hidden.bs.modal', function () {
+            iframe.src = '';
+          });
+        }
+        
         const solicitarBotones = document.querySelectorAll('.btn-solicitar-inscripcion');
 
         solicitarBotones.forEach(boton => {
-            boton.addEventListener('click', function(e) {
-                e.preventDefault(); // Evita que el enlace navegue inmediatamente
+          boton.addEventListener('click', function(e) {
+            e.preventDefault(); // Evita que el enlace navegue inmediatamente
 
-                const mailtoLink = this.getAttribute('data-mailto');
-                const confirmacion = confirm("Se abrirá tu aplicación de correo con un mensaje pre-redactado.\n\nPor favor, revisa la información y haz clic en 'Enviar' para completar tu solicitud.\n\n¿Deseas continuar?");
+            const mailtoLink = this.getAttribute('data-mailto');
+            const confirmacion = confirm("Se abrirá tu aplicación de correo con un mensaje pre-redactado.\n\nPor favor, revisa la información y haz clic en 'Enviar' para completar tu solicitud.\n\n¿Deseas continuar?");
 
-                if (confirmacion) {
-                    window.location.href = mailtoLink;
-                }
-            });
+            if (confirmacion) {
+              window.location.href = mailtoLink;
+            }
+          });
         });
 
 
@@ -1524,22 +1597,38 @@
                 if(cursoFormContainer) {
                     cursoFormContainer.innerHTML = html;
                     cursoFormContainer.style.display = "block";
-                    setTimeout(function() {
-                        try {
-                            $('#edit-curso-form #id_edit-departamentos_destinados').select2({
-                                theme: 'bootstrap-5',
-                                allowClear: true,
-                                dropdownParent: $('#modalEditarCurso .modal-content')
-                            });
-                            $('#edit-curso-form #id_edit-inscritos').select2({
-                                theme: 'bootstrap-5',
-                                allowClear: true,
-                                dropdownParent: $('#modalEditarCurso .modal-content')
-                            });
-                        } catch (e) {
-                            console.error("¡Falló la inicialización de Select2 (Editar Curso)!", e);
-                        }
-                    }, 0); 
+                    // Dentro de loadCursoEditForm, reemplaza el setTimeout actual por este:
+                  setTimeout(function() {
+                      try {
+                          // --- INICIO LÓGICA TOGGLE CURSO EDIT ---
+                          const esGeneralCheckEdit = document.querySelector('#edit-curso-form [name$="-es_general"]');
+                          // Asegúrate de que tu formulario de edición de curso tenga un div con este ID envolviendo el campo de departamentos
+                          const deptoFieldEdit = document.getElementById('campoDepartamentosCurso-edit'); // <--- NECESITARÁS AÑADIR ESTE ID EN TU HTML PARCIAL DE EDICIÓN
+
+                          function toggleDeptosEdit() {
+                              if(deptoFieldEdit && esGeneralCheckEdit) {
+                                  deptoFieldEdit.style.display = esGeneralCheckEdit.checked ? 'none' : 'block';
+                              }
+                          }
+                          if(esGeneralCheckEdit) {
+                              toggleDeptosEdit();
+                              esGeneralCheckEdit.addEventListener('change', toggleDeptosEdit);
+                          }
+
+                          $('#edit-curso-form #id_edit-departamentos_destinados').select2({
+                              theme: 'bootstrap-5',
+                              allowClear: true,
+                              dropdownParent: $('#modalEditarCurso .modal-content')
+                          });
+                          $('#edit-curso-form #id_edit-inscritos').select2({
+                              theme: 'bootstrap-5',
+                              allowClear: true,
+                              dropdownParent: $('#modalEditarCurso .modal-content')
+                          });
+                      } catch (e) {
+                          console.error("¡Falló la inicialización (Editar Curso)!", e);
+                      }
+                  }, 0);
                 }
             } catch (error) {
                 console.error("Error cargando el form de editar (curso):", error);
@@ -1587,8 +1676,25 @@
                 if(documentoFormContainer) {
                     documentoFormContainer.innerHTML = html;
                     documentoFormContainer.style.display = "block";
+                    // Dentro de loadDocumentoEditForm, reemplaza el setTimeout por:
                     setTimeout(function() {
                         try {
+                            // --- INICIO LÓGICA TOGGLE DOCUMENTO EDIT ---
+                            const esGeneralCheckEdit = document.querySelector('#documento-form-container [name$="-es_general"]');
+                            // Asegúrate de añadir este ID en tu partial de edición de documento
+                            const deptoFieldEdit = document.getElementById('campoDepartamentosDoc-edit');
+
+                            function toggleDeptosEdit() {
+                                if(deptoFieldEdit && esGeneralCheckEdit) {
+                                    deptoFieldEdit.style.display = esGeneralCheckEdit.checked ? 'none' : 'block';
+                                }
+                            }
+                            if(esGeneralCheckEdit) {
+                                toggleDeptosEdit();
+                                esGeneralCheckEdit.addEventListener('change', toggleDeptosEdit);
+                            }
+                            // --- FIN LÓGICA TOGGLE ---
+
                             $('#documento-form-container #id_edit-doc-departamentos_destinados').select2({
                                 placeholder: "Busca y selecciona departamentos",
                                 width: '100%',
@@ -1596,9 +1702,9 @@
                                 dropdownParent: $('#modalEditarDocumento .modal-content')
                             });
                         } catch (e) {
-                            console.error("¡Falló la inicialización de Select2 (Editar Doc)!", e);
+                            console.error("¡Falló la inicialización (Editar Doc)!", e);
                         }
-                    }, 0); 
+                    }, 0);
                 }
             } catch (error) {
                 console.error("Error cargando el form de editar (documento):", error);
@@ -1718,11 +1824,6 @@
             });
         }
 
-
-        
-
-
-
         // --- Lógica Toasts ---
         const toastElements = document.querySelectorAll('.toast');
         if (toastElements.length > 0) {
@@ -1804,10 +1905,6 @@
                 if (modalEditarContenidoEl.classList.contains('show')) myModalEditarContenido.hide();
             }
         });
-
-        // -----------------------------------------------------------------
-        // --- NUEVA LÓGICA DE FILTRADO (REEMPLAZA TODO LO ANTERIOR) ---
-        // -----------------------------------------------------------------
 
         /**
         * Configura una sección de filtrado genérica.
@@ -1935,7 +2032,6 @@
             loadingSpinnerId: 'vid-loading-spinner',
             apiUrl: "{% url 'resources:search_videos' %}" 
         });
-
-    }); // <-- FIN DEL ÚNICO DOMCONTENTLOADED
+    }); 
 </script>
   {% endblock %}

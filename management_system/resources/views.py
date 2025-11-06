@@ -8,7 +8,6 @@ from django.core.paginator import Paginator
 from django.template.loader import render_to_string
 from django.http import JsonResponse
 from .forms import CursoForm, DocumentoForm, VideoCursoForm, SlideForm
-from django.contrib.auth.models import Group
 from django.views.decorators.http import require_POST # <--- 1. IMPORT AÑADIDO
 
 @login_required
@@ -18,7 +17,7 @@ def ResourcesView(request):
     # SLIDES
     slides_activos = Slide.objects.filter(is_active=True)
     # CURSOS
-    mis_cursos = Curso.objects.none() # Queryset vacío por si no hay empleado
+    mis_cursos = Curso.objects.none()
     cursos_disponibles = Curso.objects.none()
     empleado = None
     user_depto_id = None
@@ -27,7 +26,7 @@ def ResourcesView(request):
     form_curso = CursoForm(prefix='create_curso') 
     form_documento = DocumentoForm(prefix='create_doc')
     form_video = VideoCursoForm(prefix='create_video')
-    form_slide = SlideForm(prefix='create_slide')  # <--- IMPORTANTE: Inicializar SlideForm
+    form_slide = SlideForm(prefix='create_slide')
 
     form_with_errors = None
 
@@ -464,8 +463,6 @@ def CursoEditView(request, curso_id):
     return render(request, '_curso_edit_form.html', {
         'form': form
     })
-
-
 
 @user_passes_test(is_admin_check)
 def edit_documento(request, documento_id):

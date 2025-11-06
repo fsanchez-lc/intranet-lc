@@ -11,7 +11,7 @@ class Curso(models.Model):
         SOLICITUD = 'solicitud', 'Pedir inscribirse'
 
     titulo = models.CharField(max_length=200, help_text="Título oficial del curso")
-    descripcion = models.TextField(blank=True, null=True, help_text="Descripción detallada del curso")
+    descripcion = models.TextField(blank=True, null=True, help_text="Descripción detallada del curso", verbose_name="Descripción")
     
     estado = models.CharField(
         max_length=10,
@@ -39,6 +39,7 @@ class Curso(models.Model):
     duracion_horas = models.DecimalField(
         max_digits=4, 
         decimal_places=1, 
+        verbose_name="Duración (horas)",
         null=True, 
         blank=True, 
         help_text="Duración total del curso en horas (Ej. 2.5)"
@@ -53,6 +54,8 @@ class Curso(models.Model):
 
     link = models.URLField(
         max_length=255, 
+        blank=True, 
+        null=True, 
         help_text="Enlace a la sesión (Zoom, Teams) o a los materiales del curso"
     )
 
@@ -94,9 +97,13 @@ class Curso(models.Model):
 class Slide(models.Model):
     title = models.CharField(max_length=100, verbose_name="Título")
     description = models.TextField(verbose_name="Descripción", blank=True, null=True)
-    
     image = models.ImageField(upload_to='slides/', verbose_name="Imagen")
-    alt_text = models.CharField(max_length=150, verbose_name="Texto Alternativo (Alt)")
+    alt_text = models.CharField(
+        max_length=150, 
+        verbose_name="Texto Alternativo (Alt)",
+        blank=True,                   # Permite que el campo esté vacío (opcional)
+        null=True,  
+    )
     order = models.PositiveIntegerField(default=0, verbose_name="Orden")
     is_active = models.BooleanField(default=True, verbose_name="Está activo")
 

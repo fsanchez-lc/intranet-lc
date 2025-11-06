@@ -6,9 +6,7 @@ from django.core.exceptions import ValidationError
 class SlideForm(forms.ModelForm):
     class Meta:
         model = Slide
-        # Lista los campos que quieres que aparezcan en el formulario
         fields = ['title', 'description', 'image', 'alt_text', 'order', 'is_active']
-        # Opcional: Personaliza los widgets (los elementos HTML) para que se vean mejor con Bootstrap
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Título del slide'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Descripción (opcional)'}),
@@ -17,14 +15,11 @@ class SlideForm(forms.ModelForm):
             'order': forms.NumberInput(attrs={'class': 'form-control'}),
             'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
-        # Opcional: Personaliza las etiquetas (labels) si quieres que sean diferentes a las verbose_name del modelo
         labels = {
             'title': 'Título Principal',
-            # ...
         }
 
 class CursoForm(forms.ModelForm):
-
     class Meta:
         model = Curso
         fields = [
@@ -36,21 +31,14 @@ class CursoForm(forms.ModelForm):
         widgets = {
             'titulo': forms.TextInput(attrs={'class': 'form-control'}),
             'descripcion': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
-            
-            # Estos inputs ya son compatibles con Bootstrap
             'fecha': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'horario': forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),
             'duracion_horas': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1'}),
-            
             'plataforma': forms.TextInput(attrs={'class': 'form-control'}),
             'link': forms.URLInput(attrs={'class': 'form-control'}),
             'imagen': forms.FileInput(attrs={'class': 'form-control'}),
-            
             'estado': forms.Select(attrs={'class': 'form-select'}),
-
-            # Checkbox usa una clase diferente
             'es_general': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-            
             'departamentos_destinados': forms.SelectMultiple(attrs={
                 'class': 'form-select',
                 'data-placeholder': 'Busca y selecciona departamentos'
@@ -60,7 +48,6 @@ class CursoForm(forms.ModelForm):
                 'data-placeholder': 'Busca y selecciona empleados'
             }),
         }
-        
         labels = {
             'titulo': 'Título del curso',
             'es_general': '¿Es un curso general (para todos)?',
@@ -68,38 +55,23 @@ class CursoForm(forms.ModelForm):
             'inscritos': 'Inscribir empleados',
         }
 
-    # Para que los campos ManyToMany se muestren correctamente
-    # (Django los inicializa vacíos por defecto)
     def __init__(self, *args, **kwargs):
         super(CursoForm, self).__init__(*args, **kwargs)
         self.fields['departamentos_destinados'].queryset = Departamento.objects.all()
         self.fields['inscritos'].queryset = Empleado.objects.all().order_by('nombre')
 
     def clean(self):
-        """
-        Validación personalizada para la regla de negocio.
-        """
-        # 1. Obtiene los datos limpios
         cleaned_data = super().clean()
-        
-        # 2. Saca los valores de los campos
         es_general = cleaned_data.get('es_general')
         departamentos = cleaned_data.get('departamentos_destinados')
 
-        # 3. Aplica tu regla:
-        # Si 'es_general' NO está marcado (es False) Y 'departamentos' está vacío...
         if not es_general and not departamentos:
-            
-            # 4. Lanza un error de validación en el campo específico
             self.add_error('departamentos_destinados', 
-                           "Si el curso NO es 'General', debes seleccionar al menos un departamento.")
-
-        # 5. Devuelve siempre los datos limpios
+                            "Si el curso NO es 'General', debes seleccionar al menos un departamento.")
         return cleaned_data
 
 class DocumentoForm(forms.ModelForm):
     
-    # Override para inicializar con Select2
     departamentos_destinados = forms.ModelMultipleChoiceField(
         queryset=Departamento.objects.all(),
         required=False,
@@ -109,21 +81,18 @@ class DocumentoForm(forms.ModelForm):
                 'data-placeholder': 'Selecciona uno o más departamentos'
             }
         ),
-        label="Departamentos Destinados", # El modelo ya tiene un verbose_name, pero lo ponemos para asegurar
+        label="Departamentos Destinados",
         help_text="Departamentos que pueden ver esto (si no es 'general')."
     )
 
     class Meta:
         model = Documento
-        
-        # Campos que el usuario llenará
         fields = [
             'nombre', 'descripcion', 'codigo_documento', 'tipo_documento',
             'archivo', 'enlace_externo', 'palabras_clave', 'estado', 
             'es_general', 'departamentos_destinados'
         ]
         
-        # Aplicar clases de Bootstrap a todos los campos
         widgets = {
             'nombre': forms.TextInput(attrs={'class': 'form-control'}),
             'descripcion': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
@@ -137,16 +106,13 @@ class DocumentoForm(forms.ModelForm):
         }
 
     def clean(self):
-        # Llama al método clean() padre para obtener los datos limpios
         cleaned_data = super().clean()
-        
-        # Obtenemos los valores de los campos
         archivo = cleaned_data.get("archivo")
         enlace_externo = cleaned_data.get("enlace_externo")
+        es_general = cleaned_data.get('es_general')
+        departamentos = cleaned_data.get('departamentos_destinados')
 
-        # Comprobamos nuestra lógica
         if not archivo and not enlace_externo:
-            # Si AMBOS están vacíos, lanzamos un error
             raise ValidationError(
                 "Debes proporcionar al menos un Archivo o un Enlace Externo.",
                 code='archivo_o_enlace_requerido'
@@ -155,13 +121,10 @@ class DocumentoForm(forms.ModelForm):
         es_general = cleaned_data.get('es_general')
         departamentos = cleaned_data.get('departamentos_destinados')
 
-        # Si 'es_general' NO está marcado Y 'departamentos' está vacío...
         if not es_general and not departamentos:
-            # Lanza un error de validación en el campo específico
             self.add_error('departamentos_destinados', 
                            "Si el documento NO es 'General', debes seleccionar al menos un departamento.")
             
-        # Si al menos uno tiene valor, la validación es correcta
         return cleaned_data
     
 class VideoCursoForm(forms.ModelForm):
@@ -193,3 +156,16 @@ class VideoCursoForm(forms.ModelForm):
             'es_general': 'Contenido General',
             'departamentos_destinados': 'Departamentos Destinados (si no es general)',
         }
+    def __init__(self, *args, **kwargs):
+        super(VideoCursoForm, self).__init__(*args, **kwargs)
+        self.fields['departamentos_destinados'].queryset = Departamento.objects.all()
+
+    def clean(self):
+        cleaned_data = super().clean()
+        es_general = cleaned_data.get('es_general')
+        departamentos = cleaned_data.get('departamentos_destinados')
+
+        if not es_general and not departamentos:
+            self.add_error('departamentos_destinados', 
+                           "Si el video NO es 'General', debes seleccionar al menos un departamento.")
+        return cleaned_data
