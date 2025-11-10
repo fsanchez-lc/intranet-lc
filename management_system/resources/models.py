@@ -28,6 +28,7 @@ class Curso(models.Model):
         verbose_name="Modalidad de Inscripción",
         help_text="Define si el usuario puede inscribirse directamente o debe solicitarlo."
     )
+    
     fecha = models.DateField(
         help_text="Fecha programada para el curso (YYYY-MM-DD)"
     )
@@ -53,8 +54,8 @@ class Curso(models.Model):
     )
 
     link = models.URLField(
-        max_length=255, 
-        blank=True, 
+        max_length=255,
+        blank=True,
         null=True, 
         help_text="Enlace a la sesión (Zoom, Teams) o a los materiales del curso"
     )
@@ -73,9 +74,9 @@ class Curso(models.Model):
     )
 
     imagen = models.ImageField(
-        upload_to='cursos_portadas/', 
-        blank=True,                   # Permite que el campo esté vacío (opcional)
-        null=True,                    
+        upload_to='cursos_portadas/',
+        blank=True,
+        null=True,
         help_text="Imagen de portada para el curso (Si se tiene)"
     )
     
