@@ -1,0 +1,66 @@
+{% comment %}
+Este es el archivo parcial: templates/partials/_employee_cards.html
+
+Itera sobre la variable 'empleados_page' (que viene del Paginator).
+Esto es usado tanto por la carga inicial de la página como por las llamadas AJAX.
+{% endcomment %}
+
+{% for empleado in empleados_page %}
+<div class="col-12 col-md-6 col-lg-4 mb-4">
+    <div class="card h-100 shadow-sm border-light-subtle"> 
+        <div class="card-body">
+            <div class="d-flex align-items-center mb-3">
+                <i class="bi bi-person-badge display-4 text-primary me-3"></i>
+            <div>
+            <h5 class="card-title fw-bold mb-1">{{ empleado.nombre }}</h5>
+            <h6 class="card-subtitle mb-2 text-muted">{{ empleado.posicion|default:"Sin Posición" }}</h6>
+        </div>
+    </div>
+
+    <ul class="list-group list-group-flush">
+        <li class="list-group-item px-0 d-flex align-items-center">
+            <i class="bi bi-envelope-fill me-2 text-muted" style="width: 20px;"></i>
+            <a href="mailto:{{ empleado.email }}" class="text-decoration-none text-truncate">{{ empleado.email }}</a>
+        </li>
+        <li class="list-group-item px-0 d-flex align-items-center">
+            <i class="bi bi-building me-2 text-muted" style="width: 20px;"></i>
+            {{ empleado.departamento.nombre|default:"<span class='text-danger'>Sin Depto.</span>"|safe }}
+        </li>
+        <li class="list-group-item px-0 d-flex align-items-center">
+            <i class="bi bi-person-circle me-2 text-muted" style="width: 20px;"></i>
+            {% if empleado.user %}
+            <span class="fw-medium text-success">{{ empleado.user.username }}</span>
+            {% else %}
+            <span class="text-danger small">Sin usuario de sistema</span>
+            {% endif %}
+        </li>
+        <li class="list-group-item px-0 d-flex align-items-center">
+            <i class="bi bi-geo-alt-fill me-2 text-muted" style="width: 20px;"></i>
+            {{ empleado.estacion_servicio.nombre|default:"<span class='text-muted small'>Sin estación</span>"|safe }}
+        </li>
+    </ul>
+</div>
+    
+    {% if is_admin %}
+    <div class="card-footer bg-light-subtle text-end border-0 pt-0">
+        <button type="button" 
+            class="btn btn-outline-primary btn-sm btn-edit-empleado" 
+            data-bs-toggle="modal" 
+            data-bs-target="#modalEditarEmpleado" 
+            data-empleado-id="{{ empleado.id }}">
+            <i class="bi bi-pencil me-1"></i> Modificar
+        </button>
+    </div>
+    {% endif %}
+</div>
+</div>
+{% empty %}
+    {% if empleados_page.number == 1 %}
+    <div class="col-12">
+        <div class="alert alert-info text-center shadow-sm">
+            <h4 class="alert-heading">No se encontraron empleados</h4>
+            <p class="mb-0">No hay empleados activos que coincidan con los filtros de búsqueda.</p>
+        </div>
+    </div>
+    {% endif %}
+{% endfor %}

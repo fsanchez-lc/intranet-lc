@@ -17,7 +17,7 @@ urlpatterns = [
     path('usuarios/', include('users.urls', namespace='users_urls')),
     path('equipos/', equipment_views.EquipmentView, name='lista_equipos'),
     path('equipos/crear/', equipment_views.CreateEquipmentView, name='crear_equipo_url'),
-    path('empleados/', include('employees.urls', namespace='employees_urls')),
+    path('empleados/', include('employees.urls')),
     path('tipos-equipos/', equipment_views.TypeEquipmentView, name='type_equipment_url'),
     path('equipos/editar/<int:pk>/', equipment_views.EditEquipmentView, name='editar_equipo_url'),
     path('equipos/eliminar/<int:pk>/', equipment_views.DeactivateEquipmentView, name='eliminar_equipo_url'),

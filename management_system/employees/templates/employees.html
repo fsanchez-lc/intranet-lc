@@ -4,6 +4,29 @@
 
 {% block content %}
 
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1100">
+  {% if messages %}
+    {% for message in messages %}
+      <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header text-white 
+          {% if message.tags == 'success' %} bg-success 
+          {% elif message.tags == 'info' %} bg-primary 
+          {% elif message.tags == 'warning' %} bg-warning 
+          {% elif message.tags == 'error' %} bg-danger 
+          {% endif %}">
+          <i class="bi bi-bell-fill me-2"></i>
+          <strong class="me-auto">Notificación</strong>
+          <small>Ahora</small>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+          {{ message }}
+        </div>
+      </div>
+    {% endfor %}
+  {% endif %}
+</div>
+
 <div class="d-flex justify-content-between align-items-center mb-3">
   <div> 
     <h2 class="h3 fw-bold mb-2">Empleados</h2>
@@ -25,6 +48,48 @@
     </a>
     {% endif %}
   </div>
+</div>
+
+<div class="card shadow-sm border-light-subtle mb-4">
+  <div class="card-body">
+    <form id="filter-form" method="GET" action="">
+      <div class="row g-3">
+        <div class="col-12 col-md-6">
+          <label for="search-query-empleado" class="form-label fw-bold">Buscar Empleado</label>
+          <div class="input-group">
+            <input type="text" class="form-control" id="search-query-empleado" name="q" 
+            placeholder="Buscar por nombre, email, usuario..." value="{{ current_q|default:'' }}">
+            <button class="btn btn-outline-secondary" type="submit" id="search-submit-btn">
+              <i class="bi bi-search"></i>
+            </button>
+          </div>
+        </div>
+        <div class="col-12 col-md-6">
+          <label for="filter-depto-empleado" class="form-label fw-bold">Departamento</label>
+          <select class="form-select" id="filter-depto-empleado" name="depto_id">
+            <option value="">Todos los Departamentos</option>
+              {% for depto in all_departamentos %}
+            <option value="{{ depto.id }}" {% if current_depto_id == depto.id|stringformat:"s" %}selected{% endif %}>
+              {{ depto.nombre }}
+            </option>
+              {% endfor %}
+          </select>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+<div class="row" id="employee-list-container">
+  {% include '_employee_cards.html' with empleados_page=empleados_page is_admin=is_admin %}
+</div>
+
+<div class="text-center mt-4" id="load-more-container">
+  {% if empleados_page.has_next %}
+    <button class="btn btn-primary" id="load-more-btn">
+      <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none;"></span>
+      <span class="btn-text">Cargar más empleados</span>
+    </button>
+  {% endif %}
 </div>
 
 <div class="modal fade" id="modalCrearEmpleado" tabindex="-1" aria-labelledby="modalCrearEmpleadoLabel" aria-hidden="true">
@@ -239,7 +304,115 @@
 
 <script>
   document.addEventListener("DOMContentLoaded", () => {
+    // --- Variables de Filtros y Paginación ---
+    const filterForm = document.getElementById('filter-form');
+    const searchInput = document.getElementById('search-query-empleado');
+    const deptoSelect = document.getElementById('filter-depto-empleado');
+    const loadMoreBtn = document.getElementById('load-more-btn');
+    const employeeContainer = document.getElementById('employee-list-container');
+    let currentPage = 1;
+    let isLoading = false;
+    // ¡ASEGÚRATE DE QUE ESTA URL NAME COINCIDA CON TU URLS.PY!
+    const searchUrl = "{% url 'employees:search_employees' %}"; 
+
+    // --- 1. FUNCIÓN DE DEBOUNCE ---
+    let debounceTimer;
+    const debounce = (func, delay) => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(func, delay);
+    };
+
+    // --- 2. FUNCIÓN PRINCIPAL PARA CARGAR EMPLEADOS ---
+    async function fetchEmployees(page = 1, append = false) {
+      if (isLoading) return;
+      isLoading = true;
+
+      const query = searchInput.value;
+      const deptoId = deptoSelect.value;
+      
+      if (loadMoreBtn) {
+        const btnSpinner = loadMoreBtn.querySelector('.spinner-border');
+        const btnText = loadMoreBtn.querySelector('.btn-text');
+        if (btnSpinner) btnSpinner.style.display = 'inline-block';
+        if (btnText) btnText.textContent = 'Cargando...';
+        loadMoreBtn.disabled = true;
+      }
+
+      const url = new URL(searchUrl, window.location.origin);
+      url.searchParams.append('page', page);
+      if (query) url.searchParams.append('q', query);
+      if (deptoId) url.searchParams.append('depto_id', deptoId);
+
+      try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error('Error de red al cargar empleados.');
+        
+        const data = await response.json();
+        
+        if (append) {
+          employeeContainer.insertAdjacentHTML('beforeend', data.html);
+        } else {
+          employeeContainer.innerHTML = data.html;
+        }
+
+        if (loadMoreBtn) {
+          if (data.has_next) {
+            loadMoreBtn.style.display = 'block';
+          } else {
+            loadMoreBtn.style.display = 'none';
+          }
+        }
+        currentPage = page;
+
+      } catch (error) {
+        console.error("Error en fetchEmployees:", error);
+        if (loadMoreBtn) loadMoreBtn.querySelector('.btn-text').textContent = 'Error al cargar';
+      } finally {
+        if (loadMoreBtn && loadMoreBtn.style.display !== 'none') {
+          const btnSpinner = loadMoreBtn.querySelector('.spinner-border');
+          const btnText = loadMoreBtn.querySelector('.btn-text');
+          if (btnSpinner) btnSpinner.style.display = 'none';
+          if (btnText) btnText.textContent = 'Cargar más empleados';
+          loadMoreBtn.disabled = false;
+        }
+        isLoading = false;
+      }
+    }
+
+    // --- 3. EVENT LISTENERS ---
+
+    // 1. Botón "Cargar Más"
+    if (loadMoreBtn) {
+      loadMoreBtn.addEventListener('click', () => {
+        fetchEmployees(currentPage + 1, true); 
+      });
+    }
+
+    // 2. Submit del formulario (al presionar Enter)
+    if (filterForm) {
+      filterForm.addEventListener('submit', (e) => {
+        e.preventDefault(); 
+        debounce(() => {}, 0); 
+        fetchEmployees(1, false); 
+      });
+    }
+
+    // 3. Búsqueda "en vivo" al teclear
+    if (searchInput) {
+      searchInput.addEventListener('input', () => {
+        debounce(() => {
+          fetchEmployees(1, false);
+        }, 300);
+      });
+    }
     
+    // 4. Filtro de Departamento
+    if (deptoSelect) {
+      deptoSelect.addEventListener('change', () => {
+        fetchEmployees(1, false);
+      });
+    }
+
     // --- Variables Modales (Empleados) ---
     const modalCrearEmpleadoEl = document.getElementById('modalCrearEmpleado');
     const myModalCrearEmpleado = new bootstrap.Modal(modalCrearEmpleadoEl);
@@ -254,26 +427,15 @@
 
 
     // --- Lógica para reabrir modal con errores ---
-    // Tu vista 'EmployeesView' pasa esta variable
     const modalToReopen = "{{ form_with_errors|default:'none' }}";
     
     if (modalToReopen === 'empleado') {
         myModalCrearEmpleado.show();
     }
-    // NOTA: 'form_with_errors' no aplica al modal de EDICIÓN,
-    // ya que ese se envía a 'update_employee' y recarga la página.
 
-    
     // --- Lógica modal EDITAR EMPLEADO ---
-    
-    // 1. URL base para obtener el formulario de edición
-    //    Asegúrate de que 'employees:get_employee_edit_form' exista en tu urls.py
     const getEmpleadoFormUrlBase = "{% url 'employees:edit_empleado' 0 %}";
     
-    /**
-     * Carga el formulario de edición de un empleado vía AJAX
-     * @param {string} empleadoId - El ID del empleado a editar
-     */
     async function loadEmpleadoEditForm(empleadoId) {
       if (!empleadoId) return;
 
@@ -297,9 +459,6 @@
         if (empleadoFormContainer) {
           empleadoFormContainer.innerHTML = html;
           empleadoFormContainer.style.display = "block";
-          
-          // Aquí iría la inicialización de Select2 si la necesitaras,
-          // pero el EmpleadoForm usa checkboxes estándar.
         }
 
       } catch (error) {
@@ -344,7 +503,7 @@
       });
     }
 
-    // --- Lógica Toasts (copiada de tu script) ---
+    // --- Lógica Toasts ---
     const toastElements = document.querySelectorAll('.toast');
     if (toastElements.length > 0) {
       toastElements.forEach(function (toastEl) {

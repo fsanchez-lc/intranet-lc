@@ -216,7 +216,7 @@ def ResourcesView(request):
 @login_required 
 def BuscarDocumentosView(request):
     page_number = request.GET.get('page', 1)
-    query = request.GET.get('q', '') # El término de búsqueda del input
+    query = request.GET.get('q', '')
     depto_id = request.GET.get('departamento', '')
     tipo_id = request.GET.get('tipo', '')
     is_admin = request.user.groups.filter(name='Administrativo').exists()
@@ -233,7 +233,6 @@ def BuscarDocumentosView(request):
     except (Empleado.DoesNotExist, AttributeError):
         pass
 
-    # El "mundo" de documentos que este usuario tiene permitido ver
     permission_query = Q(es_general=True)
     if empleado and empleado.departamento:
         permission_query.add(Q(departamentos_destinados=empleado.departamento), Q.OR)
@@ -530,8 +529,7 @@ def SlideEditView(request, slide_id):
             messages.success(request, f'Slide "{slide.title}" actualizado correctamente. 👍')
             return redirect('resources:resources') # Redirige tras guardar
         else:
-            # Si hay error en POST, podrías devolver el parcial con errores
-            # Para simplificar, por ahora redirigimos con mensaje de error
+
              messages.error(request, 'Error al actualizar el slide. Verifica los datos.')
              return redirect('resources:resources')
 

@@ -14,23 +14,19 @@ class EmpleadoForm(forms.ModelForm):
         ]
 
         widgets = {
-            # Campos de texto y email (¡SIN ID!)
             'nombre': forms.TextInput(attrs={'class': 'form-control'}),
             'email': forms.EmailInput(attrs={'class': 'form-control'}),
             'telefono': forms.TextInput(attrs={'class': 'form-control'}),
             'posicion': forms.TextInput(attrs={'class': 'form-control'}),
 
-            # Selects (ForeignKey) (¡SIN ID!)
             'user': forms.Select(attrs={'class': 'form-select'}),
             'departamento': forms.Select(attrs={'class': 'form-select'}),
             'estacion_servicio': forms.Select(attrs={'class': 'form-select'}),
             'estado': forms.Select(attrs={'class': 'form-select'}),
 
-            # Checkboxes (ManyToMany)
             'grupos': forms.CheckboxSelectMultiple(attrs={'class': 'form-check-input'}),
             'politicas_permisos': forms.CheckboxSelectMultiple(attrs={'class': 'form-check-input'}),
 
-            # Archivo (¡SIN ID!)
             'firma_digital': forms.ClearableFileInput(attrs={'class': 'form-control'}),
         }
         
