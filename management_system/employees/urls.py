@@ -5,5 +5,5 @@ app_name = 'employees'
 
 urlpatterns = [
     path('', views.EmployeesView, name='employees'),
-    path('crear/', views.CrearEmpleadoView, name='crear_empleado'),
+    path('empleado/edit/<int:empleado_id>/', views.EditEmpleadoView, name='edit_empleado'),
 ]

@@ -1,66 +1,78 @@
-from django.shortcuts import render, redirect
-from django.contrib.auth.models import Group, User
-from django.contrib.auth.decorators import login_required
-from .models import Empleado, Departamento, Permiso
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required, user_passes_test
+from .models import Empleado
 from django.contrib import messages
-from .forms import EmpleadoForm # Importa el nuevo formulario
-from django.core.paginator import Paginator # Importa el Paginador
+from .forms import EmpleadoForm
+
+# Función para verificar si es admin
+def is_admin_check(user):
+    return user.is_authenticated and user.groups.filter(name='Administrativo').exists()
 
 @login_required
 def EmployeesView(request):
     is_admin = request.user.groups.filter(name='Administrativo').exists()
 
-    if 'crear_empleado_form' in request.session:
-        # Recupera el formulario con errores de la sesión (si existe)
-        form = request.session.pop('crear_empleado_form')
+    form_empleado = EmpleadoForm(prefix='create_empleado') 
+
+    form_with_errors = None
+    if request.method == 'POST':
+        # Identificamos qué formulario se envió
+        form_type = request.POST.get('form_type')
+
+        if form_type == 'empleado':
+            form_empleado = EmpleadoForm(request.POST, request.FILES, prefix='create_empleado')         
+
+            if form_empleado.is_valid():
+                empleado_guardado = form_empleado.save() # Guardamos la instancia
+                messages.success(request, f'¡Nuevo empleado "{empleado_guardado.nombre}" guardado exitosamente! 👍')                
+                return redirect('employees:employees') 
+            else:
+                messages.error(request, 'Error al guardar el empleado. Revisa los campos.')
+                form_with_errors = 'empleado'
+        else:
+                # Fallback por si no se identifica el form
+                messages.error(request, 'Error desconocido al enviar el formulario.')
+                form_empleado = EmpleadoForm(prefix='create_empleado')
     else:
-        # Si no, crea un formulario nuevo y vacío
-        form = EmpleadoForm()
+        form_empleado = EmpleadoForm(prefix='create_empleado')
 
     empleados_list = Empleado.objects.all().order_by('nombre')
-    
-    # Muestra 10 empleados por página
-    paginator = Paginator(empleados_list, 10) 
-    
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number) # page_obj se usará en la plantilla
 
     context = {
         'is_admin': is_admin,
-        'page_obj': page_obj,
-        'crear_empleado_form': form, # Pasa el formulario al contexto
-        # 'empleados': empleados_list,
+        'form_with_errors': form_with_errors,
+        'form_empleado': form_empleado,
+        'todos_los_empleados': empleados_list,
     }
     return render(request, 'employees.html', context)
 
-@login_required
-def CrearEmpleadoView(request):
+# Edu
+@user_passes_test(is_admin_check)
+def EditEmpleadoView(request, empleado_id):
+    """
+    Maneja el GET (cargar formulario parcial) y POST (actualizar)
+    para el modal de edición de empleados.
+    """
+    empleado = get_object_or_404(Empleado, id=empleado_id)
+    
     if request.method == 'POST':
-        form = EmpleadoForm(request.POST, request.FILES)
+        # El usuario está enviando el formulario actualizado
+        form = EmpleadoForm(request.POST, request.FILES, instance=empleado, prefix="edit-empleado")
         
         if form.is_valid():
             form.save()
-            messages.success(request, '¡Empleado creado exitosamente!')
+            messages.success(request, f'Empleado "{empleado.nombre}" actualizado con éxito.')
+            return redirect('employees:employees')
         else:
-            # Si el formulario NO es válido
-            messages.error(request, 'Hubo un error. Por favor corrige el formulario.')
-            # Guarda el formulario con errores en la sesión para mostrarlo
-            request.session['crear_empleado_form'] = form.as_p() # O una forma de pasarlo
-            
-            # --- Corrección importante ---
-            # En lugar de guardar en sesión, es mejor re-renderizar la vista
-            # que muestra el modal, pasándole el formulario con errores.
-            
-            empleados_list = Empleado.objects.all().order_by('nombre')
-            paginator = Paginator(empleados_list, 10)
-            page_obj = paginator.get_page(request.GET.get('page'))
-            
-            context = {
-                'page_obj': page_obj,
-                'crear_empleado_form': form # Pasa el formulario CON errores
-            }
-            # Vuelve a renderizar la página de la lista, el modal mostrará los errores
-            return render(request, 'employees/tu_plantilla_de_empleados.html', context)
+            messages.error(request, 'Error al actualizar el documento. Revisa los campos.')
+            pass 
 
-    # Redirige de vuelta a la lista (a la página 1)
-    return redirect('employees:employees')
+    else:
+        # El usuario está pidiendo el formulario por primera vez (AJAX/Fetch)
+        form = EmpleadoForm(instance=empleado, prefix="edit-empleado")
+    
+    # Para GET o POST fallido, renderizamos el formulario parcial
+    return render(request, '_edit_empleado_form.html', {
+        'form_empleado_edit': form,
+        'empleado': empleado
+    })

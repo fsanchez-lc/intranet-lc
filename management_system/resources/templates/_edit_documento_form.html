@@ -1,9 +1,3 @@
-{% comment %} 
-Este template es SOLO el formulario que se inyectará en el modal.
-Usa los IDs únicos que el JS espera (ej: campoDepartamentosEditDoc)
-y el 'prefix' ("edit-doc") que la vista definió.
-{% endcomment %}
-
 <form action="{% url 'resources:edit_documento' documento.id %}" method="POST" enctype="multipart/form-data">
   {% csrf_token %}
   <p class="text-muted small">

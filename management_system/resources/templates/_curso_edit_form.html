@@ -61,15 +61,27 @@
       {% endif %}
       {{ form.imagen }}
     </div>
-    
-    <div class="col-md-6 mb-3">
-      <label for="{{ form_curso.estado.id_for_label }}" class="form-label fw-bold">
-        {{ form.estado.label }}
-      </label>
-      {{ form.estado }}
-      <div class="form-text">{{ form.estado.help_text|default:'' }}</div>
-      {% if form.estado.errors %}<div class="invalid-feedback d-block">{{ form.estado.errors.0 }}</div>{% endif %}
+
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label for="{{ form_curso.estado.id_for_label }}" class="form-label fw-bold">
+          {{ form.estado.label }}
+        </label>
+        {{ form.estado }}
+        <div class="form-text">{{ form.estado.help_text|default:'' }}</div>
+        {% if form.estado.errors %}<div class="invalid-feedback d-block">{{ form.estado.errors.0 }}</div>{% endif %}
+      </div>
+
+      <div class="col-md-6 mb-3">
+        <label for="{{ form.modalidad.id_for_label }}" class="form-label fw-bold">    
+          {{ form.modalidad.label }}
+        </label>      
+        {{ form.modalidad }}  
+        <div class="form-text">{{ form.modalidad.help_text|default:'' }}</div>
+        {% if form.modalidad.errors %}<div class="invalid-feedback d-block">{{ form.modalidad.errors.0 }}</div>{% endif %}
+      </div>
     </div>
+    
 
     <hr class="my-4">
 

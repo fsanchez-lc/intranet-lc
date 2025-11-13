@@ -25,8 +25,8 @@ class Permiso(models.Model):
 class Empleado(models.Model):
     user = models.OneToOneField(
         User, 
-        on_delete=models.SET_NULL, # O models.CASCADE si prefieres
-        related_name="empleado",   # Así puedes hacer request.user.empleado
+        on_delete=models.SET_NULL,
+        related_name="empleado",
         null=True, 
         blank=True,
         verbose_name="Usuario del Sistema"
@@ -36,22 +36,36 @@ class Empleado(models.Model):
         ACTIVO = 'ACTIVO', 'Activo'
         INACTIVO = 'INACTIVO', 'Inactivo'
 
-    nombre = models.CharField(max_length=255, help_text="Nombre completo del empleado.")
+    nombre = models.CharField(
+        max_length=255, 
+        help_text="Nombre completo del empleado.",
+        verbose_name="Nombre completo",
+    )
     email = models.EmailField(unique=True, help_text="Correo electrónico del empleado.")
-    telefono = models.CharField(max_length=20, blank=True)
+    telefono = models.CharField(
+        max_length=20, blank=True,
+        verbose_name="Teléfono",
+
+    )
     departamento = models.ForeignKey(
         Departamento,
         on_delete=models.SET_NULL,
         null=True,
         blank=True
     )
-    posicion = models.CharField(max_length=100, blank=True, help_text="Ej: Coordinadora de RRHH")
+    posicion = models.CharField(
+        max_length=100, 
+        blank=True, 
+        help_text="Ej: Coordinadora de RRHH",
+        verbose_name="Posición",
+    )
 
     estacion_servicio = models.ForeignKey(
         'service_stations.ServiceStation',
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
+        verbose_name="Estación de Servicio",
         related_name="empleados",
         help_text="Estación de servicio a la que está asignado el empleado."
     )

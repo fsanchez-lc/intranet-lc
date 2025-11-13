@@ -2,31 +2,10 @@
 
 {% block title %}Empleados{% endblock %}
 
-{# 1. Los estilos van en su propio bloque #}
-{% block styles %}
-{{ block.super }}
-<style>
-  .clickable-row {
-    cursor: pointer;
-  }
-  .clickable-row:hover {
-    background-color: #ececec;
-  }
-  .accordion-cell {
-    padding: 0 !important;
-    border-top: none !important;
-  }
-  .accordion-content {
-    background-color: #f8f9fa;
-    padding: 1rem 1.5rem;
-  }
-</style>
-{% endblock %}
-
-
 {% block content %}
+
 <div class="d-flex justify-content-between align-items-center mb-3">
-  <div>
+  <div> 
     <h2 class="h3 fw-bold mb-2">Empleados</h2>
     <h3 class="h5 fw-italic mb-4 text-muted">Gestión de empleados y expedientes</h3>
   </div>
@@ -48,205 +27,368 @@
   </div>
 </div>
 
-<hr>
-
-<div class="card shadow-sm">
-  <div class="card-body">
-    <div class="table-responsive">
-      <table class="table table-striped align-middle">
-        <thead class="table-dark">
-          <tr>
-            <th scope="col">Nombre</th>
-            <th scope="col">Puesto</th>
-            <th scope="col">Departamento</th>
-            <th scope="col">Email</th>
-            <th scope="col" class="text-end">Acciones</th>
-          </tr>
-        </thead>
-        <tbody id="employeeTableBody">
-          
-          {% for employee in page_obj %}
-            {% with collapseId="collapse-employee-"|add:employee.id|slugify %}
-            
-            <tr class="clickable-row" data-bs-toggle="collapse" data-bs-target="#{{ collapseId }}" aria-expanded="false" aria-controls="{{ collapseId }}">
-              <td>{{ employee.nombre }}</td>
-              <td>{{ employee.posicion|default:"N/A" }}</td>
-              <td>{{ employee.departamento.nombre|default:"N/A" }}</td>
-              <td>{{ employee.email }}</td>
-              <td class="text-end">
-                <button class="btn btn-sm btn-outline-primary" title="Editar" onclick="event.stopPropagation(); editEmployee('{{ employee.id }}');">
-                  <i class="bi bi-pencil-square"></i>
-                </button>
-                <button class="btn btn-sm btn-outline-danger ms-1" title="Eliminar" onclick="event.stopPropagation(); deleteEmployee('{{ employee.id }}');">
-                  <i class="bi bi-trash"></i>
-                </button>
-              </td>
-            </tr>
-            
-            <tr>
-              <td colspan="5" class="accordion-cell">
-                <div id="{{ collapseId }}" class="collapse accordion-content" data-bs-parent="#employeeTableBody">
-                  <h5>Detalles de {{ employee.nombre }}</h5>
-                  <div class="row">
-                    <div class="col-md-3"><strong>ID:</strong> {{ employee.id }}</div>
-                    <div class="col-md-3"><strong>Tel:</strong> {{ employee.telefono|default:"N/A" }}</div>
-                    <div class="col-md-3"><strong>Usuario:</strong> {{ employee.user.username|default:"N/A" }}</div>
-                    <div class="col-md-3"><strong>Estación:</strong> {{ employee.estacion_servicio.name|default:"N/A" }}</div>
-                  </div>
-                </div>
-              </td>
-            </tr>
-            {% endwith %}
-          {% endfor %}
-          
-        </tbody>
-      </table>
-    </div>
-  </div>
-</div>
-
-<nav aria-label="Paginación de empleados" class="mt-4">
-  <ul class="pagination justify-content-center">
-    {% if page_obj.has_previous %}
-      <li class="page-item">
-        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Anterior</a>
-      </li>
-    {% else %}
-      <li class="page-item disabled">
-        <span class="page-link">Anterior</span>
-      </li>
-    {% endif %}
-
-    <li class="page-item active" aria-current="page">
-      <span class="page-link">
-        Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
-      </span>
-    </li>
-
-    {% if page_obj.has_next %}
-      <li class="page-item">
-        <a class="page-link" href="?page={{ page_obj.next_page_number }}">Siguiente</a>
-      </li>
-    {% else %}
-      <li class="page-item disabled">
-        <span class="page-link">Siguiente</span>
-      </li>
-    {% endif %}
-  </ul>
-</nav>
-
-
 <div class="modal fade" id="modalCrearEmpleado" tabindex="-1" aria-labelledby="modalCrearEmpleadoLabel" aria-hidden="true">
-  <div class="modal-dialog modal-xl modal-dialog-centered">
-    <div class="modal-content">
-      
-      <form id="formCrearEmpleado" method="POST" action="{% url 'employees:crear_empleado' %}" enctype="multipart/form-data">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content p-1">
+
+      <form action="" method="POST" enctype="multipart/form-data">
         {% csrf_token %}
-        
+        <input type="hidden" name="form_type" value="empleado">
+
         <div class="modal-header">
-          <h5 class="modal-title" id="modalCrearEmpleadoLabel">Añadir Nuevo Empleado</h5>
+          <div>
+            <h5 class="modal-title fw-bold" id="modalCrearEmpleadoLabel">Añadir un empleado</h5>
+            <p class="mb-0 text-muted small">Crea un nuevo perfil de empleado y asigna permisos.</p>
+          </div>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        
+
         <div class="modal-body">
-          {% if crear_empleado_form.non_field_errors %}
-            <div class="alert alert-danger">{{ crear_empleado_form.non_field_errors }}</div>
-          {% endif %}
+          <p class="text-muted small">
+            Los campos con (<span class="text-danger">*</span>) son obligatorios.
+          </p>
 
-          <div class="row g-3">
-            
-            <div class="col-md-6">
-              <label for="{{ crear_empleado_form.nombre.id_for_label }}" class="form-label">Nombre Completo</label>
-              {{ crear_empleado_form.nombre }}
-              <div class="form-text">{{ crear_empleado_form.nombre.help_text }}</div>
-              {% if crear_empleado_form.nombre.errors %}<div class="text-danger small">{{ crear_empleado_form.nombre.errors }}</div>{% endif %}
-            </div>
-            <div class="col-md-6">
-              <label for="{{ crear_empleado_form.email.id_for_label }}" class="form-label">Email</label>
-              {{ crear_empleado_form.email }}
-              <div class="form-text">{{ crear_empleado_form.email.help_text }}</div>
-              {% if crear_empleado_form.email.errors %}<div class="text-danger small">{{ crear_empleado_form.email.errors }}</div>{% endif %}
-            </div>
-            <div class="col-md-6">
-              <label for="{{ crear_empleado_form.telefono.id_for_label }}" class="form-label">Teléfono</label>
-              {{ crear_empleado_form.telefono }}
-            </div>
-            <div class="col-md-6">
-              <label for="{{ crear_empleado_form.posicion.id_for_label }}" class="form-label">Posición / Puesto</label>
-              {{ crear_empleado_form.posicion }}
-            </div>
+          <div class="mb-3">
+            <label for="{{ form_empleado.nombre.id_for_label }}" class="form-label fw-bold">
+              {{ form_empleado.nombre.label }}<span class="text-danger"> *</span>
+            </label>
+            {{ form_empleado.nombre }}
+            {% if form_empleado.nombre.errors %}
+              <div class="invalid-feedback d-block">{{ form_empleado.nombre.errors.0 }}</div>
+            {% endif %}
+          </div>
 
-            <div class="col-md-6">
-              <label for="{{ crear_empleado_form.user.id_for_label }}" class="form-label">Usuario del Sistema</label>
-              {{ crear_empleado_form.user }}
-            </div>
-            <div class="col-md-6">
-              <label for="{{ crear_empleado_form.departamento.id_for_label }}" class="form-label">Departamento</label>
-              {{ crear_empleado_form.departamento }}
-            </div>
-            <div class="col-md-6">
-              <label for="{{ crear_empleado_form.estacion_servicio.id_for_label }}" class="form-label">Estación de Servicio</label>
-              {{ crear_empleado_form.estacion_servicio }}
-            </div>
-            <div class="col-md-6">
-              <label for="{{ crear_empleado_form.estado.id_for_label }}" class="form-label">Estado</label>
-              {{ crear_empleado_form.estado }}
-            </div>
-            
-            <div class="col-12">
-              <label class="form-label">Tipos de Usuario (Grupos)</label>
-              <div class="border rounded p-3 bg-light" style="max-height: 150px; overflow-y: auto;">
-                {% for check in crear_empleado_form.grupos %}
-                <div class="form-check">
-                  {{ check.tag }}
-                  <label class="form-check-label" for="{{ check.id_for_label }}">{{ check.choice_label }}</label>
-                </div>
-                {% endfor %}
-              </div>
-            </div>
+          <div class="mb-3">
+            <label for="{{ form_empleado.email.id_for_label }}" class="form-label fw-bold">
+              {{ form_empleado.email.label }}<span class="text-danger"> *</span>
+            </label>
+            {{ form_empleado.email }}
+            {% if form_empleado.email.errors %}
+              <div class="invalid-feedback d-block">{{ form_empleado.email.errors.0 }}</div>
+            {% endif %}
+          </div>
 
-            <div class="col-12">
-              <label class="form-label">Políticas y Permisos Individuales</label>
-              <div class="border rounded p-3 bg-light" style="max-height: 150px; overflow-y: auto;">
-                {% for check in crear_empleado_form.politicas_permisos %}
-                <div class="form-check">
-                  {{ check.tag }}
-                  <label class="form-check-label" for="{{ check.id_for_label }}">{{ check.choice_label }}</label>
-                </div>
-                {% endfor %}
-              </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="{{ form_empleado.telefono.id_for_label }}" class="form-label fw-bold">
+                {{ form_empleado.telefono.label }}
+              </label>
+              {{ form_empleado.telefono }}
+              {% if form_empleado.telefono.errors %}
+                <div class="invalid-feedback d-block">{{ form_empleado.telefono.errors.0 }}</div>
+              {% endif %}
             </div>
-
-            <div class="col-12">
-              <label for="{{ crear_empleado_form.firma_digital.id_for_label }}" class="form-label">Firma Digital</label>
-              {{ crear_empleado_form.firma_digital }}
+            <div class="col-md-6 mb-3">
+              <label for="{{ form_empleado.posicion.id_for_label }}" class="form-label fw-bold">
+                {{ form_empleado.posicion.label }}
+              </label>
+              {{ form_empleado.posicion }}
+              {% if form_empleado.posicion.errors %}
+                <div class="invalid-feedback d-block">{{ form_empleado.posicion.errors.0 }}</div>
+              {% endif %}
             </div>
           </div>
+
+          <hr class="my-4">
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="{{ form_empleado.user.id_for_label }}" class="form-label fw-bold">
+                {{ form_empleado.user.label }}
+              </label>
+              {{ form_empleado.user }}
+              <div class="form-text">Asignar un usuario de Django (opcional).</div>
+              {% if form_empleado.user.errors %}
+                <div class="invalid-feedback d-block">{{ form_empleado.user.errors.0 }}</div>
+              {% endif %}
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="{{ form_empleado.departamento.id_for_label }}" class="form-label fw-bold">
+                {{ form_empleado.departamento.label }}
+              </label>
+              {{ form_empleado.departamento }}
+              {% if form_empleado.departamento.errors %}
+                <div class="invalid-feedback d-block">{{ form_empleado.departamento.errors.0 }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="{{ form_empleado.estacion_servicio.id_for_label }}" class="form-label fw-bold">
+                {{ form_empleado.estacion_servicio.label }}
+              </label>
+              {{ form_empleado.estacion_servicio }}
+              {% if form_empleado.estacion_servicio.errors %}
+                <div class="invalid-feedback d-block">{{ form_empleado.estacion_servicio.errors.0 }}</div>
+              {% endif %}
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="{{ form_empleado.estado.id_for_label }}" class="form-label fw-bold">
+                {{ form_empleado.estado.label }}<span class="text-danger"> *</span>
+              </label>
+              {{ form_empleado.estado }}
+              {% if form_empleado.estado.errors %}
+                <div class="invalid-feedback d-block">{{ form_empleado.estado.errors.0 }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="{{ form_empleado.firma_digital.id_for_label }}" class="form-label fw-bold">
+              {{ form_empleado.firma_digital.label }}
+            </label>
+            {{ form_empleado.firma_digital }}
+            <div class="form-text">Sube una imagen de la firma (opcional).</div>
+            {% if form_empleado.firma_digital.errors %}
+              <div class="invalid-feedback d-block">{{ form_empleado.firma_digital.errors.0 }}</div>
+            {% endif %}
+          </div>
+
+          <hr class="my-4">
+
+          <div class="mb-3">
+            <label class="form-label fw-bold">
+              {{ form_empleado.grupos.label }}<span class="text-danger"> *</span>
+            </label>
+            <div class="border rounded p-2" style="max-height: 200px; overflow-y: auto;">
+              {% for check in form_empleado.grupos %}
+              <div class="form-check">
+                {{ check.tag }}
+                <label class="form-check-label" for="{{ check.id_for_label }}">
+                  {{ check.choice_label }}
+                </label>
+              </div>
+              {% endfor %}
+            </div>
+            <div class="form-text">Grupos de permisos de Django.</div>
+            {% if form_empleado.grupos.errors %}
+              <div class="invalid-feedback d-block">{{ form_empleado.grupos.errors.0 }}</div>
+            {% endif %}
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-bold">
+              {{ form_empleado.politicas_permisos.label }}<span class="text-danger"> *</span>
+            </label>
+            <div class="border rounded p-2" style="max-height: 200px; overflow-y: auto;">
+              {% for check in form_empleado.politicas_permisos %}
+              <div class="form-check">
+                {{ check.tag }}
+                <label class="form-check-label" for="{{ check.id_for_label }}">
+                  {{ check.choice_label }}
+                </label>
+              </div>
+              {% endfor %}
+            </div>
+            <div class="form-text">Políticas de permisos personalizadas.</div>
+            {% if form_empleado.politicas_permisos.errors %}
+              <div class="invalid-feedback d-block">{{ form_empleado.politicas_permisos.errors.0 }}</div>
+            {% endif %}
+          </div>
+
         </div>
-        
+
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          <button type="submit" class="btn btn-success">
-            <i class="bi bi-person-plus-fill"></i> Crear Empleado
-          </button>
+          <button type="submit" class="btn btn-primary">Guardar Empleado</button>
         </div>
+
       </form>
     </div>
   </div>
 </div>
-{% endblock %}
 
+<div class="modal fade" id="modalEditarEmpleado" tabindex="-1" aria-labelledby="modalEditarEmpleadoLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content p-1">
+      
+      <div class="modal-header">
+        <div>
+          <h5 class="modal-title fw-bold" id="modalEditarEmpleadoLabel">Modificar un empleado</h5>
+          <p class="mb-0 text-muted small">Selecciona un empleado para editar sus detalles.</p>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
 
-{% block scripts %}
-  {{ block.super }} 
-    <script>
-    // --- Tus funciones ---
-    function editEmployee(id) {
-      alert(`Función EDITAR llamada para el empleado ID: ${id}. Aún no implementada.`);
-    }
+      <div class="modal-body">
+        <div id="empleado-selector-container">
+          <select class="form-select" id="select-empleado-a-editar">
+            <option value="" selected disabled>Elige un empleado...</option>
+            
+            {% for empleado in todos_los_empleados %}
+              <option value="{{ empleado.id }}">{{ empleado.nombre }}</option>
+            {% endfor %}
+
+          </select>
+        </div>
+
+        <div id="empleado-form-container" class="mt-4" style="display: none;">
+          </div>
+
+        <div id="loading-spinner-editar-empleado" class="text-center mt-4" style="display: none;">
+          <div class="spinner-border" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <p>Cargando datos del empleado...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
     
-    function deleteEmployee(id) {
-      alert(`Función ELIMINAR llamada para el empleado ID: ${id}. Aún no implementada.`);
+    // --- Variables Modales (Empleados) ---
+    const modalCrearEmpleadoEl = document.getElementById('modalCrearEmpleado');
+    const myModalCrearEmpleado = new bootstrap.Modal(modalCrearEmpleadoEl);
+
+    const modalEditarEmpleadoEl = document.getElementById('modalEditarEmpleado');
+    const myModalEditarEmpleado = new bootstrap.Modal(modalEditarEmpleadoEl);
+    
+    // Elementos del modal de EDICIÓN
+    const empleadoSelector = document.getElementById('select-empleado-a-editar');
+    const empleadoFormContainer = document.getElementById('empleado-form-container');
+    const loadingSpinnerEditarEmpleado = document.getElementById('loading-spinner-editar-empleado');
+
+
+    // --- Lógica para reabrir modal con errores ---
+    // Tu vista 'EmployeesView' pasa esta variable
+    const modalToReopen = "{{ form_with_errors|default:'none' }}";
+    
+    if (modalToReopen === 'empleado') {
+        myModalCrearEmpleado.show();
     }
-  </script>
+    // NOTA: 'form_with_errors' no aplica al modal de EDICIÓN,
+    // ya que ese se envía a 'update_employee' y recarga la página.
+
+    
+    // --- Lógica modal EDITAR EMPLEADO ---
+    
+    // 1. URL base para obtener el formulario de edición
+    //    Asegúrate de que 'employees:get_employee_edit_form' exista en tu urls.py
+    const getEmpleadoFormUrlBase = "{% url 'employees:edit_empleado' 0 %}";
+    
+    /**
+     * Carga el formulario de edición de un empleado vía AJAX
+     * @param {string} empleadoId - El ID del empleado a editar
+     */
+    async function loadEmpleadoEditForm(empleadoId) {
+      if (!empleadoId) return;
+
+      // Mostrar spinner y ocultar/limpiar formulario anterior
+      if (loadingSpinnerEditarEmpleado) loadingSpinnerEditarEmpleado.style.display = "block";
+      if (empleadoFormContainer) empleadoFormContainer.style.display = "none";
+      if (empleadoFormContainer) empleadoFormContainer.innerHTML = "";
+
+      try {
+        // Construir la URL y hacer la petición
+        const url = getEmpleadoFormUrlBase.replace('0', empleadoId);
+        const response = await fetch(url);
+
+        if (!response.ok) {
+          throw new Error(`Error ${response.status}: ${response.statusText}`);
+        }
+
+        const html = await response.text();
+
+        // Inyectar el formulario HTML en el contenedor
+        if (empleadoFormContainer) {
+          empleadoFormContainer.innerHTML = html;
+          empleadoFormContainer.style.display = "block";
+          
+          // Aquí iría la inicialización de Select2 si la necesitaras,
+          // pero el EmpleadoForm usa checkboxes estándar.
+        }
+
+      } catch (error) {
+        // Manejar errores de red o del servidor
+        console.error("Error cargando el form de editar (empleado):", error);
+        if (empleadoFormContainer) {
+          empleadoFormContainer.innerHTML = `<div class="alert alert-danger">No se pudo cargar el formulario. ${error.message}</div>`;
+          empleadoFormContainer.style.display = "block";
+        }
+      } finally {
+        // Ocultar el spinner en cualquier caso
+        if (loadingSpinnerEditarEmpleado) loadingSpinnerEditarEmpleado.style.display = "none";
+      }
+    }
+
+    // 2. Listener para cuando se MUESTRA el modal de edición
+    modalEditarEmpleadoEl.addEventListener('show.bs.modal', function(event) {
+      const triggerButton = event.relatedTarget; // El botón que abrió el modal
+      const selectorContainer = document.getElementById('empleado-selector-container');
+
+      // Resetear estado inicial
+      if (empleadoSelector) empleadoSelector.value = "";
+      if (empleadoFormContainer) empleadoFormContainer.style.display = "none";
+      if (empleadoFormContainer) empleadoFormContainer.innerHTML = "";
+      if (loadingSpinnerEditarEmpleado) loadingSpinnerEditarEmpleado.style.display = "none";
+
+      // Lógica para (futuros) botones de "editar" en una tabla
+      if (triggerButton && triggerButton.classList.contains('btn-edit-empleado')) {
+        const empleadoId = triggerButton.dataset.empleadoId; // data-empleado-id="123"
+        if (selectorContainer) selectorContainer.style.display = "none"; // Oculta el selector
+        loadEmpleadoEditForm(empleadoId); // Carga el form directamente
+      } else {
+        // Si se abre desde el menú general (tu caso actual)
+        if (selectorContainer) selectorContainer.style.display = "block"; // Muestra el selector
+      }
+    });
+
+    // 3. Listener para el dropdown SELECTOR de empleados
+    if (empleadoSelector) {
+      empleadoSelector.addEventListener('change', function() {
+        loadEmpleadoEditForm(this.value);
+      });
+    }
+
+    // --- Lógica Toasts (copiada de tu script) ---
+    const toastElements = document.querySelectorAll('.toast');
+    if (toastElements.length > 0) {
+      toastElements.forEach(function (toastEl) {
+        const toast = new bootstrap.Toast(toastEl, { autohide: true, delay: 5000 });
+        toast.show();
+      });
+    }
+
+    // --- Lógica Botón Móvil (Historial - adaptada) ---
+    modalCrearEmpleadoEl.addEventListener('show.bs.modal', function () {
+      if (window.location.hash !== '#modalCreateEmpleado') {
+        history.pushState({ modal: 'createEmpleado' }, '', '#modalCreateEmpleado');
+      }
+    });
+    modalCrearEmpleadoEl.addEventListener('hide.bs.modal', function () {
+      if (history.state && history.state.modal === 'createEmpleado') {
+        history.back();
+      }
+    });
+    
+    modalEditarEmpleadoEl.addEventListener('show.bs.modal', function () {
+      if (window.location.hash !== '#modalEditEmpleado') {
+        history.pushState({ modal: 'editEmpleado' }, '', '#modalEditEmpleado');
+      }
+    });
+    modalEditarEmpleadoEl.addEventListener('hide.bs.modal', function () {
+      if (history.state && history.state.modal === 'editEmpleado') {
+        history.back();
+      }
+      // Limpiar al cerrar
+      if (empleadoFormContainer) empleadoFormContainer.innerHTML = "";
+      if (empleadoFormContainer) empleadoFormContainer.style.display = "none";
+      if (empleadoSelector) empleadoSelector.value = ""; 
+    });
+
+    // Listener para el botón "atrás" del navegador
+    window.addEventListener('popstate', function (event) {
+      if (!event.state || !event.state.modal) { 
+        if (modalCrearEmpleadoEl.classList.contains('show')) myModalCrearEmpleado.hide();
+        if (modalEditarEmpleadoEl.classList.contains('show')) myModalEditarEmpleado.hide();
+      }
+    });
+
+  }); 
+</script>
+
 {% endblock %}

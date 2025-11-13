@@ -8,7 +8,6 @@ from django.core.paginator import Paginator
 from django.template.loader import render_to_string
 from django.http import JsonResponse
 from .forms import CursoForm, DocumentoForm, VideoCursoForm, SlideForm
-from django.views.decorators.http import require_POST # <--- 1. IMPORT AÑADIDO
 
 @login_required
 def ResourcesView(request):
@@ -95,39 +94,45 @@ def ResourcesView(request):
 
     try:
         empleado = request.user.empleado 
-        if empleado and empleado.departamento: # <--- AÑADIDO
-            user_depto_id = empleado.departamento.id # <--- AÑADIDO: Guardamos el ID
+        if empleado and empleado.departamento:
+            user_depto_id = empleado.departamento.id
     except (Empleado.DoesNotExist, AttributeError):
         pass
 
     if empleado:
-        # Obtenemos los cursos donde el empleado está inscrito
         mis_cursos = empleado.cursos_inscritos.filter(
             estado=Curso.Estado.ACTIVO 
         ).order_by('fecha')
-    # Empleado con departamento, ve solo sus cursos
-    if empleado and empleado.departamento:
-        query_disponibles = Q(es_general=True) | Q(departamentos_destinados=empleado.departamento)
+
+    if empleado:
+        # EMPLEADO NORMAL: Ve solo los de su depto o generales.
+        if empleado.departamento:
+            # Empleado CON departamento
+            query_disponibles = Q(es_general=True) | Q(departamentos_destinados=empleado.departamento)
+        else:
+            # Empleado SIN departamento
+            query_disponibles = Q(es_general=True)
+        
         cursos_disponibles = Curso.objects.filter(
             query_disponibles, 
             estado=Curso.Estado.ACTIVO
         ).exclude(inscritos=empleado).distinct().order_by('fecha')
+        
     else:
-        # Empleado sin departamento, solo ve generales
+        # Usuario SIN perfil de empleado
+        # (Este caso ya casi no debería pasar si todos tienen perfil)
         cursos_disponibles = Curso.objects.filter(
             es_general=True,
             estado=Curso.Estado.ACTIVO
-        ).exclude(inscritos=empleado).distinct().order_by('fecha')
+        ).distinct().order_by('fecha')
 
     chunk_size = 3
     mis_cursos_chunks = [mis_cursos[i:i + chunk_size] for i in range(0, len(mis_cursos), chunk_size)]
     cursos_disponibles_chunks = [cursos_disponibles[i:i + chunk_size] for i in range(0, len(cursos_disponibles), chunk_size)]    
-    
-    # CONSULTA PARA DOCUMENTOS
+
     if is_admin:
         documentos_dept_query = Q()
     else:
-        # Si no es admin, aplicamos la lógica de permisos normal
         documentos_dept_query = Q(es_general=True)
         if empleado and empleado.departamento:
             documentos_dept_query.add(Q(departamentos_destinados=empleado.departamento), Q.OR)
@@ -150,10 +155,6 @@ def ResourcesView(request):
     if is_admin:
         video_permission_query = Q() # Admin ve todo
     else:
-        # Un video es visible si:
-        # 1. No tiene curso (es general) O
-        # 2. El curso es general O
-        # 3. El curso es para el departamento del empleado
         video_permission_query = Q(curso=None) | Q(curso__es_general=True)
         if empleado and empleado.departamento:
             video_permission_query.add(Q(curso__departamentos_destinados=empleado.departamento), Q.OR)
@@ -167,11 +168,11 @@ def ResourcesView(request):
     # 3. PAGINA AMBAS LISTAS
     paginator_docs = Paginator(documentos_generales_list, 4)
     paginator_formatos = Paginator(formatos_list, 4)
-    paginator_videos = Paginator(videos_list, 4) # <--- AÑADIDO
+    paginator_videos = Paginator(videos_list, 4)
     
     documentos_page_1 = paginator_docs.get_page(1)
     formatos_page_1 = paginator_formatos.get_page(1)
-    videos_page_1 = paginator_videos.get_page(1) # <--- AÑADIDO
+    videos_page_1 = paginator_videos.get_page(1)
 
     todos_los_cursos_list = Curso.objects.all().order_by('titulo')
     todos_los_documentos_list = Documento.objects.filter(documentos_dept_query).distinct().order_by('nombre')
@@ -304,17 +305,14 @@ def BuscarFormatosView(request):
         permission_query.add(Q(departamentos_destinados=empleado.departamento), Q.OR)
     
     if depto_id:
-        # REQ 1: Si se selecciona un depto, mostrar SOLO de ese depto.
         filter_query = Q(departamentos_destinados__id=depto_id)    
     else:
-        # REQ 2: Si se selecciona "Todos" (depto_id=''), mostrar SOLO 'es_general=True'.
         filter_query = Q(es_general=True)    
-        # --- FIN MODIFICADO ---
 
     tipo_query_base = Q(tipo_documento__nombre__in=['Formato', 'Plantilla', ''])
 
     documentos_list = Documento.objects.filter(
-        permission_query, # <-- 1. APLICAR PERMISOS PRIMERO
+        permission_query,
         filter_query,
         lookup, 
         tipo_query_base,
@@ -439,24 +437,19 @@ def CursoEditView(request, curso_id):
 
     if request.method == 'POST':
         # Si el método es POST, estamos guardando cambios
-        # Usamos 'instance=curso' para que el form sepa que estamos editando
         form = CursoForm(request.POST, request.FILES, instance=curso, prefix='edit')
         
         if form.is_valid():
             form.save()
-            messages.success(request, f'¡Curso "{curso.titulo}" actualizado exitosamente! 🚀')            # Redirigimos a la página principal del repositorio
+            messages.success(request, f'¡Curso "{curso.titulo}" actualizado exitosamente! 🚀')
             return redirect('resources:resources')
         else:
             # Si el form no es válido, se lo devolvemos al JS con los errores
             messages.warning(request, 'Hubo un error al actualizar. Revisa los campos.')
-            # (El JS recibirá este HTML y lo mostrará en el modal)
             pass 
             
     else:
-        # Si el método es GET, solo estamos pidiendo el formulario
-        # Usamos 'instance=curso' para pre-llenar los datos
-        # Usamos 'prefix' para que los IDs de los campos (ej: "id_edit-titulo")
-        # no choquen con los del modal de "Crear Curso" (ej: "id_titulo")
+        # Si el método es GET, solo cargamos el formulario parcial
         form = CursoForm(instance=curso, prefix='edit')
 
     # Renderizamos solo el formulario en una plantilla parcial

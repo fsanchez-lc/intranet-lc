@@ -26,7 +26,7 @@ class EmpleadoAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Información Personal', {
             # --- CAMBIO AQUÍ: Añadido 'estacion_servicio' al formulario ---
-            'fields': ('nombre', 'email','telefono', 'posicion', 'departamento', 'estacion_servicio', 'firma_digital')
+            'fields': ('user','nombre', 'email','telefono', 'posicion', 'departamento', 'estacion_servicio', 'firma_digital')
         }),
         ('Estado, Tipos de Usuario y Permisos', {
             'fields': ('estado', 'grupos', 'politicas_permisos')

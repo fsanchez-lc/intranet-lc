@@ -24,7 +24,7 @@ class CursoForm(forms.ModelForm):
         model = Curso
         fields = [
             'titulo', 'descripcion', 'fecha', 'horario', 'duracion_horas',
-            'plataforma', 'link', 'imagen', 'estado', 'es_general',
+            'plataforma', 'link', 'imagen', 'estado', 'modalidad', 'es_general',
             'departamentos_destinados', 'inscritos'
         ]
 
@@ -38,6 +38,7 @@ class CursoForm(forms.ModelForm):
             'link': forms.URLInput(attrs={'class': 'form-control'}),
             'imagen': forms.FileInput(attrs={'class': 'form-control'}),
             'estado': forms.Select(attrs={'class': 'form-select'}),
+            'modalidad': forms.Select(attrs={'class': 'form-select'}),
             'es_general': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'departamentos_destinados': forms.SelectMultiple(attrs={
                 'class': 'form-select',
@@ -50,6 +51,7 @@ class CursoForm(forms.ModelForm):
         }
         labels = {
             'titulo': 'Título del curso',
+            'modalidad': 'Modalidad de Inscripción',
             'es_general': '¿Es un curso general (para todos)?',
             'departamentos_destinados': 'Departamentos específicos',
             'inscritos': 'Inscribir empleados',

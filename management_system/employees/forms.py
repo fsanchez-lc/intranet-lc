@@ -2,7 +2,6 @@
 from django import forms
 from django.contrib.auth.models import Group, User
 from .models import Empleado, Departamento, Permiso
-# Asumo que ServiceStation está en 'service_stations.models'
 from service_stations.models import ServiceStation 
 
 class EmpleadoForm(forms.ModelForm):
@@ -15,31 +14,30 @@ class EmpleadoForm(forms.ModelForm):
         ]
 
         widgets = {
-            # Campos de texto y email
-            'nombre': forms.TextInput(attrs={'class': 'form-control', 'id': 'id_nombre'}),
-            'email': forms.EmailInput(attrs={'class': 'form-control', 'id': 'id_email'}),
-            'telefono': forms.TextInput(attrs={'class': 'form-control', 'id': 'id_telefono'}),
-            'posicion': forms.TextInput(attrs={'class': 'form-control', 'id': 'id_posicion'}),
+            # Campos de texto y email (¡SIN ID!)
+            'nombre': forms.TextInput(attrs={'class': 'form-control'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
+            'telefono': forms.TextInput(attrs={'class': 'form-control'}),
+            'posicion': forms.TextInput(attrs={'class': 'form-control'}),
 
-            # Selects (ForeignKey)
-            'user': forms.Select(attrs={'class': 'form-select', 'id': 'id_user'}),
-            'departamento': forms.Select(attrs={'class': 'form-select', 'id': 'id_departamento'}),
-            'estacion_servicio': forms.Select(attrs={'class': 'form-select', 'id': 'id_estacion_servicio'}),
-            'estado': forms.Select(attrs={'class': 'form-select', 'id': 'id_estado'}),
+            # Selects (ForeignKey) (¡SIN ID!)
+            'user': forms.Select(attrs={'class': 'form-select'}),
+            'departamento': forms.Select(attrs={'class': 'form-select'}),
+            'estacion_servicio': forms.Select(attrs={'class': 'form-select'}),
+            'estado': forms.Select(attrs={'class': 'form-select'}),
 
-            # Checkboxes (ManyToMany) - Renderizará como checkboxes
+            # Checkboxes (ManyToMany)
             'grupos': forms.CheckboxSelectMultiple(attrs={'class': 'form-check-input'}),
             'politicas_permisos': forms.CheckboxSelectMultiple(attrs={'class': 'form-check-input'}),
 
-            # Archivo
-            'firma_digital': forms.ClearableFileInput(attrs={'class': 'form-control', 'id': 'id_firma_digital'}),
+            # Archivo (¡SIN ID!)
+            'firma_digital': forms.ClearableFileInput(attrs={'class': 'form-control'}),
         }
         
     def __init__(self, *args, **kwargs):
-        """
-        Poblamos los QuerySets de los campos ForeignKey y ManyToMany.
-        """
+        # ... tu __init__ está perfecto, no lo cambies ...
         super().__init__(*args, **kwargs)
+        # ...
         
         # Obtenemos todos los usuarios que aún NO están ligados a un empleado
         usuarios_libres = User.objects.filter(empleado__isnull=True)
