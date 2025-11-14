@@ -74,6 +74,11 @@
         </button>
         <ul class="dropdown-menu">
           <li>
+            <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#modalCrearSlide">
+              Añadir slide
+            </a>
+          </li>
+          <li>
             <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#modalCrearCurso">
               Añadir curso
             </a>
@@ -132,12 +137,12 @@
     <div class="position-relative">
 
       {% if is_admin %}
-      <div class="position-absolute top-0 start-0 p-3" style="z-index: 10;">
+      <div class="position-absolute top-0 start-0 p-3 d-none d-md-block" style="z-index: 10;">
           <button class="btn btn-success btn-sm shadow" data-bs-toggle="modal" data-bs-target="#modalCrearSlide">
               <i class="bi bi-plus-lg"></i> Añadir slide
           </button>
       </div>
-      {% endif %}    
+      {% endif %}
 
       <div id="carouselCaptions" class="carousel slide carousel-fade carousel-bienvenida shadow-lg rounded-3" data-bs-ride="carousel" data-bs-interval="4000">
       
@@ -157,7 +162,7 @@
             <div class="carousel-item {% if forloop.first %}active{% endif %}">
               
               {% if is_admin %}
-              <div class="position-absolute top-0 end-0 p-4" style="z-index: 5;">
+              <div class="position-absolute top-0 end-0 p-3" style="z-index: 5;">
                   <button class="btn btn-warning btn-sm shadow btn-edit-slide" 
                           data-bs-toggle="modal" 
                           data-bs-target="#modalEditarSlide" 
@@ -247,131 +252,128 @@
 
     <hr class="my-1">
 
-    <div class="p-3">
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2>Cursos</h2>
-        
-        <div class="d-flex gap-2">
-          {% if is_admin %}
-          <a href="#" class="btn bg-success d-flex align-items-center gap-2 d-none d-md-flex fw-medium text-white"
-                  data-bs-toggle="modal" 
-                  data-bs-target="#modalCrearCurso">
-          <i class="bi bi-plus-lg"></i>
-          Añadir un curso
-          </a>
-          <a href="#" class="btn d-flex bg-warning align-items-center gap-2 d-none d-md-flex fw-medium text-white"
-                  data-bs-toggle="modal" 
-                  data-bs-target="#modalEditarCurso">
-          <i class="bi bi-pencil"></i>
-          Modificar cursos
-          </a>
-          {% endif %}
-        </div>
-      </div>
-
-      <hr class="my-1">
-
-      {% if mis_cursos_chunks %}
-      <div class="mb-5 p-3" id="MisCursos">
-        <h2 class="h4 mb-2">Mis cursos</h2>
-        <p class="text-muted">
-          Aquí puedes visualizar los materiales de capacitación y de aprendizajes en los que estás inscrito/a.
-        </p>
-
-        <div class="bg-body-secondary p-3 rounded-3">
-          <div id="cursosCarousel" class="carousel slide">
-            <div class="carousel-inner">
-
-              {% for chunk in mis_cursos_chunks %}
-              <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                <div class="row g-3">
-                  
-                  {% for curso in chunk %}
-                  <div class="col-md-4">
-                      <div class="card border-0 rounded-0 course-card">
-                        
-                        {% if is_admin %}
-                        <a href="#" 
-                            class="btn btn-warning btn-sm rounded-circle shadow-sm btn-edit-curso" 
-                            data-bs-toggle="modal" 
-                            data-bs-target="#modalEditarCurso" 
-                            data-curso-id="{{ curso.id }}"
-                            aria-label="Editar curso"
-                            style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
-                            <i class="bi bi-gear-fill fs-5"></i>
-                        </a>
-                        {% endif %}
-
-                        {% if curso.imagen %}
-                          <img src="{{ curso.imagen.url }}" 
-                              class="card-img-top" 
-                              alt="Portada de {{ curso.titulo }}" 
-                              style="height: 200px; object-fit: cover;"> {% else %}
-                          <div class="card-img-placeholder">
-                              <i class="bi bi-mortarboard-fill"></i>
-                          </div>
-                        {% endif %}
-                        
-                        <div class="card-body text-white" style="background-color: #12255B;">
-                          <h5 class="card-title h6">{{ curso.titulo }}</h5>
-                          
-                          <p class="card-text small mb-0">
-                            Fecha: {{ curso.fecha|date:"d/m/Y"|default:"No definida" }}
-                          </p>
-                          <p class="card-text small">
-                            Horario: {{ curso.horario|time:"H:i"|default:"No definido" }} hrs
-                          </p>
-                        </div>
-
-                        <div style="background-color: rgba(18, 37, 91, 0.9);" class="course-info-overlay p-5 text-center d-flex flex-column justify-content-center align-items-center">
-                          <h5 class="fw-bold">{{ curso.titulo }}</h5>
-                          {% if curso.descripcion %}
-                            <p class="text-white-50 small">{{ curso.descripcion|truncatechars:100 }}</p>
-                          {% endif %}
-                          <p class="small mb-1">
-                            <i class="bi bi-calendar"></i> {{ curso.fecha|date:"d/m/Y"|default:"N/A" }}
-                            {% if curso.horario %} | <i class="bi bi-clock"></i> {{ curso.horario|time:"H:i" }} hrs {% endif %}
-                          </p>
-                          {% if curso.duracion_horas %}
-                            <p class="small mb-1"><i class="bi bi-hourglass-split"></i> {{ curso.duracion_horas|floatformat:1 }} horas</p>
-                          {% endif %}
-                          {% if curso.plataforma %}
-                            <p class="small mb-3"><i class="bi bi-geo-alt"></i> {{ curso.plataforma }}</p>
-                          {% endif %}
-                          {% if curso.link %}
-                            <a href="{{ curso.link }}" target="_blank" class="btn btn-sm mt-auto btn-color">
-                              Ir al Curso <i class="bi bi-box-arrow-up-right"></i>
-                            </a>
-                          {% else %}
-                            <span class="text-white-50 small mt-auto">Enlace no disponible</span>
-                          {% endif %}
-                        </div>
-                      </div>
-                  </div>
-                  {% endfor %}
-
-                </div>
-              </div>
-              {% endfor %}
-              </div>
-
-            {% if mis_cursos_chunks|length > 1 %}
-            <button class="carousel-control-prev" type="button" data-bs-target="#cursosCarousel" data-bs-slide="prev">
-              <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-              <span class="visually-hidden">Previous</span>
-            </button>
-            <button class="carousel-control-next" type="button" data-bs-target="#cursosCarousel" data-bs-slide="next">
-              <span class="carousel-control-next-icon" aria-hidden="true"></span>
-              <span class="visually-hidden">Next</span>
-            </button>
-            {% endif %}
-          </div>
-        </div>
+    <div class="d-flex justify-content-between align-items-center mb-3 mt-3">
+      <h2>Cursos</h2>
+      
+      <div class="d-flex gap-2">
+        {% if is_admin %}
+        <a href="#" class="btn bg-success d-flex align-items-center gap-2 d-none d-md-flex fw-medium text-white"
+                data-bs-toggle="modal" 
+                data-bs-target="#modalCrearCurso">
+        <i class="bi bi-plus-lg"></i>
+        Añadir un curso
+        </a>
+        <a href="#" class="btn d-flex bg-warning align-items-center gap-2 d-none d-md-flex fw-medium text-white"
+                data-bs-toggle="modal" 
+                data-bs-target="#modalEditarCurso">
+        <i class="bi bi-pencil"></i>
+        Modificar cursos
+        </a>
+        {% endif %}
       </div>
     </div>
   
+    <hr class="my-1">
+
+    {% if mis_cursos_chunks %}
+    <div class="mb-2 mb-md-3 p-3" id="MisCursos">
+      <h2 class="h4 mb-2">Mis cursos</h2>
+      <p class="text-muted">
+        Aquí puedes visualizar los materiales de capacitación y de aprendizajes en los que estás inscrito/a.
+      </p>
+
+      <div class="bg-body-secondary p-1 p-md-3 rounded-3">
+        <div id="cursosCarousel" class="carousel slide">
+          <div class="carousel-inner">
+
+            {% for chunk in mis_cursos_chunks %}
+            <div class="carousel-item {% if forloop.first %}active{% endif %}">
+              <div class="row g-3">
+                
+                {% for curso in chunk %}
+                <div class="col-md-4">
+                    <div class="card border-0 rounded-0 course-card">
+                      
+                      {% if is_admin %}
+                      <a href="#" 
+                          class="btn btn-warning btn-sm rounded-circle shadow-sm btn-edit-curso" 
+                          data-bs-toggle="modal" 
+                          data-bs-target="#modalEditarCurso" 
+                          data-curso-id="{{ curso.id }}"
+                          aria-label="Editar curso"
+                          style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                          <i class="bi bi-gear-fill fs-5"></i>
+                      </a>
+                      {% endif %}
+
+                      {% if curso.imagen %}
+                        <img src="{{ curso.imagen.url }}" 
+                            class="card-img-top" 
+                            alt="Portada de {{ curso.titulo }}" 
+                            style="height: 200px; object-fit: cover;"> {% else %}
+                        <div class="card-img-placeholder">
+                            <i class="bi bi-mortarboard-fill"></i>
+                        </div>
+                      {% endif %}
+                      
+                      <div class="card-body text-white" style="background-color: #12255B;">
+                        <h5 class="card-title h6">{{ curso.titulo }}</h5>
+                        
+                        <p class="card-text small mb-0">
+                          Fecha: {{ curso.fecha|date:"d/m/Y"|default:"No definida" }}
+                        </p>
+                        <p class="card-text small">
+                          Horario: {{ curso.horario|time:"H:i"|default:"No definido" }} hrs
+                        </p>
+                      </div>
+
+                      <div style="background-color: rgba(18, 37, 91, 0.9);" class="course-info-overlay p-5 text-center d-flex flex-column justify-content-center align-items-center">
+                        <h5 class="fw-bold">{{ curso.titulo }}</h5>
+                        {% if curso.descripcion %}
+                          <p class="text-white-50 small">{{ curso.descripcion|truncatechars:100 }}</p>
+                        {% endif %}
+                        <p class="small mb-1">
+                          <i class="bi bi-calendar"></i> {{ curso.fecha|date:"d/m/Y"|default:"N/A" }}
+                          {% if curso.horario %} | <i class="bi bi-clock"></i> {{ curso.horario|time:"H:i" }} hrs {% endif %}
+                        </p>
+                        {% if curso.duracion_horas %}
+                          <p class="small mb-1"><i class="bi bi-hourglass-split"></i> {{ curso.duracion_horas|floatformat:1 }} horas</p>
+                        {% endif %}
+                        {% if curso.plataforma %}
+                          <p class="small mb-3"><i class="bi bi-geo-alt"></i> {{ curso.plataforma }}</p>
+                        {% endif %}
+                        {% if curso.link %}
+                          <a href="{{ curso.link }}" target="_blank" class="btn btn-sm mt-auto btn-color">
+                            Ir al Curso <i class="bi bi-box-arrow-up-right"></i>
+                          </a>
+                        {% else %}
+                          <span class="text-white-50 small mt-auto">Enlace no disponible</span>
+                        {% endif %}
+                      </div>
+                    </div>
+                </div>
+                {% endfor %}
+
+              </div>
+            </div>
+            {% endfor %}
+            </div>
+
+          {% if mis_cursos_chunks|length > 1 %}
+          <button class="carousel-control-prev" type="button" data-bs-target="#cursosCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+          </button>
+          <button class="carousel-control-next" type="button" data-bs-target="#cursosCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+          </button>
+          {% endif %}
+        </div>
+      </div>
+    </div>
     {% else %}
-    <div class="mb-5 p-3" id="MisCursos">
+    <div class="mb-2 mb-md-3 p-3" id="MisCursos">
       <h2 class="h4 mb-2">Mis cursos</h2>
       <p class="text-muted">
         Aquí puedes visualizar los materiales de capacitación y de aprendizajes en los que estás inscrito/a.
@@ -392,7 +394,7 @@
         Los cursos disponibles para tu área y generales.
       </p>
 
-      <div class="bg-body-secondary p-3 rounded-3">
+      <div class="bg-body-secondary p-1 p-md-3 rounded-3">
         <div id="disponiblesCarousel" class="carousel slide">
           <div class="carousel-inner">
 
@@ -667,7 +669,7 @@
 
     <hr class="my-1"> 
 
-    <div class="mb-3 p-3" id="Contenido">
+    <div class="mb-3 p-2 p-md-3" id="Contenido">
       <h2 class="h4 mb-2">Contenido digital</h2>
       <p class="text-muted">Consulta el contenido de cursos, videos de apoyo y sesiones anteriores.</p>
       
@@ -738,7 +740,7 @@
 
     <hr class="my-1"> 
 
-    <div class="mb-3 p-3" id="DesarrolloProfesional">
+    <div class="mb-3 p-2 p-md-3" id="DesarrolloProfesional">
       <h2 class="h4 mb-2">Cursos completados y certificaciones</h2>
       <p class="text-muted">Consulta el contenido y certificaciones de tus cursos finalizados.</p>
 
@@ -758,19 +760,19 @@
       <div class="tab-content" id="myTabContent">
 
         <div class="tab-pane fade show active" id="historial-tab-pane" role="tabpanel" aria-labelledby="historial-tab" tabindex="0">
-          <div class="p-4 bg-body-tertiary rounded-bottom">
+          <div class="p-2 mt-1 p-md-3 bg-body-tertiary rounded-bottom">
             <div class="row g-3 align-items-end mb-4">
-              <div class="col-md">
+              <div class="col-sm">
                 <label for="completed-filter-fecha-inicio" class="form-label">Desde</label>
                 <input type="date" class="form-control" id="completed-filter-fecha-inicio" aria-label="Fecha inicio">
               </div>
 
-              <div class="col-md">
+              <div class="col-sm">
                 <label for="completed-filter-fecha-fin" class="form-label">Hasta</label>
                 <input type="date" class="form-control" id="completed-filter-fecha-fin" aria-label="Fecha fin">
               </div>
 
-              <div class="col-md">
+              <div class="col-sm">
                 <div class="input-group"> 
                   <span class="input-group-text"><i class="bi bi-search"></i></span>
                   <input type="text" class="form-control" placeholder="Buscar en historial...">
@@ -822,7 +824,7 @@
         </div>
 
         <div class="tab-pane fade" id="habilidades-tab-pane" role="tabpanel" aria-labelledby="habilidades-tab" tabindex="0">
-          <div class="p-4 bg-body-tertiary rounded-bottom">
+          <div class="p-2 p-md-3 mt-1 bg-body-tertiary rounded-bottom">
             
             <h4><i class="bi bi-patch-check-fill me-2"></i>Mis certificaciones</h4>
             <p class="text-muted">Los certificados de los cursos que has tomado.</p>

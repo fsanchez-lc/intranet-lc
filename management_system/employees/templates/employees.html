@@ -4,6 +4,34 @@
 
 {% block content %}
 
+<style>
+  /* Asegura que la tarjeta sea el 'padre' para el posicionamiento */
+  .card {
+    position: relative;
+  }
+  
+  /* Estilos para el nuevo botón de expedientes */
+  .card-expediente-btn {
+    position: absolute;
+    top: 10px;  /* Ajusta el espacio desde arriba */
+    right: 10px; /* Ajusta el espacio desde la derecha */
+    z-index: 5;  /* Se asegura que esté sobre el contenido */
+    
+    font-size: 1.25rem; /* Un poco más grande para que sea fácil de clickear */
+    color: var(--bs-secondary-color); /* Color gris sutil */
+    text-decoration: none;
+    
+    /* Transición suave para el hover */
+    transition: all 0.2s ease-in-out;
+  }
+
+  /* Efecto hover que pediste */
+  .card-expediente-btn:hover {
+    color: var(--bs-primary); /* Cambia al color primario */
+    transform: scale(1.1);   /* Se agranda un poco */
+  }
+</style>
+
 <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1100">
   {% if messages %}
     {% for message in messages %}
@@ -50,11 +78,13 @@
   </div>
 </div>
 
+<hr class="my-4">
+
 <div class="card shadow-sm border-light-subtle mb-4">
   <div class="card-body">
     <form id="filter-form" method="GET" action="">
       <div class="row g-3">
-        <div class="col-12 col-md-6">
+        <div class="col-12 col-md-4">
           <label for="search-query-empleado" class="form-label fw-bold">Buscar Empleado</label>
           <div class="input-group">
             <input type="text" class="form-control" id="search-query-empleado" name="q" 
@@ -64,13 +94,24 @@
             </button>
           </div>
         </div>
-        <div class="col-12 col-md-6">
+        <div class="col-12 col-md-4">
           <label for="filter-depto-empleado" class="form-label fw-bold">Departamento</label>
           <select class="form-select" id="filter-depto-empleado" name="depto_id">
             <option value="">Todos los Departamentos</option>
               {% for depto in all_departamentos %}
             <option value="{{ depto.id }}" {% if current_depto_id == depto.id|stringformat:"s" %}selected{% endif %}>
               {{ depto.nombre }}
+            </option>
+              {% endfor %}
+          </select>
+        </div>
+        <div class="col-12 col-md-4">
+          <label for="filter-estacion-empleado" class="form-label fw-bold">Estación</label>
+          <select class="form-select" id="filter-estacion-empleado" name="estacion_id">
+            <option value="">Todas las Estaciones</option>
+              {% for estacion in all_estaciones %}
+            <option value="{{ estacion.id }}" {% if current_estacion_id == estacion.id|stringformat:"s" %}selected{% endif %}>
+              {{ estacion.nombre }}
             </option>
               {% endfor %}
           </select>
@@ -308,11 +349,12 @@
     const filterForm = document.getElementById('filter-form');
     const searchInput = document.getElementById('search-query-empleado');
     const deptoSelect = document.getElementById('filter-depto-empleado');
+    const estacionSelect = document.getElementById('filter-estacion-empleado');
     const loadMoreBtn = document.getElementById('load-more-btn');
     const employeeContainer = document.getElementById('employee-list-container');
     let currentPage = 1;
     let isLoading = false;
-    // ¡ASEGÚRATE DE QUE ESTA URL NAME COINCIDA CON TU URLS.PY!
+
     const searchUrl = "{% url 'employees:search_employees' %}"; 
 
     // --- 1. FUNCIÓN DE DEBOUNCE ---
@@ -329,7 +371,8 @@
 
       const query = searchInput.value;
       const deptoId = deptoSelect.value;
-      
+      const estacionId = estacionSelect.value;
+
       if (loadMoreBtn) {
         const btnSpinner = loadMoreBtn.querySelector('.spinner-border');
         const btnText = loadMoreBtn.querySelector('.btn-text');
@@ -342,6 +385,7 @@
       url.searchParams.append('page', page);
       if (query) url.searchParams.append('q', query);
       if (deptoId) url.searchParams.append('depto_id', deptoId);
+      if (estacionId) url.searchParams.append('estacion_id', estacionId);
 
       try {
         const response = await fetch(url);
@@ -379,8 +423,6 @@
       }
     }
 
-    // --- 3. EVENT LISTENERS ---
-
     // 1. Botón "Cargar Más"
     if (loadMoreBtn) {
       loadMoreBtn.addEventListener('click', () => {
@@ -409,6 +451,12 @@
     // 4. Filtro de Departamento
     if (deptoSelect) {
       deptoSelect.addEventListener('change', () => {
+        fetchEmployees(1, false);
+      });
+    }
+
+    if (estacionSelect) {
+      estacionSelect.addEventListener('change', () => {
         fetchEmployees(1, false);
       });
     }

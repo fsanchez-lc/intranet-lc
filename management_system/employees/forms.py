@@ -32,13 +32,14 @@ class EmpleadoForm(forms.ModelForm):
         
     def __init__(self, *args, **kwargs):
         # ... tu __init__ está perfecto, no lo cambies ...
-        super().__init__(*args, **kwargs)
-        # ...
-        
+        super().__init__(*args, **kwargs)        
         # Obtenemos todos los usuarios que aún NO están ligados a un empleado
         usuarios_libres = User.objects.filter(empleado__isnull=True)
-        self.fields['user'].queryset = usuarios_libres
-        
+        if self.instance and self.instance.user:
+            usuario_actual = User.objects.filter(pk=self.instance.user.pk)
+            self.fields['user'].queryset = (usuarios_libres | usuario_actual).distinct()
+        else:
+            self.fields['user'].queryset = usuarios_libres        
         self.fields['departamento'].queryset = Departamento.objects.all()
         self.fields['estacion_servicio'].queryset = ServiceStation.objects.all()
         self.fields['grupos'].queryset = Group.objects.all()

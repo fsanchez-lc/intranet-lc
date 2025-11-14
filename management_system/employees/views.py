@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, user_passes_test
-from .models import Empleado, Departamento # <--- 1. IMPORTAR DEPARTAMENTO
+from .models import Empleado, Departamento
+from service_stations.models import ServiceStation
 from django.contrib import messages
 from .forms import EmpleadoForm
 from django.db.models import Q
@@ -38,6 +39,7 @@ def EmployeesView(request):
     # Obtenemos los filtros de la URL (si los hay)
     query = request.GET.get('q', '')
     depto_id = request.GET.get('depto_id', '')
+    estacion_id = request.GET.get('estacion_id', '') # <-- NUEVA LÍNEA
 
     # Filtro de búsqueda (igual que en BuscarDocumentosView)
     lookup = Q()
@@ -54,10 +56,15 @@ def EmployeesView(request):
     if depto_id:
         depto_query = Q(departamento__id=depto_id)
 
+    estacion_query = Q()
+    if estacion_id:
+        estacion_query = Q(estacion_servicio__id=estacion_id)
+
     # Obtenemos la lista base de empleados ACTIVOS y aplicamos filtros
     empleados_activos = Empleado.objects.filter(
         lookup,
         depto_query,
+        estacion_query,
         estado=Empleado.EstadoEmpleado.ACTIVO,
     ).distinct().order_by('nombre')
 
@@ -67,6 +74,7 @@ def EmployeesView(request):
 
     empleados_list_full = Empleado.objects.all().order_by('nombre')
     all_departamentos = Departamento.objects.all().order_by('nombre')
+    all_estaciones = ServiceStation.objects.all().order_by('nombre')
 
     context = {
         'is_admin': is_admin,
@@ -74,9 +82,10 @@ def EmployeesView(request):
         'form_empleado': form_empleado,
         'empleados_page': empleados_page,
         'all_departamentos': all_departamentos,
+        'all_estaciones': all_estaciones,
         'current_q': query,
         'current_depto_id': depto_id,
-        'todos_los_empleados': empleados_list_full,    
+        'todos_los_empleados': empleados_list_full,
     }
     return render(request, 'employees.html', context)
 
@@ -85,6 +94,7 @@ def SearchEmployeesView(request):
     page_number = request.GET.get('page', 1)
     query = request.GET.get('q', '')
     depto_id = request.GET.get('depto_id', '')
+    estacion_id = request.GET.get('estacion_id', '')
 
     lookup = Q()
     if query:
@@ -99,17 +109,22 @@ def SearchEmployeesView(request):
     if depto_id:
         depto_query = Q(departamento__id=depto_id)
 
+    estacion_query = Q()
+    if estacion_id:
+        estacion_query = Q(estacion_servicio__id=estacion_id)
+
     empleados_activos = Empleado.objects.filter(
         lookup,
         depto_query,
+        estacion_query,
         estado=Empleado.EstadoEmpleado.ACTIVO,
     ).distinct().order_by('nombre')
 
-    paginator = Paginator(empleados_activos, 6) # Mismo número de página
+    paginator = Paginator(empleados_activos, 6)
     empleados_page = paginator.get_page(page_number)
 
     html = render_to_string(
-         '_employee_cards.html', # <--- RUTA CORREGIDA
+         '_employee_cards.html',
         {
             'empleados_page': empleados_page, 
             'is_admin': request.user.groups.filter(name='Administrativo').exists()
@@ -120,8 +135,6 @@ def SearchEmployeesView(request):
         'html': html,
         'has_next': empleados_page.has_next()
     })
-
-
 
 @user_passes_test(is_admin_check)
 def EditEmpleadoView(request, empleado_id):
@@ -139,10 +152,8 @@ def EditEmpleadoView(request, empleado_id):
             pass 
 
     else:
-        # El usuario está pidiendo el formulario por primera vez (AJAX/Fetch)
         form = EmpleadoForm(instance=empleado, prefix="edit-empleado")
     
-    # Para GET o POST fallido, renderizamos el formulario parcial
     return render(request, '_edit_empleado_form.html', {
         'form_empleado_edit': form,
         'empleado': empleado

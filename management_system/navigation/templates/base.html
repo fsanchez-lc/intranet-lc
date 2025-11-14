@@ -21,27 +21,24 @@
   {% block styles %}
   {% endblock %}
 </head>
-<body class="bg-light vh-100 d-flex overflow-hidden">
-  
+<body class="bg-light vh-100 d-lg-flex">  
   <!-- Sidebar -->
-  <aside class="d-none d-lg-flex flex-column text-white p-4 bg-menu" style="width: 280px; flex-shrink: 0;">
+  <aside class="d-none d-lg-flex flex-column text-white p-4 bg-menu" style="width: 250px; flex-shrink: 0;">
     {% include '_menu_content.html' %}
   </aside>
 
   <div class="d-flex flex-column flex-grow-1">
-    <nav class="navbar bg-light d-lg-none">
-        <div class="container-fluid">
-          <div class="text-center mb-4">
-              <img src="{% static 'images/logo-blanco1.png' %}" alt="Logo del Sistema" class="img-fluid" style="max-width: 100px;">
-          </div>            
-            <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileMenu" aria-controls="mobileMenu">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-        </div>
+    <nav class="navbar d-lg-none bg-menu navbar-dark">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="/"> <img src="{% static 'images/logo-blanco1.png' %}" alt="Logo del Sistema" class="img-fluid" style="max-width: 80px;"></a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileMenu" aria-controls="mobileMenu">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+      </div>
     </nav>
     <!-- Contenido principal -->
-    <main class="flex-grow-1 p-4 overflow-auto">
-      <div class="container-fluid">
+    <main class="flex-grow-1 overflow-auto">
+      <div class="container-fluid p-3 p-md-4">
         {% block content %}{% endblock %}
       </div>
     </main>
