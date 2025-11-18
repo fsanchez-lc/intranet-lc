@@ -10,8 +10,16 @@ class Curso(models.Model):
         AUTOINSCRIPCION = 'auto', 'Autoinscripción'
         SOLICITUD = 'solicitud', 'Pedir inscribirse'
 
-    titulo = models.CharField(max_length=200, help_text="Título oficial del curso")
-    descripcion = models.TextField(blank=True, null=True, help_text="Descripción detallada del curso", verbose_name="Descripción")
+    titulo = models.CharField(
+        max_length=200, 
+        help_text="Título oficial del curso"
+    )
+    
+    descripcion = models.TextField(
+        blank=True, null=True, 
+        help_text="Descripción detallada del curso", 
+        verbose_name="Descripción"
+    )
     
     estado = models.CharField(
         max_length=10,
@@ -85,6 +93,14 @@ class Curso(models.Model):
         related_name="cursos_inscritos",
         blank=True,
         help_text="Empleados que están inscritos o han tomado este curso"
+    )
+
+    participantes = models.ManyToManyField(
+        'employees.Empleado',
+        through='InscripcionCurso',
+        related_name="cursos_historial_detallado", # Cambiado para evitar conflicto
+        blank=True,
+        verbose_name="Historial de Participación Detallado"
     )
 
     class Meta:
@@ -324,3 +340,66 @@ class VideoCurso(models.Model):
 
     def __str__(self):
         return self.titulo
+    
+class InscripcionCurso(models.Model):
+    class EstadoInscripcion(models.TextChoices):
+        INSCRITO = 'INSCRITO', 'Inscrito'
+        COMPLETADO = 'COMPLETADO', 'Completado'
+        APROBADO = 'APROBADO', 'Aprobado'
+        RECHAZADO = 'RECHAZADO', 'Rechazado'
+        DADO_DE_BAJA = 'DADO DE BAJA', 'Dado de Baja'
+
+    curso = models.ForeignKey(
+        Curso, 
+        on_delete=models.CASCADE, 
+        related_name="historial_participantes",
+        verbose_name="Curso"
+    )
+    
+    empleado = models.ForeignKey(
+        'employees.Empleado', 
+        on_delete=models.CASCADE, 
+        related_name="historial_cursos",
+        verbose_name="Empleado"
+    )
+
+    estado = models.CharField(
+        max_length=15,
+        choices=EstadoInscripcion.choices,
+        default=EstadoInscripcion.INSCRITO,
+        verbose_name="Estado de Participación"
+    )
+    
+    fecha_finalizacion = models.DateField(
+        null=True, blank=True,
+        verbose_name="Fecha de Finalización"
+    )
+    
+    calificacion = models.DecimalField(
+        max_digits=4, 
+        decimal_places=2, 
+        null=True, 
+        blank=True, 
+        verbose_name="Calificación (0-100)"
+    )
+    
+    certificado = models.FileField(
+        upload_to='certificados_cursos/%Y/',
+        null=True, blank=True,
+        verbose_name="Certificado/Diploma"
+    )
+    
+    fecha_inscripcion = models.DateTimeField(
+        auto_now_add=True, 
+        verbose_name="Fecha de Inscripción"
+    )
+
+    class Meta:
+        verbose_name = "Inscripción y Historial"
+        verbose_name_plural = "Inscripciones y Historial"
+        ordering = ['-fecha_finalizacion']
+        # Esto asegura que no se pueda tener dos registros idénticos (mismo curso, mismo empleado).
+        unique_together = ('curso', 'empleado') 
+        
+    def __str__(self):
+        return f"{self.empleado.nombre} - {self.curso.titulo} ({self.estado})"

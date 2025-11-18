@@ -1,19 +1,28 @@
 from django.contrib import admin
-from .models import Curso, Slide, TipoDocumento, Documento, VideoCurso
+from .models import Curso, Slide, TipoDocumento, Documento, VideoCurso, InscripcionCurso
 
 @admin.register(Slide)
 class SlideAdmin(admin.ModelAdmin):
-    # Campos que se mostrarán en la lista del admin
     list_display = ('title', 'order', 'is_active')
     
-    # Campos que se pueden editar directamente desde la lista
     list_editable = ('order', 'is_active')
     
-    # Filtros que aparecerán a la derecha
     list_filter = ('is_active',)
     
-    # Un buscador
     search_fields = ('title', 'description')
+
+class InscripcionCursoInline(admin.TabularInline):
+    model = InscripcionCurso 
+    
+    fields = (
+        'empleado', 'estado', 'fecha_finalizacion', 'calificacion', 'certificado'
+    )
+    
+    extra = 0
+    
+    autocomplete_fields = ['empleado'] 
+    
+    readonly_fields = ('fecha_inscripcion',)
 
 @admin.register(Curso)
 class CursoAdmin(admin.ModelAdmin):
@@ -23,7 +32,6 @@ class CursoAdmin(admin.ModelAdmin):
     list_editable = ('fecha', 'estado',)
     search_fields = ('titulo', 'descripcion', 'plataforma')
     
-    # Para campos ManyToMany, 'filter_horizontal' es más amigable
     filter_horizontal = ('departamentos_destinados', 'inscritos')
 
 @admin.register(TipoDocumento)
@@ -75,3 +83,10 @@ class DocumentoAdmin(admin.ModelAdmin):
     readonly_fields = ('fecha_creacion', 'fecha_modificacion')
     
     list_per_page = 25
+
+@admin.register(InscripcionCurso)
+class InscripcionCursoAdmin(admin.ModelAdmin):
+    list_display = ('curso', 'empleado', 'estado', 'fecha_finalizacion', 'calificacion')
+    list_filter = ('estado', 'fecha_finalizacion')
+    # Permite buscar inscripciones por nombre del curso o empleado
+    search_fields = ('curso__titulo', 'empleado__nombre', 'empleado__email')

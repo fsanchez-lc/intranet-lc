@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
-from .models import Slide, Curso, Documento, TipoDocumento, VideoCurso
+from .models import Slide, Curso, Documento, TipoDocumento, VideoCurso, InscripcionCurso
 from employees.models import Empleado, Departamento
 from django.db.models import Q
 from django.core.paginator import Paginator
@@ -137,21 +137,18 @@ def ResourcesView(request):
         if empleado and empleado.departamento:
             documentos_dept_query.add(Q(departamentos_destinados=empleado.departamento), Q.OR)
 
-    # 1. CREA LA LISTA DE DOCUMENTOS (Políticas, Manuales, etc.)
     documentos_generales_list = Documento.objects.filter(
         documentos_dept_query, 
         estado='activo',
         tipo_documento__nombre__in=['Manual', 'Política', 'Guía', 'Anexo', 'Documento de interés']
     ).distinct().order_by('nombre')
     
-    # 2. CREA LA LISTA DE FORMATOS (Formatos, Plantillas)
     formatos_list = Documento.objects.filter(
         documentos_dept_query, 
         estado='activo',
         tipo_documento__nombre__in=['Formato', 'Plantilla', 'Formato de interés']
     ).distinct().order_by('nombre')
 
-    # 3. CREA LA CONSULTA DE PERMISOS PARA VIDEOS
     if is_admin:
         video_permission_query = Q() # Admin ve todo
     else:
@@ -159,13 +156,11 @@ def ResourcesView(request):
         if empleado and empleado.departamento:
             video_permission_query.add(Q(curso__departamentos_destinados=empleado.departamento), Q.OR)
 
-    # 4. CREA LA LISTA DE VIDEOS
     videos_list = VideoCurso.objects.filter(
         video_permission_query, # Aplicamos los permisos
         estado='activo'         # Solo mostramos videos activos
     ).distinct().order_by('-fecha_grabacion') # Orden más reciente primero
 
-    # 3. PAGINA AMBAS LISTAS
     paginator_docs = Paginator(documentos_generales_list, 4)
     paginator_formatos = Paginator(formatos_list, 4)
     paginator_videos = Paginator(videos_list, 4)
@@ -238,28 +233,26 @@ def BuscarDocumentosView(request):
         permission_query.add(Q(departamentos_destinados=empleado.departamento), Q.OR)
 
     if depto_id:
-        # Si se seleccionó un depto específico ("1", "2", etc.)
         filter_query = Q(departamentos_destinados__id=depto_id)
     else:
         filter_query = Q(es_general=True)    
         if empleado and empleado.departamento:
             filter_query.add(Q(departamentos_destinados=empleado.departamento), Q.OR)
-        # --- FIN MODIFICADO ---
 
-    tipo_query_base = Q(tipo_documento__nombre__in=['Manual', 'Política', 'Guía', 'Anexo', 'Documento de interés']) # <--- MODIFICADO
+    tipo_query_base = Q(tipo_documento__nombre__in=['Manual', 'Política', 'Guía', 'Anexo', 'Documento de interés'])
     
     documentos_list = Documento.objects.filter(
-        permission_query, # <-- 1. APLICAR PERMISOS PRIMERO
+        permission_query,
         filter_query,
         lookup, 
-        tipo_query_base, # <--- MODIFICADO
+        tipo_query_base,
         estado='activo'
     )
 
     if tipo_id:
         documentos_list = documentos_list.filter(tipo_documento__id=tipo_id)
 
-    documentos_list = documentos_list.distinct().order_by('nombre') # <--- MODIFICADO (movido después del filtro de tipo)
+    documentos_list = documentos_list.distinct().order_by('nombre')
 
     paginator = Paginator(documentos_list, 4)
     page_obj = paginator.get_page(page_number)
@@ -280,7 +273,7 @@ def BuscarDocumentosView(request):
 @login_required
 def BuscarFormatosView(request):
     page_number = request.GET.get('page', 1)
-    query = request.GET.get('q', '') # El término de búsqueda del input
+    query = request.GET.get('q', '')
     depto_id = request.GET.get('departamento', '')
     tipo_id = request.GET.get('tipo', '')
 
@@ -298,7 +291,6 @@ def BuscarFormatosView(request):
     except (Empleado.DoesNotExist, AttributeError):
         pass
 
-    # El "mundo" de documentos que este usuario tiene permitido ver
     permission_query = Q(es_general=True)
     if empleado and empleado.departamento:
         permission_query.add(Q(departamentos_destinados=empleado.departamento), Q.OR)
@@ -320,7 +312,7 @@ def BuscarFormatosView(request):
     if tipo_id:
         documentos_list = documentos_list.filter(tipo_documento__id=tipo_id)
 
-    documentos_list = documentos_list.distinct().order_by('nombre') # <--- MODIFICADO (movido después del filtro de tipo)
+    documentos_list = documentos_list.distinct().order_by('nombre')
     paginator = Paginator(documentos_list, 4)
     page_obj = paginator.get_page(page_number)
 
@@ -347,36 +339,67 @@ def InscribirCursoView(request, curso_id):
         messages.error(request, "No tienes un perfil de empleado asociado para inscribirte.")
         return redirect('resources:resources')
 
-    # Verificar si ya está inscrito
-    if curso.inscritos.filter(id=empleado.id).exists():
-        messages.info(request, f"Ya estás inscrito en el curso '{curso.titulo}'.")
-    elif curso.modalidad == Curso.Modalidad.AUTOINSCRIPCION:
-        # Realizar la inscripción
+    # 1. Buscar el registro de historial existente
+    inscripcion_existente = InscripcionCurso.objects.filter(
+        curso=curso, 
+        empleado=empleado
+    ).first()
+    
+    if inscripcion_existente:
+        
+        # A. Bloquear si el registro NO está dado de baja (Es un estado activo: INSCRITO, APROBADO, etc.)
+        if inscripcion_existente.estado != InscripcionCurso.EstadoInscripcion.DADO_DE_BAJA:
+            messages.info(request, f"Ya tienes un registro activo para el curso '{curso.titulo}'. Estado: {inscripcion_existente.get_estado_display()}")
+            return redirect('resources:resources') # Bloquea aquí.
+
+        # B. Si el registro SÍ está 'Dado de Baja', lo eliminamos para crear un registro limpio.
+        else: 
+            # 1. Eliminar el registro de historial (InscripcionCurso)
+            inscripcion_existente.delete()
+            
+            # 2. Eliminar la relación M2M simple (inscritos)
+            if empleado in curso.inscritos.all():
+                curso.inscritos.remove(empleado)
+                
+            # 3. La ejecución continúa a la creación de la nueva inscripción.
+    
+    # --- 3. CREACIÓN DE LA INSCRIPCIÓN (Se ejecuta si no había registro activo o fue eliminado) ---
+    
+    # Comprobar si la modalidad permite la inscripción (esto ahora maneja el caso inicial Y el caso de reinscripción)
+    if curso.modalidad == Curso.Modalidad.AUTOINSCRIPCION: 
+        
+        # 1. Crear el objeto de Historial Detallado (InscripcionCurso)
+        InscripcionCurso.objects.create(
+            curso=curso,
+            empleado=empleado,
+            # Se asume que la inscripción significa finalización (usando curso.fecha)
+            fecha_finalizacion= curso.fecha,
+            estado=InscripcionCurso.EstadoInscripcion.INSCRITO 
+        )
+        
+        # 2. Agregar a la relación M2M simple (inscritos)
         curso.inscritos.add(empleado)
+        
         messages.success(request, f"¡Te has inscrito correctamente al curso '{curso.titulo}'! 🎉")
-    else:
+        
+    elif curso.modalidad != Curso.Modalidad.AUTOINSCRIPCION:
         messages.error(request, "Este curso requiere solicitud de inscripción.")
 
-    # Redirigir de vuelta a la página de recursos (o donde estabas)
     return redirect('resources:resources')
 
 @login_required
 def BuscarVideosView(request):
-    """
-    Maneja las solicitudes AJAX para buscar y paginar la videoteca.
-    """
+
     page_number = request.GET.get('page', 1)
-    query = request.GET.get('q', '') # El término de búsqueda
+    query = request.GET.get('q', '')
     depto_id = request.GET.get('departamento', '')
-    # No hay 'tipo_id' para videos
 
     is_admin = request.user.groups.filter(name='Administrativo').exists()
 
-    # Búsqueda por Título, Ponente, o Título del Curso
     lookup = (
         Q(titulo__icontains=query) |
         Q(ponente__icontains=query) |
-        Q(curso__titulo__icontains=query) # Búsqueda en el curso relacionado
+        Q(curso__titulo__icontains=query)
     )
     
     empleado = None
@@ -385,37 +408,32 @@ def BuscarVideosView(request):
     except (Empleado.DoesNotExist, AttributeError):
         pass
 
-    # 1. PERMISOS: El "mundo" de videos que este usuario puede ver
     if is_admin:
-        permission_query = Q() # Admin ve todo
+        permission_query = Q()
     else:
         permission_query = Q(es_general=True)
         if empleado and empleado.departamento:
             permission_query.add(Q(departamentos_destinados=empleado.departamento), Q.OR)
     
-    # 2. FILTRO: El filtro de departamento seleccionado
     if depto_id:
-        # Si se seleccionó un depto específico ("1", "2", etc.)
         filter_query = Q(departamentos_destinados__id=depto_id)
     else:
-        # "Todos los Departamentos"
-        # Muestra todo lo que está en el scope de permisos
         filter_query = permission_query 
     
     videos_list = VideoCurso.objects.filter(
-        permission_query, # Permisos base (si no es admin)
-        filter_query,   # Filtro del dropdown
-        lookup,         # Filtro de búsqueda
+        permission_query,
+        filter_query,
+        lookup,
         estado='activo'
     ).distinct().order_by('-fecha_grabacion')
 
-    paginator = Paginator(videos_list, 4) # Paginar por 4
+    paginator = Paginator(videos_list, 4)
     page_obj = paginator.get_page(page_number)
 
     html = render_to_string(
-        template_name='_videos_partial.html', # <-- Usar el partial de video
+        template_name='_videos_partial.html',
         context={
-            'videos': page_obj, # <-- Pasar 'videos'
+            'videos': page_obj,
             'is_admin': is_admin
         }    
     )
@@ -425,17 +443,14 @@ def BuscarVideosView(request):
         'has_next': page_obj.has_next()
     })
 
-# Función para verificar si es admin
 def is_admin_check(user):
     return user.is_authenticated and user.groups.filter(name='Administrativo').exists()
 
 @user_passes_test(is_admin_check)
 def CursoEditView(request, curso_id):
-    # Obtenemos el curso que se quiere editar
     curso = get_object_or_404(Curso, id=curso_id)
 
     if request.method == 'POST':
-        # Si el método es POST, estamos guardando cambios
         form = CursoForm(request.POST, request.FILES, instance=curso, prefix='edit')
         
         if form.is_valid():
@@ -443,25 +458,19 @@ def CursoEditView(request, curso_id):
             messages.success(request, f'¡Curso "{curso.titulo}" actualizado exitosamente! 🚀')
             return redirect('resources:resources')
         else:
-            # Si el form no es válido, se lo devolvemos al JS con los errores
             messages.warning(request, 'Hubo un error al actualizar. Revisa los campos.')
             pass 
             
     else:
-        # Si el método es GET, solo cargamos el formulario parcial
         form = CursoForm(instance=curso, prefix='edit')
 
-    # Renderizamos solo el formulario en una plantilla parcial
     return render(request, '_curso_edit_form.html', {
         'form': form
     })
 
 @user_passes_test(is_admin_check)
 def edit_documento(request, documento_id):
-    """
-    Maneja el GET (cargar formulario parcial) y POST (actualizar)
-    para el modal de edición de documentos.
-    """
+
     documento = get_object_or_404(Documento, id=documento_id)
     
     if request.method == 'POST':

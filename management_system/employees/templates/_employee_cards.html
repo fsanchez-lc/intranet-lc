@@ -1,82 +1,73 @@
-{% comment %}
-Este es el archivo parcial: templates/partials/_employee_cards.html
-
-Itera sobre la variable 'empleados_page' (que viene del Paginator).
-Esto es usado tanto por la carga inicial de la página como por las llamadas AJAX.
-{% endcomment %}
-
 {% for empleado in empleados_page %}
 <div class="col-12 col-md-6 col-lg-4 mb-3">
-    <div class="card h-100 shadow-sm border-light-subtle"> 
-
-        <a href="#" 
-            class="card-expediente-btn" 
-            data-bs-toggle="modal" 
-            data-bs-target="#modalExpedientes{{ empleado.id }}"
-            title="Ver expedientes de {{ empleado.nombre }}">
-            <i class="bi bi-archive-fill"></i>
-        </a>
-        
-        <div class="card-body">
-            <div class="d-flex align-items-center mb-3">
-                <i class="bi bi-person-badge display-4 text-primary me-3"></i>
-                <div>
-                    <h5 class="card-title fw-bold mb-1">{{ empleado.nombre }}</h5>
-                    <h6 class="card-subtitle mb-2 text-muted">{{ empleado.posicion|default:"Sin Posición" }}</h6>
-                </div>
-            </div>
-
-            <ul class="list-group list-group-flush">
-            
-                <li class="list-group-item px-0 d-flex align-items-center">
-                    <i class="bi bi-envelope-fill me-2 text-muted" style="width: 20px;"></i>
-                    <a href="mailto:{{ empleado.email }}" class="text-decoration-none text-truncate" style="min-width: 0;">
-                        {{ empleado.email }}
-                    </a>
-                </li>
-
-                <li class="list-group-item px-0 d-flex align-items-center">
-                    <i class="bi bi-building me-2 text-muted" style="width: 20px;"></i>
-                    <span class="text-truncate d-inline-block" style="min-width: 0;">
-                        {{ empleado.departamento.nombre|default:"<span class='text-danger'>Sin Depto.</span>"|safe }}
-                    </span>
-                </li>
-
-                <li class="list-group-item px-0 d-flex align-items-center">
-                    <i class="bi bi-person-circle me-2 text-muted" style="width: 20px;"></i>
-                    <span class="text-truncate d-inline-block" style="min-width: 0;">
-                        {% if empleado.user %}
-                            <span class="fw-medium text-success">{{ empleado.user.username }}</span>
-                        {% else %}
-                            <span class="text-danger small">Sin usuario de sistema</span>
-                        {% endif %}
-                    </span>
-                </li>
-
-                <li class="list-group-item px-0 d-flex align-items-center">
-                    <i class="bi bi-geo-alt-fill me-2 text-muted" style="width: 20px;"></i>
-                    <span class="text-truncate d-inline-block" style="min-width: 0;">
-                        {{ empleado.estacion_servicio.nombre|default:"<span class='text-muted small'>Sin estación</span>"|safe }}
-                    </span>
-                </li>
-            </ul>
+  <div class="card h-100 shadow-sm border-light-subtle"> 
+    <div class="card-body">
+      <div class="d-flex align-items-center mb-3">
+        <i class="bi bi-person-badge display-4 text-primary me-3"></i>
+        <div>
+          <h5 class="card-title fw-bold mb-1">{{ empleado.nombre }}</h5>
+          <h6 class="card-subtitle mb-2 text-muted">{{ empleado.posicion|default:"Sin Posición" }}</h6>
         </div>
+      </div>
 
-        {% if is_admin %}
-        <div class="card-footer bg-light-subtle text-end border-0 pt-0">
-            <button type="button" 
-                class="btn btn-outline-primary btn-sm btn-edit-empleado" 
-                data-bs-toggle="modal" 
-                data-bs-target="#modalEditarEmpleado" 
-                data-empleado-id="{{ empleado.id }}">
-                <i class="bi bi-pencil me-1"></i> Modificar
-            </button>
-        </div>
-        {% endif %}
+      <ul class="list-group list-group-flush">
+      
+        <li class="list-group-item px-0 d-flex align-items-center">
+          <i class="bi bi-envelope-fill me-2 text-muted" style="width: 20px;"></i>
+          <a href="mailto:{{ empleado.email }}" class="text-decoration-none text-truncate" style="min-width: 0;">
+            {{ empleado.email }}
+          </a>
+        </li>
+
+        <li class="list-group-item px-0 d-flex align-items-center">
+          <i class="bi bi-building me-2 text-muted" style="width: 20px;"></i>
+          <span class="text-truncate d-inline-block" style="min-width: 0;">
+            {{ empleado.departamento.nombre|default:"<span class='text-danger'>Sin Depto.</span>"|safe }}
+          </span>
+        </li>
+
+        <li class="list-group-item px-0 d-flex align-items-center">
+          <i class="bi bi-person-circle me-2 text-muted" style="width: 20px;"></i>
+          <span class="text-truncate d-inline-block" style="min-width: 0;">
+            {% if empleado.user %}
+              <span class="fw-medium text-success">{{ empleado.user.username }}</span>
+            {% else %}
+              <span class="text-danger small">Sin usuario de sistema</span>
+            {% endif %}
+          </span>
+        </li>
+
+        <li class="list-group-item px-0 d-flex align-items-center">
+          <i class="bi bi-geo-alt-fill me-2 text-muted" style="width: 20px;"></i>
+          <span class="text-truncate d-inline-block" style="min-width: 0;">
+            {{ empleado.estacion_servicio.nombre|default:"<span class='text-muted small'>Sin estación</span>"|safe }}
+          </span>
+        </li>
+      </ul>
     </div>
+
+    <div class="card-footer bg-light-subtle text-end border-0 pt-0 pb-3">
+      <button type="button" 
+              class="btn btn-outline-secondary btn-sm me-2"
+              data-bs-toggle="modal" 
+              data-bs-target="#modalExpedientes{{ empleado.id }}"
+              title="Ver expedientes">
+          <i class="bi bi-archive-fill me-1"></i> Expediente
+      </button>
+
+      {% if is_admin %}
+      <button type="button" 
+          class="btn btn-outline-primary btn-sm btn-edit-empleado" 
+          data-bs-toggle="modal" 
+          data-bs-target="#modalEditarEmpleado" 
+          data-empleado-id="{{ empleado.id }}">
+          <i class="bi bi-pencil me-1"></i> Modificar
+      </button>
+      {% endif %}
+    </div>
+  </div>
 </div>
 
-<!-- ▼▼▼ 2. ESTE ES EL MODAL QUE FALTABA (DENTRO DEL LOOP) ▼▼▼ -->
 <div class="modal fade" id="modalExpedientes{{ empleado.id }}" tabindex="-1" aria-labelledby="modalExpedientesLabel{{ empleado.id }}" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
     <div class="modal-content">
@@ -90,7 +81,6 @@ Esto es usado tanto por la carga inicial de la página como por las llamadas AJA
       <div class="modal-body">
         
         {% comment %}
-        <!-- EJEMPLO de cómo mostrarías los expedientes (reemplaza 'expedientes' con tu related_name) -->
         {% if empleado.expedientes.all %}
           <ul class="list-group list-group-flush">
             {% for expediente in empleado.expedientes.all %}
@@ -107,7 +97,6 @@ Esto es usado tanto por la carga inicial de la página como por las llamadas AJA
         {% endif %}
         {% endcomment %}
         
-        <!-- Contenido de ejemplo temporal (borra esto cuando tengas tu loop) -->
         <p class="text-muted text-center py-4">Aquí se mostrará la lista de expedientes.</p>
 
       </div>
