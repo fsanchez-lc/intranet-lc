@@ -3,11 +3,43 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
+
+<style>
+    /* Contenedor circular de la flecha */
+    .action-arrow {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: #f0f7ff; /* Azul muy pálido */
+        color: #0d6efd; 
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        text-decoration: none;
+    }
+
+    /* Efecto al pasar el mouse */
+    .action-arrow:hover {
+        transform: translateX(8px); /* Deslizamiento suave */
+        background-color: #0d6efd; /* Cambia a azul sólido */
+        color: white; /* Flecha blanca */
+        box-shadow: 0 4px 10px rgba(13, 110, 253, 0.3); /* Sombra azulada */
+    }
+
+    /* Ajuste del icono interno */
+    .action-arrow i {
+        font-size: 1.5rem;
+        line-height: 0;
+    }
+</style>
+
+{% if is_admin %}
 <h2 class="h3 fw-bold mb-2">Dashboard</h2>
 <h3 class="h5 fw-italic mb-4 text-muted">Resumen del sistema</h3>
 
 <div class="row g-4">
-    <div class="col-lg-4 col-md-6">
+    <div class="col-lg-4 col-md-6 d-none">
         <div class="card shadow-sm border-0">
             <div class="card-body">
                 <div class="p-2">
@@ -30,8 +62,7 @@
                         <h3 class="card-title h5 fw-bold text-muted mb-0">Empleados</h3>
                         <i class="bi bi-people-fill fs-1 text-success"></i>
                     </div>
-                    <p class="display-6 fw-bold mt-2 mb-0">3</p>
-                    <small class="text-muted">Empleados activos</small>    
+                    <p class="display-6 fw-bold mt-2 mb-0">{{ total_empleados }}</p> <small class="text-muted">Empleados activos</small>
                 </div>
             </div>
         </div>
@@ -45,8 +76,7 @@
                         <h3 class="card-title h5 fw-bold text-muted mb-0">Usuarios</h3>
                         <i class="bi bi-person-badge fs-1" style="color: #9c27b0;"></i>
                     </div>
-                    <p class="display-6 fw-bold mt-2 mb-0">3</p>
-                    <small class="text-muted">Usuarios del sistema</small>    
+                    <p class="display-6 fw-bold mt-2 mb-0">{{ total_usuarios }}</p> <small class="text-muted">Usuarios del sistema</small>
                 </div>
             </div>
         </div>
@@ -98,4 +128,288 @@
         </div>
     </div>
 </div>
+
+<hr class="my-4">
+{% endif %}
+
+
+<div class="d-flex justify-content-between align-items-start">
+    <div>
+    <h2 class="h3 fw-bold mb-2">Últimas noticias</h2>
+    <h3 class="h5 fw-italic text-muted">Entérate de las novedades en López Castro</h3>
+    </div>
+</div>
+
+<hr class="my-4">
+
+<div class="position-relative mb-4">  
+    {% if slides %}
+        <div id="carouselCaptions" class="carousel slide carousel-fade carousel-bienvenida shadow-lg rounded-3" data-bs-ride="carousel" data-bs-interval="4000">
+            <div class="carousel-indicators">
+                {% for slide in slides %}
+                <button type="button" 
+                        data-bs-target="#carouselCaptions" 
+                        data-bs-slide-to="{{ forloop.counter0 }}"
+                        {% if forloop.first %}class="active" aria-current="true"{% endif %}
+                        aria-label="Slide {{ forloop.counter }}">
+                </button>
+                {% endfor %}
+            </div>
+
+            <div class="carousel-inner">
+                {% for slide in slides %}
+                <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                    <a href="#" data-bs-toggle="modal" data-bs-target="#modalSlide{{ slide.id }}">
+                        <img src="{{ slide.image.url }}" class="d-block w-100 rounded-3" alt="{{ slide.alt_text|default:slide.title }}" style="max-height: 700px; object-fit: cover;">
+                    </a>          
+                </div>
+                {% endfor %}
+            </div>
+
+            <button class="carousel-control-prev" type="button" data-bs-target="#carouselCaptions" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#carouselCaptions" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            </button>
+        </div>
+    {% else %}
+        {% if is_admin or is_rh %}
+        <div class="bg-light border border-dashed rounded-3 p-5 text-center my-3">
+            <i class="bi bi-images fs-1 text-muted"></i>
+            <h5 class="text-muted mt-2">No hay noticias o anuncios activos</h5>
+            <p class="text-secondary small">Utiliza la carga masiva para actualizar el banner principal.</p>
+            <button class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#modalCrearSlide">
+                <i class="bi bi-upload me-1"></i> Subir contenido ahora
+            </button>
+        </div>
+        {% endif %}
+    {% endif %}
+</div>
+
+{% for slide in slides %}
+<div class="modal fade" id="modalSlide{{ slide.id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content border-0 bg-transparent">
+            <div class="modal-header border-0 p-0 justify-content-end">
+                <button type="button" class="btn-close btn-close-white shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0 text-center">
+                <img src="{{ slide.image.url }}" class="img-fluid rounded shadow-lg" alt="{{ slide.title }}">
+                {% if slide.description %}
+                <div class="bg-white p-3 rounded-bottom mt-n1 mx-auto" style="max-width: 90%;">
+                    <h5 class="fw-bold mb-1">{{ slide.title }}</h5>
+                    <p class="text-muted mb-0">{{ slide.description }}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<hr class="my-4">
+
+<div id="tareas" class="container mt-5">
+    <h2 class="h3 fw-bold mb-2">Tareas en Curso y Pendientes</h2>
+    <h3 class="h5 fw-italic mb-4 text-muted">Muestra y resuelve las tareas que tienes pendientes</h3>
+    <div class="row">
+        {% for tarea in tareas %}
+        <div class="col-md-6 col-lg-4 mb-4" id="tarea-card-{{ tarea.id }}">
+            <div class="card shadow-sm h-100 position-relative {% if tarea.estado == 'COMPLETADA' %}border-success{% endif %}">
+                <div class="card-body d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <span class="badge mb-2 
+                                {% if tarea.estado == 'EN_PROGRESO' %} bg-primary
+                                {% elif tarea.estado == 'COMPLETADA' %} bg-success
+                                {% else %}
+                                    {% if tarea.prioridad == 'ALTA' %} bg-danger
+                                    {% elif tarea.prioridad == 'MEDIA' %} bg-warning text-dark
+                                    {% else %} bg-info text-white {% endif %}
+                                {% endif %}">
+                                {{ tarea.get_estado_display }}
+                            </span>
+                            <h6 class="card-title">{{ tarea.titulo }}</h6>
+                        </div>
+
+                        {% if tarea.enlace %}
+                        <a href="{{ tarea.enlace }}" 
+                        target="_blank" 
+                        class="action-arrow" 
+                        title="Ir a tarea">
+                            <i class="bi bi-arrow-right-short"></i>
+                        </a>
+                        {% endif %}
+                    </div>
+
+                    <p class="card-text small text-muted">{{ tarea.descripcion }}</p>
+                    <div class="mt-auto d-flex gap-2" id="botones-tarea-{{ tarea.id }}">
+                        {% if tarea.estado == 'COMPLETADA' %}
+                            <button onclick="cambiarEstado('{{ tarea.id }}', 'PENDIENTE')" class="btn btn-sm btn-light w-100 border">
+                                <i class="bi bi-arrow-counterclockwise"></i> Deshacer
+                            </button>
+                        {% else %}
+                            <button id="btn-completar-{{ tarea.id }}" onclick="marcarCompletado('{{ tarea.id }}')" class="btn btn-sm btn-outline-success w-100">
+                                <span id="span-{{ tarea.id }}"><i class="bi bi-check-circle"></i> Completar</span>
+                            </button>
+                            <button class="btn btn-sm btn-outline-secondary w-100">
+                                <i class="bi bi-calendar-event"></i> Aplazar
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="card-footer bg-transparent border-0 d-flex justify-content-between">
+                    <small class="text-muted"><i class="fas fa-user"></i> {{ tarea.empleado.nombre }}</small>
+                    <small class="text-muted">{{ tarea.fecha_vencimiento|date:"d/m/y" }}</small>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center">
+            <p class="text-muted">No hay tareas activas actualmente.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    function marcarCompletado(tareaId) {
+        // Efecto visual inmediato antes de enviar al servidor
+        const btn = document.getElementById(`btn-completar-${tareaId}`);
+        const span = document.getElementById(`span-${tareaId}`);
+        
+        if(btn && span) {
+            btn.classList.remove('btn-outline-success');
+            btn.classList.add('btn-success');
+            span.innerHTML = '<i class="bi bi-check-lg" style="animation: pop 0.3s ease;"></i>';
+        }
+        
+        enviarEstado(tareaId, 'COMPLETADA');
+    }
+
+    function cambiarEstado(tareaId, nuevoEstado) {
+        enviarEstado(tareaId, nuevoEstado);
+    }
+
+    function enviarEstado(tareaId, estado) {
+        const formData = new FormData();
+        formData.append('estado', estado);
+        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+        fetch(`/cambiar-estado/${tareaId}/`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => {
+            if(response.ok) {
+                actualizarInterfazTarea(tareaId, estado);
+            } else {
+                alert("Error al actualizar la tarea");
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    function actualizarInterfazTarea(tareaId, estado) {
+        const cardContainer = document.getElementById(`tarea-card-${tareaId}`);
+        const cardElement = cardContainer.querySelector('.card');
+        const botonesContainer = document.getElementById(`botones-tarea-${tareaId}`);
+        const badge = cardContainer.querySelector('.badge');
+
+        if (estado === 'COMPLETADA') {
+            // 1. Cambiar borde
+            cardElement.classList.add('border-success');
+            
+            // 2. Actualizar Badge
+            badge.className = 'badge mb-2 bg-success';
+            badge.innerText = 'Completada';
+
+            // 3. Cambiar botones al de "Deshacer"
+            botonesContainer.innerHTML = `
+                <button onclick="cambiarEstado('${tareaId}', 'PENDIENTE')" class="btn btn-sm btn-light w-100 border">
+                    <i class="bi bi-arrow-counterclockwise"></i> Deshacer
+                </button>
+            `;
+        } else {
+            // 1. Quitar borde
+            cardElement.classList.remove('border-success');
+            
+            // 2. Actualizar Badge (asumiendo Pendiente)
+            badge.className = 'badge mb-2 bg-info text-white';
+            badge.innerText = 'Pendiente';
+
+            // 3. Restaurar botones originales
+            botonesContainer.innerHTML = `
+                <button id="btn-completar-${tareaId}" onclick="marcarCompletado('${tareaId}')" class="btn btn-sm btn-outline-success w-100">
+                    <span id="span-${tareaId}"><i class="bi bi-check-circle"></i> Completar</span>
+                </button>
+                <button class="btn btn-sm btn-outline-secondary w-100">
+                    <i class="bi bi-calendar-event"></i> Aplazar
+                </button>
+            `;
+        }
+    }
+
+    function validarSeccion() {
+        const pass = document.getElementById('input-pass-local').value;
+        const acepto = document.getElementById('check-privacidad-local').checked;
+
+        if (!acepto) {
+            alert("Debes aceptar el aviso de privacidad.");
+            return;
+        }
+
+        // Llamada a la vista de Django
+        fetch("{% url 'dashboard:validar_acceso_reporte' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ csrf_token }}" // Token de seguridad de Django
+            },
+            body: JSON.stringify({ password: pass })
+        })
+        .then(response => {
+            if (response.ok) {
+                document.getElementById('bloqueo-local').style.display = 'none';
+                document.getElementById('contenedor-iframes').style.display = 'block';
+                cargarLosIframes(); // La función que inyecta las URLs
+            } else {
+                document.getElementById('error-local').style.display = 'block';
+            }
+        });
+    }
+
+    function cargarLosIframes() {
+        // Definimos las URLs aquí para que no estén presentes en el HTML inicial
+        const reportes = [
+            "https://app.powerbi.com/view?r=eyJrIjoiZWM3MDA2ZWQtYzVkMC00ZDBiLWI2MDItZWIzMjcyNGNhMWZlIiwidCI6Ijk2Y2NhMTkwLTIzM2MtNGFkNC1hMzEzLWUyMGFjMTJmYmQyYiJ9",
+            "https://app.powerbi.com/view?r=eyJrIjoiZTJjZDhkMWEtYWUyOC00OGZmLWFkM2UtMTliMjQ0MTZkODc5IiwidCI6Ijk2Y2NhMTkwLTIzM2MtNGFkNC1hMzEzLWUyMGFjMTJmYmQyYiJ9&pageName=4fc9ab3250756aa68b51",
+            "https://app.powerbi.com/view?r=eyJrIjoiZTJjZDhkMWEtYWUyOC00OGZmLWFkM2UtMTliMjQ0MTZkODc5IiwidCI6Ijk2Y2NhMTkwLTIzM2MtNGFkNC1hMzEzLWUyMGFjMTJmYmQyYiJ9&pageName=6c05babebee373668167"
+        ];
+
+        let htmlFinal = "";
+        reportes.forEach(url => {
+            htmlFinal += `
+                <div style="width: 100%; height: 664px; overflow: hidden; border-bottom: 2px solid #eee; margin-bottom: 20px;">
+                    <iframe title="Reporte" width="100%" height="700" src="${url}" frameborder="0" allowFullScreen="true"></iframe>
+                </div>`;
+        });
+        
+        document.getElementById('contenedor-iframes').innerHTML = htmlFinal;
+    }
+</script>
+
+<style>
+@keyframes pop {
+    0% { transform: scale(0.5); }
+    70% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+</style>
 {% endblock %}
+

@@ -1,0 +1,91 @@
+{% comment %}
+  Este formulario debe ser incluido dentro del Modal 'modalEditarVacaciones'.
+  El action se asigna dinámicamente vía JS (llenarFormularioVacacion).
+{% endcomment %}
+
+<form id="formEditarVacacion" method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input type="hidden" name="form_type" value="vacacion_edit">
+    
+    <p class="text-muted small">
+        Los campos con (<span class="text-danger">*</span>) son obligatorios.
+    </p>
+
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label for="id_fecha_inicio" class="form-label fw-bold">
+                Fecha de Inicio<span class="text-danger"> *</span>
+            </label>
+            <input type="date" name="fecha_inicio" id="id_fecha_inicio" class="form-control" required>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label for="id_fecha_fin" class="form-label fw-bold">
+                Fecha de Fin<span class="text-danger"> *</span>
+            </label>
+            <input type="date" name="fecha_fin" id="id_fecha_fin" class="form-control" required>
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label for="id_estado" class="form-label fw-bold">
+            Estado de la Solicitud<span class="text-danger"> *</span>
+        </label>
+        <select name="estado" id="id_estado" class="form-select">
+            <option value="PENDIENTE">Pendiente de Aprobación</option>
+            <option value="APROBADO">Aprobado</option>
+            <option value="RECHAZADO">Rechazado</option>
+            <option value="DISFRUTADO">Disfrutado</option>
+        </select>
+    </div>
+
+    <hr class="my-4">
+
+    <div class="mb-3">
+        <label class="form-label fw-bold">Formato de Vacaciones (PDF)</label>
+        
+        <div id="container-archivo-vac-actual" class="mb-2 d-none">
+            <div class="d-flex align-items-center p-2 border rounded bg-light">
+                <i class="bi bi-file-earmark-pdf text-danger fs-4 me-2"></i>
+                <span class="small text-truncate me-auto text-muted">Archivo cargado actualmente</span>
+                <a href="#" id="link-vac-actual" target="_blank" class="btn btn-sm btn-outline-secondary">Ver</a>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-cloud-arrow-up"></i></span>
+            <input type="file" name="archivo_vacaciones" id="id_archivo_vacaciones" class="form-control" accept=".pdf">
+        </div>
+        <div class="form-text">Sube un nuevo PDF para reemplazar el anterior.</div>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label fw-bold">Roles y Pendientes</label>
+        
+        <div id="container-archivo-roles-actual" class="mb-2 d-none">
+            <div class="d-flex align-items-center p-2 border rounded bg-light">
+                <i class="bi bi-file-earmark-text text-primary fs-4 me-2"></i>
+                <span class="small text-truncate me-auto text-muted">Documento de roles actual</span>
+                <a href="#" id="link-roles-actual" target="_blank" class="btn btn-sm btn-outline-secondary">Ver</a>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-file-earmark-person"></i></span>
+            <input type="file" name="archivo_roles" id="id_archivo_roles" class="form-control">
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label for="id_observaciones" class="form-label fw-bold">
+            Observaciones / Comentarios
+        </label>
+        <textarea name="observaciones" id="id_observaciones" class="form-control" rows="3" placeholder="Ej: Cubre su turno Juan Pérez..."></textarea>
+    </div>
+
+    <div class="modal-footer px-0 pb-0 pt-3">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="submit" class="btn btn-warning fw-bold" id="btnGuardarVacacion">
+            <i class="bi bi-check-circle me-1"></i> Guardar Cambios
+        </button>
+    </div>
+</form>

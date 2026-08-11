@@ -1,4 +1,19 @@
 {% load static %}
+<style>
+    .nav-submenu-link {
+        font-size: 0.90rem !important;
+        padding-top: 4px !important;
+        padding-bottom: 4px !important;
+    }
+    .nav-link[aria-expanded="true"] .bi-chevron-down {
+        transform: rotate(180deg);
+    }
+    .bi-chevron-down {
+        transition: transform 0.3s ease;
+        font-size: 0.8rem;
+    }
+</style>
+
 
 <div class="text-center mb-4">
     <img src="{% static 'images/logo-blanco1.png' %}" alt="Logo del Sistema" class="img-fluid" style="max-width: 130px;">
@@ -7,23 +22,39 @@
 <ul class="nav flex-column">
     {% for item in menu_items %}
         <li class="nav-item">
-            <a href="{{ item.url }}" class="nav-link txt-color {% if request.path == item.url %}active bg-menu-active fw-bold{% endif %}">
-                {{ item.name }}
-            </a>
-            {% if item.children.all %}
-                <ul class="list-unstyled ps-3">
-                    {% for child in item.children.all %}
-                        <li class="{% if request.path == child.url %}bg-menu{% endif %}">
-                            <a href="{{ child.url }}" class="nav-link text-white ps-4 {% if request.path == child.url %}active fw-bold bg-light{% endif %}">
-                                {{ child.name }}
-                            </a>
-                        </li>
-                    {% endfor %}
-                </ul>
+            {% if item.allowed_children %}
+                <div class="d-flex align-items-center justify-content-between">
+                    <a href="{{ item.url }}" class="nav-link text-white flex-grow-1 {% if request.path == item.url %}active bg-menu-active fw-bold{% endif %}">
+                        {{ item.name }}
+                    </a>
+
+                    <button class="btn btn-link text-white border-0 shadow-none px-3" 
+                            type="button"
+                            data-bs-toggle="collapse" 
+                            data-bs-target="#menu-{{ forloop.counter }}" 
+                            aria-expanded="{% if item.is_active_child %}true{% else %}false{% endif %}">
+                        <i class="bi bi-chevron-down"></i>
+                    </button>
+                </div>
+
+                <div class="collapse {% if item.is_active_child %}show{% endif %}" id="menu-{{ forloop.counter }}">
+                    <ul class="list-unstyled ps-3">
+                        {% for child in item.allowed_children %}  <li class="{% if request.path == child.url %}bg-menu{% endif %}">
+                                <a href="{{ child.url }}" class="nav-link text-white ps-4 nav-submenu-link {% if request.path == child.url %}active fw-bold bg-menu-active{% endif %}">
+                                    {{ child.name }}
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% else %}
+                <a href="{{ item.url }}" class="nav-link text-white {% if request.path == item.url %}active bg-menu-active fw-bold{% endif %}">
+                    {{ item.name }}
+                </a>
             {% endif %}
         </li>
     {% empty %}
-        <li class="nav-item">No hay opciones disponibles</li>
+        <li class="nav-item px-3 text-white-50">No hay opciones disponibles</li>
     {% endfor %}
 </ul>
 

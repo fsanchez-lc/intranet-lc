@@ -1,0 +1,108 @@
+<form action="{% url 'users:edit_usuario' usuario.id %}" id="formEditarUsuario" method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    
+    <input type="hidden" name="form_type" value="usuario_edit">
+
+    <p class="text-muted small">
+        Los campos con (<span class="text-danger">*</span>) son obligatorios.
+    </p> 
+
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label for="{{ form_usuario_edit.username.id_for_label }}" class="form-label fw-bold">Usuario</label>
+            {{ form_usuario_edit.username }}
+            {% if form_usuario_edit.username.errors %}<div class="invalid-feedback d-block">{{ form_usuario_edit.username.errors.0 }}</div>{% endif %}
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <label for="{{ form_usuario_edit.email.id_for_label }}" class="form-label fw-bold">Email<span class="text-danger"> *</span></label>
+            {{ form_usuario_edit.email }}
+            {% if form_usuario_edit.email.errors %}<div class="invalid-feedback d-block">{{ form_usuario_edit.email.errors.0 }}</div>{% endif %}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label for="{{ form_usuario_edit.first_name.id_for_label }}" class="form-label fw-bold">Nombre</label>
+            {{ form_usuario_edit.first_name }}
+            {% if form_usuario_edit.first_name.errors %}<div class="invalid-feedback d-block">{{ form_usuario_edit.first_name.errors.0 }}</div>{% endif %}
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <label for="{{ form_usuario_edit.last_name.id_for_label }}" class="form-label fw-bold">Apellido</label>
+            {{ form_usuario_edit.last_name }}
+            {% if form_usuario_edit.last_name.errors %}<div class="invalid-feedback d-block">{{ form_usuario_edit.last_name.errors.0 }}</div>{% endif %}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12 mb-3">
+            <label class="form-label fw-bold">
+            {{ form_usuario_edit.groups.label }}<span class="text-danger"> *</span>
+            </label>
+            
+            <div class="border rounded p-2 bg-white" style="max-height: 200px; overflow-y: auto;">
+            {% for check in form_usuario_edit.groups %}
+                <div class="form-check">
+                {{ check.tag }}
+                <label class="form-check-label" for="{{ check.id_for_label }}">
+                    {{ check.choice_label }}
+                </label>
+                </div>
+            {% empty %}
+                <p class="text-muted small mb-0">No hay grupos disponibles.</p>
+            {% endfor %}
+            </div>
+
+            <div class="form-text text-muted small">Seleccione los grupos/roles del usuario.</div>
+
+            {% if form_usuario_edit.groups.errors %}
+            <div class="invalid-feedback d-block">{{ form_usuario_edit.groups.errors.0 }}</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12 mb-3">
+            <div class="d-flex justify-content-between align-items-center p-3 border rounded bg-white shadow-sm">
+                <div>
+                    <label for="{{ form_usuario_edit.is_active.id_for_label }}" class="fw-bold mb-0 text-dark">
+                        Usuario Activo
+                    </label>
+                    <div class="text-muted small mt-1">
+                        Controla si este usuario tiene acceso al sistema.
+                    </div>
+                </div>
+                
+                <div class="form-check form-switch mb-0">
+                    {{ form_usuario_edit.is_active }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <hr class="my-4">
+    <p class="text-muted small">
+
+    <h6 class="text-muted small">Cambiar contraseña</h6>
+    <h6 class="text-muted small">*Dejar campos vacíos si se desea mantener la actual</h6>
+
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label for="{{ form_usuario_edit.password1.id_for_label }}" class="form-label fw-bold">Nueva Contraseña</label>
+            {{ form_usuario_edit.password1 }} 
+            {% if form_usuario_edit.password1.errors %}<div class="invalid-feedback d-block">{{ form_usuario_edit.password1.errors.0 }}</div>{% endif %}
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <label for="{{ form_usuario_edit.password2.id_for_label }}" class="form-label fw-bold">Confirmar Nueva Contraseña</label>
+            {{ form_usuario_edit.password2 }}
+            {% if form_usuario_edit.password2.errors %}<div class="invalid-feedback d-block">{{ form_usuario_edit.password2.errors.0 }}</div>{% endif %}
+        </div>
+    </div>
+
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-primary fw-medium">Guardar Cambios</button>
+    </div>
+
+</form>

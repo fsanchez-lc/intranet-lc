@@ -1,13 +1,10 @@
 from pathlib import Path
 import os
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-xi)x+xcij$fd0w9_&0z6e7b^fz!=o6*w$0uv3z$9jt#!y_9za6'
 
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = [
@@ -19,10 +16,7 @@ ALLOWED_HOSTS = [
 
 LOGIN_URL = 'login'
 
-# URL BEFORE DJANGO LOGIN
 LOGIN_REDIRECT_URL = '/'
-
-# Application definition
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -36,12 +30,15 @@ INSTALLED_APPS = [
     'navigation',
     'users',
     'equipment',
+    'import_export',
     'employees',
     'service_stations',
     'tickets',
     'resources',
     'reports',
     "django_browser_reload",
+    'guides',
+    'administrator',
 ]
 
 MIDDLEWARE = [
@@ -69,6 +66,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'navigation.utils.with_menu',
+                'navigation.context_processors.contador_tareas_global',
             ],
         },
     },
@@ -103,8 +101,8 @@ DATABASES = {
         'NAME': os.environ.get('DB_NAME'),
         'USER': os.environ.get('DB_USER'),
         'PASSWORD': os.environ.get('DB_PASS'),
-        'HOST': os.environ.get('DB_HOST'), # Esto será 'db'
-        'PORT': os.environ.get('DB_PORT'), # Esto será '5432'
+        'HOST': os.environ.get('DB_HOST'),
+        'PORT': os.environ.get('DB_PORT'),
     }
 }
 
@@ -123,12 +121,12 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'es-mx'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/Mexico_City'
 
 USE_I18N = True
-
+USE_L10N = True
 USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
@@ -156,3 +154,23 @@ X_FRAME_OPTIONS = 'SAMEORIGIN'
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 USE_X_FORWARDED_HOST = True
 USE_X_FORWARDED_PORT = True
+
+# ==========================================
+# CONFIGURACIÓN DE CORREO ELECTRÓNICO (SMTP cPanel)
+# ==========================================
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+# Obtenemos las credenciales desde las variables de entorno
+EMAIL_HOST = os.environ.get('EMAIL_HOST')           # ej. 'mail.tudominio.com'
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 465)) # 465 para SSL, 587 para TLS
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER') # ej. 'notificaciones@tudominio.com'
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+# Configuración de seguridad dependiendo del puerto
+if EMAIL_PORT == 465:
+    EMAIL_USE_SSL = True
+    EMAIL_USE_TLS = False
+elif EMAIL_PORT == 587:
+    EMAIL_USE_SSL = False
+    EMAIL_USE_TLS = True

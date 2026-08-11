@@ -1,0 +1,48 @@
+{% for inscripcion in certificados %}
+    {% comment %} 
+        Solo necesitamos verificar si el certificado existe. 
+        El filtrado de estado ya se hizo en la vista de Django.
+    {% endcomment %}
+    {% if inscripcion.certificado %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 border-success">
+                <div class="card-body d-flex flex-column">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="bi bi-award-fill text-warning me-2 fs-3"></i>
+                        <div>
+                            <h5 class="card-title mb-0">
+                                {{ inscripcion.curso.titulo }}
+                            </h5>
+                            <h6 class="card-subtitle text-muted small">
+                                Completado el: {{ inscripcion.fecha_finalizacion|date:"d M Y" }}
+                            </h6>
+                        </div>
+                    </div>
+
+                    <div class="mt-auto pt-2">
+                        <button type="button" class="btn btn-sm btn-outline-primary me-2" 
+                                data-bs-toggle="modal" 
+                                data-bs-target="#previewModal" 
+                                data-src="{{ inscripcion.certificado.url }}" 
+                                data-title="Certificado: {{ inscripcion.curso.titulo }}">
+                            <i class="bi bi-box-arrow-in-up-right me-1"></i> Vista Previa
+                        </button>
+                        <a href="{{ inscripcion.certificado.url }}" download class="btn btn-sm btn-primary">
+                            <i class="bi bi-download me-1"></i> Descargar
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+{% empty %}
+    {% comment %} 
+        Muestra este mensaje SÓLO si la búsqueda (AJAX) no encontró nada.
+        La carga inicial usa su propio bloque {% empty %}.
+    {% endcomment %}
+    {% if not certificados.start_index or certificados.number == 1 %}
+        <div class="col-12 text-center" id="no-certs-found">
+            <p class="text-info small">No se encontraron certificaciones que coincidan con la búsqueda.</p>
+        </div>
+    {% endif %}
+{% endfor %}

@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+
+    <style>
+        /* Color cuando la pestaña está seleccionada */
+        .nav-pills .nav-link.active {
+            background-color: #07286D !important;
+            color: #ffffff !important;
+            border: 1px solid #dee2e6;
+        }
+
+        /* Color cuando la pestaña NO está seleccionada */
+        .nav-pills .nav-link {
+            color: #000 !important;
+            border-radius: 0;
+            border-bottom: 2px solid transparent;
+        }
+
+        /* Efecto hover opcional */
+        .nav-pills .nav-link:hover {
+            background-color: #f1f1f1;
+        }
+    </style>
+
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1100">
+        {% if messages %}
+            {% for message in messages %}
+            <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header text-white 
+                {% if message.tags == 'success' %} bg-success 
+                {% elif message.tags == 'info' %} bg-primary 
+                {% elif message.tags == 'warning' %} bg-warning 
+                {% elif message.tags == 'error' %} bg-danger 
+                {% endif %}">
+                <i class="bi bi-bell-fill me-2"></i>
+                <strong class="me-auto">Notificación</strong>
+                <small>Ahora</small>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body">
+                {{ message }}
+                </div>
+            </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <div class="d-flex justify-content-between align-items-start">
+        <div>
+            <h2 class="h3 fw-bold mb-2">Guías de operación</h2>
+            <h3 class="h5 fw-italic text-muted">Capacitación guiada paso a paso</h3>
+        </div>
+    </div>
+    
+    <hr>
+
+    <ul class="nav nav-pills nav-justified mb-0" id="guiasTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active fw-bold py-3" id="sica-tab" data-bs-toggle="tab" data-bs-target="#sica" type="button" role="tab" aria-controls="sica" aria-selected="true">
+                <i class="bi me-2"></i>SICA Cloud
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link fw-bold py-3" id="slam-tab" data-bs-toggle="tab" data-bs-target="#slam" type="button" role="tab" aria-controls="slam" aria-selected="false">
+                <i class="bi me-2"></i>SLAM
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content border-start border-end border-bottom p-4 bg-white rounded-bottom shadow-sm" id="guiasTabContent">
+        <div class="tab-pane fade show active" id="sica" role="tabpanel" aria-labelledby="sica-tab">
+            <h4 class="mb-3">Guías de SICA Cloud</h4>
+            <p class="text-muted">Haz clic en un tema para ver los pasos detallados.</p>
+            
+            <div class="accordion accordion-flush" id="accordionSica">
+                {% for guia in guias %}
+                    {% if guia.sistema == 'SICA' %}  <div class="accordion-item border shadow-sm mb-3 rounded">
+                        <h2 class="accordion-header" id="headingSica{{ guia.id }}">
+                            <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSica{{ guia.id }}">
+                                {{ guia.titulo }}
+                            </button>
+                        </h2>
+                        
+                        <div id="collapseSica{{ guia.id }}" class="accordion-collapse collapse" data-bs-parent="#accordionSica">
+                            <div class="accordion-body bg-light">
+                                <p class="text-muted small mb-4">{{ guia.descripcion }}</p>
+                                
+                                <div class="list-group list-group-flush">
+                                    {% for paso in guia.pasos.all %}
+                                    <div class="list-group-item bg-transparent border-0 mb-4">
+                                        <p><span class="fw-bold">Paso {{ paso.orden }}.</span> {{ paso.instruccion|linebreaksbr }}</p>
+                                        {% if paso.imagen %}
+                                            <div class="text-center">
+                                                <img src="{{ paso.imagen.url }}" class="img-fluid rounded border shadow-sm" style="max-height: 400px;">
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    {% empty %}
+                                        <p class="text-muted">No hay pasos registrados para esta guía.</p>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                {% empty %}
+                    <p>No hay guías registradas.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="slam" role="tabpanel" aria-labelledby="slam-tab">
+            <h4 class="mb-3">Guías de SLAM</h4>
+            <p class="text-muted">Haz clic en un tema para ver los pasos detallados.</p>
+
+            <div class="accordion accordion-flush" id="accordionSlam"> {% for guia in guias %}
+                    {% if guia.sistema == 'SLAM' %}  <div class="accordion-item border shadow-sm mb-3 rounded">
+                        <h2 class="accordion-header" id="headingSlam{{ guia.id }}">
+                            <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSlam{{ guia.id }}">
+                                {{ guia.titulo }}
+                            </button>
+                        </h2>
+                        
+                        <div id="collapseSlam{{ guia.id }}" class="accordion-collapse collapse" data-bs-parent="#accordionSlam">
+                            <div class="accordion-body bg-light">
+                                <p class="text-muted small mb-4">{{ guia.descripcion }}</p>
+                                
+                                <div class="list-group list-group-flush">
+                                    {% for paso in guia.pasos.all %}
+                                    <div class="list-group-item bg-transparent border-0 mb-4">
+                                        <p><span class="fw-bold">Paso {{ paso.orden }}.</span> {{ paso.instruccion|linebreaksbr }}</p>
+                                        {% if paso.imagen %}
+                                            <div class="text-center">
+                                                <img src="{{ paso.imagen.url }}" class="img-fluid rounded border shadow-sm" style="max-height: 400px;">
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    {% empty %}
+                                        <p class="text-muted">No hay pasos registrados para esta guía.</p>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                {% empty %}
+                    <p>No hay guías registradas.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

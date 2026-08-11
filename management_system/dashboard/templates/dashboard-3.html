@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+
+<div id="seccion-informes-privada" style="position: relative; width: 100%; min-height: 700px; border: 1px solid #ccc; overflow: hidden;">
+    
+    <div id="bloqueo-local" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #f8f9fa; z-index: 100; display: flex; justify-content: center; align-items: center; flex-direction: column; text-align: center; padding: 20px;">
+        <div style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-width: 450px;">
+            <h3 style="color: #1a2a40; margin-top: 0;">🔒 Acceso a Datos Sensibles</h3>
+            <p style="font-size: 14px; color: #666;">Para visualizar los indicadores de 2025, confirme su identidad y acepte las condiciones.</p>
+            
+            <input type="password" id="input-pass-local" placeholder="Contraseña de seguridad" style="width: 100%; padding: 12px; margin: 15px 0; border: 1px solid #ddd; border-radius: 5px;">
+            
+            <div style="text-align: left; font-size: 12px; margin-bottom: 20px; color: #444; border: 1px solid #eee; padding: 10px; background: #fafafa;">
+                <input type="checkbox" id="check-privacidad-local"> 
+                <label for="check-privacidad-local">
+                    Acepto el <strong>Aviso de Privacidad</strong>. Entiendo que esta sesión será registrada para fines de auditoría interna.
+                </label>
+            </div>
+            
+            <button onclick="validarSeccion()" style="width: 100%; padding: 12px; background: #002d72; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
+                Desbloquear Sección
+            </button>
+            <p id="error-local" style="color: red; display: none; margin-top: 10px; font-size: 13px;">Clave incorrecta o falta aceptar el aviso.</p>
+        </div>
+    </div>
+
+    <div id="contenedor-iframes" style="display: none;">
+    </div>
+</div>
+
+<script>
+    function validarSeccion() {
+        const pass = document.getElementById('input-pass-local').value;
+        const acepto = document.getElementById('check-privacidad-local').checked;
+        
+        // --- NUEVO: Capturamos la URL o el nombre del dashboard ---
+        // window.location.pathname devolverá algo como "/dashboard-1/"
+        const origenActual = window.location.pathname; 
+
+        if (!acepto) {
+            alert("Debes aceptar el aviso de privacidad.");
+            return;
+        }
+
+        // Llamada a la vista de Django
+        fetch("{% url 'dashboard:validar_acceso_reporte' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ csrf_token }}"
+            },
+            // --- MODIFICADO: Agregamos 'origen' al JSON ---
+            body: JSON.stringify({ 
+                password: pass,
+                origen: origenActual 
+            })
+        })
+        .then(response => {
+            if (response.ok) {
+                document.getElementById('bloqueo-local').style.display = 'none';
+                document.getElementById('contenedor-iframes').style.display = 'block';
+                cargarLosIframes();
+            } else {
+                document.getElementById('error-local').style.display = 'block';
+            }
+        });
+    }
+
+    function cargarLosIframes() {
+        const reportes = [
+            "https://app.powerbi.com/view?r=eyJrIjoiMzg1NGQ2N2QtZDdiNC00OGVkLTlkYjMtNzEyNDljZTI5OTJhIiwidCI6Ijk2Y2NhMTkwLTIzM2MtNGFkNC1hMzEzLWUyMGFjMTJmYmQyYiJ9",
+        ];
+
+        let htmlFinal = "";
+        reportes.forEach((url, index) => {
+            // Añadimos el parámetro para ocultar navegación de Power BI
+            const urlLimpia = url + "&navContentPaneEnabled=false";
+            
+            htmlFinal += `
+                <div id="fullscreen-container-${index}" style="background: white; margin-bottom: 30px; border: 1px solid #ddd; position: relative; overflow: hidden;">
+                    <div style="display: flex; justify-content: flex-end; padding: 5px; background: #f8f9fa; position: relative; z-index: 10;">
+                        <button onclick="ponerEnPantallaCompleta('fullscreen-container-${index}')" 
+                                style="cursor: pointer; background: #002d72; color: white; border: none; padding: 4px 10px; border-radius: 3px; font-size: 12px;">
+                            ⛶ Pantalla Completa
+                        </button>
+                    </div>
+                    <div class="iframe-wrapper" style="width: 100%; height: 700px; overflow: hidden; position: relative;">
+                        <iframe title="Reporte" 
+                                width="100%" 
+                                height="736px" 
+                                src="${urlLimpia}" 
+                                frameborder="0" 
+                                allowFullScreen="true" 
+                                style="position: absolute; top: 0; left: 0;"></iframe>
+                    </div>
+                </div>`;
+        });
+        
+        document.getElementById('contenedor-iframes').innerHTML = htmlFinal;
+    }
+
+    function ponerEnPantallaCompleta(id) {
+        const elemento = document.getElementById(id);
+
+        // Si ya hay algo en pantalla completa, la cerramos
+        if (document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement) {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            }
+        } else {
+            // Si no, abrimos el elemento solicitado
+            if (elemento.requestFullscreen) {
+                elemento.requestFullscreen();
+            } else if (elemento.webkitRequestFullscreen) {
+                elemento.webkitRequestFullscreen();
+            } else if (elemento.msRequestFullscreen) {
+                elemento.msRequestFullscreen();
+            }
+        }
+    }
+
+    // Escuchar cambios de pantalla completa para ajustar el alto dinámicamente
+    document.addEventListener('fullscreenchange', () => {
+        const elemActivo = document.fullscreenElement;
+        
+        if (elemActivo) {
+            // MODO PANTALLA COMPLETA
+            const wrapper = elemActivo.querySelector('.iframe-wrapper');
+            const iframe = wrapper.querySelector('iframe');
+            const btn = elemActivo.querySelector('button');
+
+            wrapper.style.height = "100vh"; // El contenedor ocupa todo el alto
+            iframe.style.height = "calc(100vh + 36px)"; // El iframe se estira para "tirar" la barra fuera
+            btn.innerHTML = "✖ Salir de Pantalla Completa"; // Cambiamos el texto del botón
+        } else {
+            // MODO NORMAL (Al presionar el botón de nuevo o ESC)
+            document.querySelectorAll('.iframe-wrapper').forEach(w => {
+                w.style.height = "700px";
+                w.querySelector('iframe').style.height = "736px"; // Mantiene la barra oculta abajo
+            });
+            document.querySelectorAll('button[onclick^="ponerEnPantalla"]').forEach(b => {
+                b.innerHTML = "⛶ Pantalla Completa";
+            });
+        }
+    });
+</script>
+{% endblock %}

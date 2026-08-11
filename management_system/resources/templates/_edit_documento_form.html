@@ -3,14 +3,23 @@
   <p class="text-muted small">
     Modifica los detalles del documento. Los campos con (<span class="text-danger">*</span>) son obligatorios.
   </p>
+  <div class="row">
+    <div class="col-md-6 mb-3">
+      <label for="{{ form_documento.nombre.id_for_label }}" class="form-label fw-bold">
+        {{ form_documento.nombre.label }}<span class="text-danger"> *</span>
+      </label>
+      {{ form_documento.nombre }}
+      <div class="form-text">{{ form_documento.nombre.help_text }}</div>
+      {% if form_documento.nombre.errors %}<div class="invalid-feedback d-block">{{ form_documento.nombre.errors.0 }}</div>{% endif %}
+    </div>
 
-  <div class="mb-3">
-    <label for="{{ form_documento.nombre.id_for_label }}" class="form-label fw-bold">
-      {{ form_documento.nombre.label }}<span class="text-danger"> *</span>
-    </label>
-    {{ form_documento.nombre }}
-    <div class="form-text">{{ form_documento.nombre.help_text }}</div>
-    {% if form_documento.nombre.errors %}<div class="invalid-feedback d-block">{{ form_documento.nombre.errors.0 }}</div>{% endif %}
+    <div class="col-md-6 mb-3">
+      <label for="{{ form_documento.codigo_documento.id_for_label }}" class="form-label fw-bold">
+        {{ form_documento.codigo_documento.label }}
+      </label>
+      {{ form_documento.codigo_documento }}
+      <div class="form-text">{{ form_documento.codigo_documento.help_text }}</div>
+    </div>
   </div>
   
   <div class="mb-3">
@@ -23,19 +32,19 @@
 
   <div class="row">
     <div class="col-md-6 mb-3">
-      <label for="{{ form_documento.codigo_documento.id_for_label }}" class="form-label fw-bold">
-        {{ form_documento.codigo_documento.label }}
-      </label>
-      {{ form_documento.codigo_documento }}
-      <div class="form-text">{{ form_documento.codigo_documento.help_text }}</div>
-    </div>
-    <div class="col-md-6 mb-3">
       <label for="{{ form_documento.tipo_documento.id_for_label }}" class="form-label fw-bold">
         {{ form_documento.tipo_documento.label }}<span class="text-danger"> *</span>
       </label>
       {{ form_documento.tipo_documento }}
       <div class="form-text">{{ form_documento.tipo_documento.help_text }}</div>
       {% if form_documento.tipo_documento.errors %}<div class="invalid-feedback d-block">{{ form_documento.tipo_documento.errors.0 }}</div>{% endif %}
+    </div>
+    <div class="col-md-6 mb-3">
+      <label for="{{ form_documento.procedimiento.id_for_label }}" class="form-label fw-bold">
+        {{ form_documento.procedimiento.label }}
+      </label>
+      {{ form_documento.procedimiento }}
+      <div class="form-text">{{ form_documento.procedimiento.help_text }}</div>
     </div>
   </div>
 

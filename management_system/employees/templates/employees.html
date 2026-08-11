@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 
+{% load static %}
+
 {% block title %}Empleados{% endblock %}
 
 {% block content %}
@@ -30,6 +32,36 @@
     color: var(--bs-primary); /* Cambia al color primario */
     transform: scale(1.1);   /* Se agranda un poco */
   }
+
+  /* Centrar y expandir el calendario al 100% del modal */
+  .flatpickr-calendar.inline {
+      width: 100% !important;
+      max-width: 100% !important;
+      box-shadow: none !important;
+      border: none !important;
+      background: transparent !important;
+  }
+
+  /* Hacer que la cuadrícula de días use todo el espacio */
+  .flatpickr-innerContainer, 
+  .flatpickr-rContainer, 
+  .flatpickr-days, 
+  .dayContainer {
+      width: 100% !important;
+      min-width: 100% !important;
+      max-width: 100% !important;
+  }
+
+  /* Ajustar el tamaño de cada celda de día para que sea responsivo */
+  .flatpickr-day {
+      max-width: none !important;
+      flex-basis: 14.28% !important; /* 100% / 7 días */
+  }
+
+  /* Ocultar la caja de texto duplicada que sale arriba */
+  .flatpickr-input[type="hidden"] + .form-control {
+      display: none !important;
+  }
 </style>
 
 <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1100">
@@ -55,89 +87,402 @@
   {% endif %}
 </div>
 
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="d-flex justify-content-between align-items-center mb-1">
   <div> 
     <h2 class="h3 fw-bold mb-2">Empleados</h2>
     <h3 class="h5 fw-italic mb-4 text-muted">Gestión de empleados y expedientes</h3>
   </div>
-  <div class="d-flex gap-2">
-    {% if is_admin %}
-    <a href="#" class="btn bg-success d-flex align-items-center gap-2 d-none d-md-flex fw-medium text-white"
+  <div class="d-flex gap-2" id="header-buttons-container">
+    {% if perms.employees.add_empleado %}
+    <a href="#" id="btn-main-add" class="btn bg-success d-flex align-items-center gap-2 d-none d-md-flex fw-medium text-white"
        data-bs-toggle="modal" 
        data-bs-target="#modalCrearEmpleado">
       <i class="bi bi-plus-lg"></i>
-      Añadir un empleado
+      <span>Añadir un empleado</span>
     </a>
-    <a href="#" class="btn d-flex bg-warning align-items-center gap-2 d-none d-md-flex fw-medium text-white"
+    {% endif %}
+
+    {% if perms.employees.change_empleado %}
+    <a href="#" id="btn-main-edit" class="btn d-flex bg-warning align-items-center gap-2 d-none d-md-flex fw-medium text-white"
        data-bs-toggle="modal" 
        data-bs-target="#modalEditarEmpleado">
       <i class="bi bi-pencil"></i>
-      Modificar un empleado
+      <span>Modificar un empleado</span>
     </a>
     {% endif %}
+
+    {% if perms.employees.change_empleado %}
+    <a href="#" id="btn-main-photos" class="btn d-flex bg-info align-items-center gap-2 d-none d-md-flex fw-medium text-white shadow-sm"
+       data-bs-toggle="modal" 
+       data-bs-target="#modalCargaMultipleFotos">
+      <i class="bi bi-images"></i>
+      <span>Subir fotos</span>
+    </a>
+    {% endif %}
+
+    <a href="#" id="btn-main-formato-vac" class="btn d-flex bg-primary align-items-center gap-2 d-none d-md-flex fw-medium text-white shadow-sm"
+      data-bs-toggle="modal" 
+      data-bs-target="#modalSolicitarVacaciones"
+      style="display: none !important;">
+      <i class="bi bi-file-earmark-arrow-down"></i>
+      <span>Solicitar Vacaciones</span>
+    </a>
   </div>
 </div>
 
-<hr class="my-4">
+<ul class="nav nav-tabs mb-4" id="gestionTabs" role="tablist">
+  <li class="nav-item" role="presentation">
+    <button class="nav-link active" id="general-tab" data-bs-toggle="tab" data-bs-target="#general-content" type="button" role="tab">General</button>
+  </li>
+  {% if perms.employees.add_empleado %}
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" id="vacaciones-tab" data-bs-toggle="tab" data-bs-target="#vacaciones-content" type="button" role="tab">Vacaciones</button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" id="incapacidades-tab" data-bs-toggle="tab" data-bs-target="#incapacidades-content" type="button" role="tab">Incapacidad</button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" id="permisos-tab" data-bs-toggle="tab" data-bs-target="#permisos-content" type="button" role="tab">Permisos</button>
+  </li>
+  {% endif %}
+</ul>
 
-<div class="card shadow-sm border-light-subtle mb-4">
-  <div class="card-body">
-    <form id="filter-form" method="GET" action="">
-      <div class="row g-3">
-        <div class="col-12 col-md-4">
-          <label for="search-query-empleado" class="form-label fw-bold">Buscar Empleado</label>
-          <div class="input-group">
-            <input type="text" class="form-control" id="search-query-empleado" name="q" 
-            placeholder="Buscar por nombre, email, usuario..." value="{{ current_q|default:'' }}">
-            <button class="btn btn-outline-secondary" type="submit" id="search-submit-btn">
-              <i class="bi bi-search"></i>
-            </button>
+<div class="tab-content" id="gestionTabsContent">
+  
+  <div class="tab-pane fade show active" id="general-content" role="tabpanel" aria-labelledby="general-tab">
+    <div class="card shadow-sm border-light-subtle mb-4">
+      <div class="card-body">
+        <form id="filter-form" method="GET" action="">
+          <div class="row g-3">
+
+            <div class="col-12 col-md-4">
+              <div class="input-group">
+                <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-primary"></i></span>
+                <input type="text" class="form-control border-start-0 ps-0" id="search-query-empleado" name="q" 
+                placeholder="Buscar..." value="{{ current_q|default:'' }}">
+              </div>
+            </div>
+
+            <div class="col-12 col-md-3">
+              <select class="form-select" id="filter-depto-empleado" name="depto_id">
+                <option value="" selected>🏢 Todos los Departamentos</option>
+                {% for depto in all_departamentos %}
+                  <option value="{{ depto.id }}">
+                    {{ depto.nombre }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="col-12 col-md-3">
+              <select class="form-select" id="filter-estacion-empleado" name="estacion_id">
+                <option value="" selected>🚩 Todas las Estaciones</option>
+                {% for estacion in all_estaciones %}
+                <option value="{{ estacion.id }}">
+                  {{ estacion.nombre }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="col-12 col-md-2">
+              <button type="button" id="btn-reset-filters-form" class="btn btn-outline-secondary shadow-sm w-100" title="Limpiar filtros">
+                <i class="bi bi-funnel-fill position-relative">
+                  <small class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.5rem;">X</small>
+                </i>
+              </button>
+            </div>
+
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="row" id="employee-list-container">
+      {% include '_employee_cards.html' with empleados_page=empleados_page is_admin=is_admin %}
+    </div>
+
+    <div class="text-center mt-4" id="load-more-container">
+      {% if empleados_page.has_next %}
+        <button class="btn btn-primary" data-next-page="2" id="load-more-btn">
+          <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none;"></span>
+          <span class="btn-text">Cargar más empleados</span>
+        </button>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="tab-pane fade" id="vacaciones-content" role="tabpanel" aria-labelledby="vacaciones-tab">
+    <div class="card shadow-sm border-light-subtle mb-4">
+      <div class="card-body">
+        <form id="filter-form-vacaciones" method="GET" action="">
+          <div class="row g-3">
+ 
+            <div class="col-12 col-md-2">
+              <div class="input-group">
+                <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-primary"></i></span>
+                <input type="text" class="form-control border-start-0 ps-0" id="search-query-vacaciones" name="q" 
+                placeholder="Buscar..." value="{{ current_q|default:'' }}">
+              </div>
+            </div>
+
+            <div class="col-12 col-md-3">
+              <select class="form-select" id="filter-depto-vacaciones" name="depto_id">
+                <option value="">🏢 Todos los Departamentos</option>
+                {% for depto in all_departamentos %}
+                <option value="{{ depto.id }}">
+                  {{ depto.nombre }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="col-12 col-md-3">
+              <select class="form-select" id="filter-estacion-vacaciones" name="estacion_id">
+                <option value="">🚩 Todas las Estaciones</option>
+                {% for estacion in all_estaciones %}
+                <option value="{{ estacion.id }}">
+                  {{ estacion.nombre }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="col-12 col-md-3">
+              <select class="form-select" id="filter-estado-vacaciones" name="estado">
+                <option value="">🔄 Todos los Estados</option>
+                
+                {% for valor, etiqueta in estados_vacacion %}
+                    <option value="{{ valor }}" {% if request.GET.estado == valor %}selected{% endif %}>
+                        {{ etiqueta }}
+                    </option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="col-12 col-md-1">
+              <button type="button" id="btn-reset-filters-vac" class="btn btn-outline-secondary shadow-sm w-100" title="Limpiar filtros">
+                <i class="bi bi-funnel-fill position-relative">
+                  <small class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.5rem;">X</small>
+                </i>
+              </button>
+            </div>
+          </div>
+
+          <div class="row g-3">
+            <div class="row g-3 align-items-center">
+              <div class="col-12 col-md-auto">
+                <label class="form-label text-muted small mb-0">📅 Rango de fechas:</label>
+              </div>
+
+              <div class="col-12 col-md-3">
+                <div class="input-group">
+                  <span class="input-group-text bg-white border-end-0 small text-muted">Desde:</span>
+                  <input type="date" class="form-control border-start-0"
+                        id="filter-fecha-desde-vacaciones" name="fecha_desde"
+                        value="{{ request.GET.fecha_desde|default:'' }}">
+                </div>
+              </div>
+
+              <div class="col-12 col-md-3">
+                <div class="input-group">
+                  <span class="input-group-text bg-white border-end-0 small text-muted">Hasta:</span>
+                  <input type="date" class="form-control border-start-0"
+                        id="filter-fecha-hasta-vacaciones" name="fecha_hasta"
+                        value="{{ request.GET.fecha_hasta|default:'' }}">
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+
+        </form>
+      </div>
+    </div>
+
+    <div class="row" id="vacation-list-container">
+      {% include '_vacation_cards.html' with vacaciones_page=vacaciones_page is_admin=is_admin %}
+    </div>
+
+    <div class="text-center mt-4" id="load-more-vacations-container">
+      {% if vacaciones_page.has_next %}
+        <button class="btn btn-primary" id="load-more-vacations-btn">
+          <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none;"></span>
+          <span class="btn-text">Cargar más registros</span>
+        </button>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="tab-pane fade" id="incapacidades-content" role="tabpanel" aria-labelledby="incapacidades-tab">
+    <div class="card shadow-sm border-light-subtle mb-4">
+      <div class="card-body">
+        <form id="filter-form-incapacidades" method="GET" action="">
+          <div class="row g-3">
+            
+            <div class="col-12 col-md-3">
+              <div class="input-group">
+                <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-warning"></i></span>
+                <input type="text" class="form-control border-start-0 ps-0" id="search-query-incapacidades" name="q" 
+                placeholder="Buscar..." value="{{ current_q|default:'' }}">
+              </div>
+            </div>
+
+            <div class="col-12 col-md-4">
+              <select class="form-select" id="filter-depto-incapacidades" name="depto_id">
+                <option value="">🏢 Todos los Departamentos</option>
+                {% for depto in all_departamentos %}
+                <option value="{{ depto.id }}" {% if request.GET.depto_id == depto.id|stringformat:"i" %}selected{% endif %}>
+                  {{ depto.nombre }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="col-12 col-md-4">
+              <select class="form-select" id="filter-estacion-incapacidades" name="estacion_id">
+                <option value="">🚩 Todas las Estaciones</option>
+                {% for estacion in all_estaciones %}
+                <option value="{{ estacion.id }}" {% if request.GET.estacion_id == estacion.id|stringformat:"i" %}selected{% endif %}>
+                  {{ estacion.nombre }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="col-12 col-md-1">
+              <button type="button" id="btn-reset-filters-inca" class="btn btn-outline-secondary shadow-sm w-100" title="Limpiar filtros">
+                <i class="bi bi-funnel-fill position-relative">
+                  <small class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.5rem;">X</small>
+                </i>
+              </button>
+            </div>
+
+          </div>
+
+          <div class="row g-3">
+            <div class="row g-3 align-items-center">
+              <div class="col-12 col-md-auto">
+                <label class="form-label text-muted small mb-0">📅 Rango de fechas:</label>
+              </div>
+
+              <div class="col-12 col-md-3">
+                <div class="input-group">
+                  <span class="input-group-text bg-white border-end-0 small text-muted">Desde:</span>
+                  <input type="date" class="form-control border-start-0"
+                        id="filter-fecha-desde-incapacidades" name="fecha_desde"
+                        value="{{ request.GET.fecha_desde|default:'' }}">
+                </div>
+              </div>
+
+              <div class="col-12 col-md-3">
+                <div class="input-group">
+                  <span class="input-group-text bg-white border-end-0 small text-muted">Hasta:</span>
+                  <input type="date" class="form-control border-start-0"
+                        id="filter-fecha-hasta-incapacidades" name="fecha_hasta"
+                        value="{{ request.GET.fecha_hasta|default:'' }}">
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </form>
+      </div>
+    </div>
+
+    <div class="row" id="incapacidad-list-container">
+      {% include '_incapacidad_cards.html' with incapacidades_page=incapacidades_page %}
+    </div>
+
+    <div class="text-center mt-4" id="load-more-incapacidades-container">
+      {% if incapacidades_page.has_next %}
+        <button class="btn btn-warning fw-bold" id="load-more-incapacidades-btn">
+          <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none;"></span>
+          <span class="btn-text">Cargar más registros</span>
+        </button>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="tab-pane fade" id="permisos-content" role="tabpanel" aria-labelledby="permisos-tab">
+    <div class="card shadow-sm border-light-subtle mb-4">
+      <div class="card-body">
+        <form id="filter-form" method="GET" action="">
+          <div class="row g-3">
+            <div class="col-12 col-md-4">
+              <label for="search-query-permisos" class="form-label fw-bold">Buscar Empleado</label>
+              <div class="input-group">
+                <input type="text" class="form-control" id="search-query-permisos" name="q" 
+                placeholder="Buscar por nombre, email, usuario..." value="{{ current_q|default:'' }}">
+                <button class="btn btn-outline-secondary" type="submit" id="search-submit-btn">
+                  <i class="bi bi-search"></i>
+                </button>
+              </div>
+            </div>
+            <div class="col-12 col-md-4">
+              <label for="filter-depto-permisos" class="form-label fw-bold">Departamento</label>
+              <select class="form-select" id="filter-depto-permisos" name="depto_id">
+                <option value="">Todos los Departamentos</option>
+                {% for depto in all_departamentos %}
+                <option value="{{ depto.id }}" {% if current_depto_id == depto.id|stringformat:"s" %}selected{% endif %}>
+                  {{ depto.nombre }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-12 col-md-4">
+              <label for="filter-estacion-permisos" class="form-label fw-bold">Estación</label>
+              <select class="form-select" id="filter-estacion-permisos" name="estacion_id">
+                <option value="">Todas las Estaciones</option>
+                {% for estacion in all_estaciones %}
+                <option value="{{ estacion.id }}" {% if current_estacion_id == estacion.id|stringformat:"s" %}selected{% endif %}>
+                  {{ estacion.nombre }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="modalCargaMultipleFotos" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header bg-info text-white">
+        <h5 class="modal-title fw-bold"><i class="bi bi-images me-2"></i>Subir Fotos de Empleados</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form action="{% url 'employees:carga_masiva_fotos' %}" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="modal-body p-4">
+          <p class="text-muted small mb-4">
+            Selecciona una o varias imágenes. El sistema intentará vincularlas automáticamente si el nombre del archivo coincide con el nombre o ID del empleado.
+          </p>
+          
+          <div class="border rounded p-4 bg-light text-center" style="border-style: dashed !important; border-width: 2px !important;">
+            <i class="bi bi-cloud-arrow-up display-4 text-info"></i>
+            <input type="file" name="fotos_batch" class="form-control mt-3" multiple accept="image/*" required>
+            <div class="form-text mt-2">Puedes seleccionar varios archivos a la vez.</div>
           </div>
         </div>
-        <div class="col-12 col-md-4">
-          <label for="filter-depto-empleado" class="form-label fw-bold">Departamento</label>
-          <select class="form-select" id="filter-depto-empleado" name="depto_id">
-            <option value="">Todos los Departamentos</option>
-              {% for depto in all_departamentos %}
-            <option value="{{ depto.id }}" {% if current_depto_id == depto.id|stringformat:"s" %}selected{% endif %}>
-              {{ depto.nombre }}
-            </option>
-              {% endfor %}
-          </select>
+        <div class="modal-footer bg-light">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-info text-white fw-bold px-4">Comenzar Carga</button>
         </div>
-        <div class="col-12 col-md-4">
-          <label for="filter-estacion-empleado" class="form-label fw-bold">Estación</label>
-          <select class="form-select" id="filter-estacion-empleado" name="estacion_id">
-            <option value="">Todas las Estaciones</option>
-              {% for estacion in all_estaciones %}
-            <option value="{{ estacion.id }}" {% if current_estacion_id == estacion.id|stringformat:"s" %}selected{% endif %}>
-              {{ estacion.nombre }}
-            </option>
-              {% endfor %}
-          </select>
-        </div>
-      </div>
-    </form>
+      </form>
+    </div>
   </div>
-</div>
-<div class="row" id="employee-list-container">
-  {% include '_employee_cards.html' with empleados_page=empleados_page is_admin=is_admin %}
-</div>
-
-<div class="text-center mt-4" id="load-more-container">
-  {% if empleados_page.has_next %}
-    <button class="btn btn-primary" id="load-more-btn">
-      <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none;"></span>
-      <span class="btn-text">Cargar más empleados</span>
-    </button>
-  {% endif %}
 </div>
 
 <div class="modal fade" id="modalCrearEmpleado" tabindex="-1" aria-labelledby="modalCrearEmpleadoLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content p-1">
 
-      <form action="" method="POST" enctype="multipart/form-data">
+      <form id="formCrearEmpleado" action="" method="POST" enctype="multipart/form-data">
         {% csrf_token %}
         <input type="hidden" name="form_type" value="empleado">
 
@@ -150,30 +495,75 @@
         </div>
 
         <div class="modal-body">
-          <p class="text-muted small">
+          <p class="text-muted small mb-4">
             Los campos con (<span class="text-danger">*</span>) son obligatorios.
           </p>
 
-          <div class="mb-3">
-            <label for="{{ form_empleado.nombre.id_for_label }}" class="form-label fw-bold">
-              {{ form_empleado.nombre.label }}<span class="text-danger"> *</span>
-            </label>
-            {{ form_empleado.nombre }}
-            {% if form_empleado.nombre.errors %}
-              <div class="invalid-feedback d-block">{{ form_empleado.nombre.errors.0 }}</div>
-            {% endif %}
+          <h6 class="fw-bold text-primary mb-3 border-bottom pb-2">Información Personal</h6>
+          <div class="row">
+            <div class="col-md-4 mb-3">
+              <label for="{{ form_empleado.numero_empleado.id_for_label }}" class="form-label fw-bold">
+                {{ form_empleado.numero_empleado.label }}<span class="text-danger"> *</span>
+              </label>
+              {{ form_empleado.numero_empleado }}
+              {% if form_empleado.numero_empleado.errors %}
+                <div class="invalid-feedback d-block">{{ form_empleado.numero_empleado.errors.0 }}</div>
+              {% endif %}
+            </div>
+            <div class="col-md-8 mb-3">
+              <label for="{{ form_empleado.nombre.id_for_label }}" class="form-label fw-bold">
+                {{ form_empleado.nombre.label }}<span class="text-danger"> *</span>
+              </label>
+              {{ form_empleado.nombre }}
+              {% if form_empleado.nombre.errors %}
+                <div class="invalid-feedback d-block">{{ form_empleado.nombre.errors.0 }}</div>
+              {% endif %}
+            </div>
           </div>
 
-          <div class="mb-3">
-            <label for="{{ form_empleado.email.id_for_label }}" class="form-label fw-bold">
-              {{ form_empleado.email.label }}<span class="text-danger"> *</span>
-            </label>
-            {{ form_empleado.email }}
-            {% if form_empleado.email.errors %}
-              <div class="invalid-feedback d-block">{{ form_empleado.email.errors.0 }}</div>
-            {% endif %}
+          <div class="row">
+            <div class="col-md-3 mb-3">
+              <label for="{{ form_empleado.sexo.id_for_label }}" class="form-label fw-bold">
+                {{ form_empleado.sexo.label }}
+              </label>
+              {{ form_empleado.sexo }}
+              {% if form_empleado.sexo.errors %}
+                <div class="invalid-feedback d-block">{{ form_empleado.sexo.errors.0 }}</div>
+              {% endif %}
+            </div>
+            <div class="col-md-4 mb-3">
+              <label for="{{ form_empleado.fecha_nacimiento.id_for_label }}" class="form-label fw-bold">
+                {{ form_empleado.fecha_nacimiento.label }}<span class="text-danger"> *</span>
+              </label>
+              {{ form_empleado.fecha_nacimiento }}
+              {% if form_empleado.fecha_nacimiento.errors %}
+                <div class="invalid-feedback d-block">{{ form_empleado.fecha_nacimiento.errors.0 }}</div>
+              {% endif %}
+            </div>
+            <div class="col-md-5 mb-3">
+              <label for="{{ form_empleado.foto.id_for_label }}" class="form-label fw-bold">
+                {{ form_empleado.foto.label }}
+              </label>
+              {{ form_empleado.foto }}
+              {% if form_empleado.foto.errors %}
+                <div class="invalid-feedback d-block">{{ form_empleado.foto.errors.0 }}</div>
+              {% endif %}
+            </div>
           </div>
 
+          <h6 class="fw-bold text-primary mb-3 border-bottom pb-2 mt-2">Contacto</h6>
+          <div class="row">
+            <div class="col-md-12 mb-3">
+              <label for="{{ form_empleado.email.id_for_label }}" class="form-label fw-bold">
+                {{ form_empleado.email.label }}<span class="text-danger"> *</span>
+              </label>
+              {{ form_empleado.email }}
+              <div class="form-text">Email empresarial, de no tener uno, asignar con primera letra y apellido junto con @no-mail.com.mx</div>
+              {% if form_empleado.email.errors %}
+                <div class="invalid-feedback d-block">{{ form_empleado.email.errors.0 }}</div>
+              {% endif %}
+            </div>
+          </div>
           <div class="row">
             <div class="col-md-6 mb-3">
               <label for="{{ form_empleado.telefono.id_for_label }}" class="form-label fw-bold">
@@ -185,27 +575,25 @@
               {% endif %}
             </div>
             <div class="col-md-6 mb-3">
-              <label for="{{ form_empleado.posicion.id_for_label }}" class="form-label fw-bold">
-                {{ form_empleado.posicion.label }}
+              <label for="{{ form_empleado.telefono_emergencia.id_for_label }}" class="form-label fw-bold">
+                {{ form_empleado.telefono_emergencia.label }}
               </label>
-              {{ form_empleado.posicion }}
-              {% if form_empleado.posicion.errors %}
-                <div class="invalid-feedback d-block">{{ form_empleado.posicion.errors.0 }}</div>
+              {{ form_empleado.telefono_emergencia }}
+              {% if form_empleado.telefono_emergencia.errors %}
+                <div class="invalid-feedback d-block">{{ form_empleado.telefono_emergencia.errors.0 }}</div>
               {% endif %}
             </div>
           </div>
 
-          <hr class="my-4">
-
+          <h6 class="fw-bold text-primary mb-3 border-bottom pb-2 mt-2">Información Laboral</h6>
           <div class="row">
             <div class="col-md-6 mb-3">
-              <label for="{{ form_empleado.user.id_for_label }}" class="form-label fw-bold">
-                {{ form_empleado.user.label }}
+              <label for="{{ form_empleado.fecha_ingreso.id_for_label }}" class="form-label fw-bold">
+                {{ form_empleado.fecha_ingreso.label }}<span class="text-danger"> *</span>
               </label>
-              {{ form_empleado.user }}
-              <div class="form-text">Asignar un usuario de Django (opcional).</div>
-              {% if form_empleado.user.errors %}
-                <div class="invalid-feedback d-block">{{ form_empleado.user.errors.0 }}</div>
+              {{ form_empleado.fecha_ingreso }}
+              {% if form_empleado.fecha_ingreso.errors %}
+                <div class="invalid-feedback d-block">{{ form_empleado.fecha_ingreso.errors.0 }}</div>
               {% endif %}
             </div>
             <div class="col-md-6 mb-3">
@@ -220,7 +608,16 @@
           </div>
 
           <div class="row">
-            <div class="col-md-6 mb-3">
+            <div class="col-md-4 mb-3">
+              <label for="{{ form_empleado.posicion.id_for_label }}" class="form-label fw-bold">
+                {{ form_empleado.posicion.label }}<span class="text-danger"> *</span>
+              </label>
+              {{ form_empleado.posicion }}
+              {% if form_empleado.posicion.errors %}
+                <div class="invalid-feedback d-block">{{ form_empleado.posicion.errors.0 }}</div>
+              {% endif %}
+            </div>
+            <div class="col-md-4 mb-3">
               <label for="{{ form_empleado.estacion_servicio.id_for_label }}" class="form-label fw-bold">
                 {{ form_empleado.estacion_servicio.label }}
               </label>
@@ -229,7 +626,7 @@
                 <div class="invalid-feedback d-block">{{ form_empleado.estacion_servicio.errors.0 }}</div>
               {% endif %}
             </div>
-            <div class="col-md-6 mb-3">
+            <div class="col-md-4 mb-3">
               <label for="{{ form_empleado.estado.id_for_label }}" class="form-label fw-bold">
                 {{ form_empleado.estado.label }}<span class="text-danger"> *</span>
               </label>
@@ -240,24 +637,23 @@
             </div>
           </div>
 
+          <h6 class="fw-bold text-primary mb-3 border-bottom pb-2 mt-2">Sistema y Autenticación</h6>
           <div class="mb-3">
-            <label for="{{ form_empleado.firma_digital.id_for_label }}" class="form-label fw-bold">
-              {{ form_empleado.firma_digital.label }}
+            <label for="{{ form_empleado.user.id_for_label }}" class="form-label fw-bold">
+              {{ form_empleado.user.label }}
             </label>
-            {{ form_empleado.firma_digital }}
-            <div class="form-text">Sube una imagen de la firma (opcional).</div>
-            {% if form_empleado.firma_digital.errors %}
-              <div class="invalid-feedback d-block">{{ form_empleado.firma_digital.errors.0 }}</div>
+            {{ form_empleado.user }}
+            <div class="form-text">Asignar un usuario (opcional, se crea y asigna automáticamente).</div>
+            {% if form_empleado.user.errors %}
+              <div class="invalid-feedback d-block">{{ form_empleado.user.errors.0 }}</div>
             {% endif %}
           </div>
-
-          <hr class="my-4">
 
           <div class="mb-3">
             <label class="form-label fw-bold">
               {{ form_empleado.grupos.label }}<span class="text-danger"> *</span>
             </label>
-            <div class="border rounded p-2" style="max-height: 200px; overflow-y: auto;">
+            <div class="border rounded p-2 bg-light" style="max-height: 150px; overflow-y: auto;">
               {% for check in form_empleado.grupos %}
               <div class="form-check">
                 {{ check.tag }}
@@ -267,7 +663,7 @@
               </div>
               {% endfor %}
             </div>
-            <div class="form-text">Grupos de permisos de Django.</div>
+            <div class="form-text">Tipos de usuario con diferentes permisos.</div>
             {% if form_empleado.grupos.errors %}
               <div class="invalid-feedback d-block">{{ form_empleado.grupos.errors.0 }}</div>
             {% endif %}
@@ -275,29 +671,33 @@
 
           <div class="mb-3">
             <label class="form-label fw-bold">
-              {{ form_empleado.politicas_permisos.label }}<span class="text-danger"> *</span>
+              {{ form_empleado.firma_digital.label }}
             </label>
-            <div class="border rounded p-2" style="max-height: 200px; overflow-y: auto;">
-              {% for check in form_empleado.politicas_permisos %}
-              <div class="form-check">
-                {{ check.tag }}
-                <label class="form-check-label" for="{{ check.id_for_label }}">
-                  {{ check.choice_label }}
-                </label>
+            <div class="border rounded p-2 bg-light text-center">
+              <canvas id="signature-canvas" class="border bg-white" width="450" height="200" style="touch-action: none; max-width: 100%;"></canvas>
+              <div class="d-flex justify-content-between mt-2">
+                <small class="text-muted">Dibuja tu firma arriba</small>
+                <button type="button" class="btn btn-sm btn-outline-danger" id="clear-signature-btn">
+                  <i class="bi bi-eraser"></i> Borrar Firma
+                </button>
               </div>
-              {% endfor %}
             </div>
-            <div class="form-text">Políticas de permisos personalizadas.</div>
-            {% if form_empleado.politicas_permisos.errors %}
-              <div class="invalid-feedback d-block">{{ form_empleado.politicas_permisos.errors.0 }}</div>
+            <input type="hidden" name="firma_b64" id="firma_b64">
+            <div class="d-none">
+              {{ form_empleado.firma_digital }}
+            </div>
+            {% if form_empleado.firma_digital.errors %}
+              <div class="invalid-feedback d-block">{{ form_empleado.firma_digital.errors.0 }}</div>
             {% endif %}
           </div>
 
         </div>
 
-        <div class="modal-footer">
+        <div class="modal-footer bg-light">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          <button type="submit" class="btn btn-primary">Guardar Empleado</button>
+          <button type="submit" class="btn btn-primary fw-bold">
+            <i class="bi bi-save me-1"></i>Guardar Empleado
+          </button>
         </div>
 
       </form>
@@ -322,9 +722,19 @@
           <select class="form-select" id="select-empleado-a-editar">
             <option value="" selected disabled>Elige un empleado...</option>
             
-            {% for empleado in todos_los_empleados %}
-              <option value="{{ empleado.id }}">{{ empleado.nombre }}</option>
-            {% endfor %}
+            {% for emp in todos_los_empleados %}
+              <option value="{{ emp.id }}" 
+                      data-nombre="{{ emp.nombre }}"
+                      data-email="{{ emp.email }}"
+                      data-telefono="{{ emp.telefono|default:'' }}"
+                      data-posicion="{{ emp.posicion|default:'' }}"
+                      data-departamento="{{ emp.departamento.id|default:'' }}"
+                      data-estacion="{{ emp.estacion_servicio.id|default:'' }}"
+                      data-firma="{% if emp.firma_digital %}{{ emp.firma_digital.url }}{% endif %}"
+                      data-estado="{{ emp.estado }}">
+                  {{ emp.nombre }} {% if emp.estado == 'inactivo' %}(Inactivo){% endif %}
+              </option>
+            {% endfor %}  
 
           </select>
         </div>
@@ -343,259 +753,1736 @@
   </div>
 </div>
 
+<div class="modal fade" id="modalSolicitarVacaciones" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content p-1">
+
+      <form action="{% url 'employees:crear_vacacion' %}" method="POST" onsubmit="bloquearBoton()" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="hidden" name="form_type" value="solicitar_vacaciones">
+        <input type="hidden" name="create_vacaciones-empleado" value="{{ empleado.id }}">
+        <input type="hidden" name="{{ form_vacaciones.estado.html_name }}" value="PENDIENTE">
+
+        <div class="modal-header">
+          <div>
+            <h5 class="modal-title fw-bold">
+              <i class="bi bi-file-earmark-text me-2"></i>Solicitar Vacaciones
+            </h5>
+            <p class="mb-0 text-muted small">Descarga el formato, fírmalo y envíalo para autorización.</p>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body">
+          <p class="text-muted small">
+            Los campos con (<span class="text-danger">*</span>) son obligatorios.
+          </p>
+
+          <div class="col-md-12 mb-2">
+            <label class="form-label fw-bold">
+              <span class="badge bg-primary me-1">1</span> Descarga los formatos oficiales
+            </label>
+
+            <div class="d-flex gap-2 flex-wrap px-4">
+              <a href="{% static 'formatos/formato_vacaciones.pdf' %}" 
+                download 
+                class="btn btn-outline-primary">
+                <i class="bi bi-file-earmark-pdf me-2"></i>Formato de Vacaciones
+              </a>
+              <a href="{% static 'formatos/formato_roles.pdf' %}" 
+                download 
+                class="btn btn-outline-primary">
+                <i class="bi bi-file-earmark-person me-2"></i>Formato de Roles y Pendientes
+              </a>
+              <div class="form-text">Imprime ambos formatos, fírmalos, escanéalos y adjúntalos abajo.</div>
+
+            </div>
+          </div>
+
+          <hr class="my-4">
+
+          <div class="col-md-12 mb-2">
+            <label class="form-label fw-bold">
+              <span class="badge bg-primary me-1">2</span> Completa los datos de tu solicitud
+            </label>
+            <div class="row px-4">
+              <div class="mb-3">
+                  <label class="form-label fw-bold small">
+                      <i class="bi bi-calendar-check me-1"></i> Selecciona los días de vacaciones <span class="text-danger">*</span>
+                  </label>
+                  
+                  <div id="calendar-container" class="d-flex justify-content-center border rounded bg-light"></div>
+                  
+                  <input type="hidden" name="create_vacaciones-dias_seleccionados" id="id_create_vacaciones-dias_seleccionados" required>
+
+                  <div class="mt-2 d-flex justify-content-between align-items-center">
+                      <div class="form-text">
+                          <i class="bi bi-info-circle me-1"></i> Haz clic para seleccionar/deseleccionar días.
+                      </div>
+                      <span class="badge bg-primary">Días seleccionados: <span id="contador-dias">0</span></span>
+                  </div>
+              </div>
+            </div>
+
+            <div class="row px-4">
+              <div class="gap-1">
+                <label class="form-label fw-bold small">
+                  <i class="bi bi-person-check me-1"></i> ¿Quién debe autorizar esta solicitud? <span class="text-danger">*</span>
+                </label>
+
+                <div class="mb-2">
+                  <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">
+                    <i class="bi bi-building me-1"></i>
+                    <span id="solicitar-autorizador-depto">Detectando departamento...</span>
+                  </span>
+                </div>
+
+                <select name="autorizador" id="solicitar_autorizador" class="form-select" required>
+                  <option value="">Cargando jefes...</option>
+                </select>
+
+                <div id="solicitar-autorizador-feedback" class="form-text"></div>
+              </div>
+            </div>
+          </div>
+
+          <hr class="my-4">
+
+          <div class="col-md-12 md-2">
+            <label class="form-label fw-bold">
+              <span class="badge bg-primary me-1">3</span> Adjunta los formatos firmados
+            </label>
+
+            <div class="row px-4">
+              <div class="col-md-6">
+                <label for="{{ form_vacaciones.archivo_vacaciones.id_for_label }}" class="form-label fw-bold">
+                  {{ form_vacaciones.archivo_vacaciones.label }}
+                </label>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="bi bi-file-earmark-pdf"></i></span>
+                  {{ form_vacaciones.archivo_vacaciones }}
+                </div>
+                <div class="form-text">El formato escaneado con tu firma.</div>
+                {% if form_vacaciones.archivo_vacaciones.errors %}
+                  <div class="invalid-feedback d-block">{{ form_vacaciones.archivo_vacaciones.errors.0 }}</div>
+                {% endif %}
+              </div>
+              <div class="col-md-6">
+                <label for="{{ form_vacaciones.archivo_roles.id_for_label }}" class="form-label fw-bold">
+                  {{ form_vacaciones.archivo_roles.label }}
+                </label>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="bi bi-file-earmark-person"></i></span>
+                  {{ form_vacaciones.archivo_roles }}
+                </div>
+                {% if form_vacaciones.archivo_roles.errors %}
+                  <div class="invalid-feedback d-block">{{ form_vacaciones.archivo_roles.errors.0 }}</div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
+          <hr class="my-4">
+
+          <div class="col-md-12 mb-2">
+            <label class="form-label fw-bold">
+                <span class="badge bg-primary me-1">4</span> Configuración de correo
+            </label>
+
+            <div class="row px-4 mt-2">
+              <div class="col-md-6 mb-3">
+                <label class="form-label d-block fw-bold small">¿Requieres respuesta automática?</label>
+                <div class="form-check form-switch">
+                  <input class="form-check-input" type="checkbox" name="requiere_respuesta_automatica" id="checkRespuestaAuto">
+                  <label class="form-check-label" for="checkRespuestaAuto" id="labelRespuestaAuto">No</label>
+                </div>
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label class="form-label d-block fw-bold small">¿Requieres redirección?</label>
+                <div class="form-check form-switch">
+                  <input class="form-check-input" type="checkbox" name="requiere_redireccion" id="checkRedireccion">
+                  <label class="form-check-label" for="checkRedireccion" id="labelRedireccion">No</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="row px-4 d-none" id="containerSeleccionarEmpleado">
+              <div class="col-12 mb-3">
+                <label class="form-label fw-bold small text-primary">
+                  <i class="bi bi-people-fill me-1"></i> Selecciona los empleados para redireccionar
+                </label>
+                
+                <select name="empleados_redireccion" id="select_redireccion" class="form-select" multiple style="height: 120px;">
+                  {% for emp in empleados_mi_depto %}
+                    <option value="{{ emp.id }}">{{ emp.nombre }}</option>
+                  {% endfor %}
+                </select>
+                
+                <div class="form-text">
+                  <i class="bi bi-info-circle me-1"></i> 
+                  Mantén presionado <b>Ctrl</b> (o Cmd en Mac) para seleccionar varios empleados.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <label for="{{ form_vacaciones.observaciones.id_for_label }}" class="form-label fw-bold">
+            {{ form_vacaciones.observaciones.label }}
+          </label>
+          {{ form_vacaciones.observaciones }}
+          <div class="form-text">Notas adicionales sobre la ausencia (opcional).</div>
+          {% if form_vacaciones.observaciones.errors %}
+            <div class="invalid-feedback d-block">{{ form_vacaciones.observaciones.errors.0 }}</div>
+          {% endif %}
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" id="btnEnviarVacaciones" class="btn btn-primary">
+            Enviar Solicitud
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="modalEditarVacaciones" tabindex="-1" aria-labelledby="modalEditarVacacionesLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content p-1">
+      <form id="formEditarVacacion" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="modal-header">
+          <div>
+            <h5 class="modal-title fw-bold" id="modalEditarVacacionesLabel">
+              <i class="bi bi-pencil-square me-2"></i>Modificar Vacaciones
+            </h5>
+            <p class="mb-0 text-muted small" id="editVacationSubtitle">Selecciona una solicitud para comenzar.</p>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body">
+          <p class="text-muted small">
+            Los campos con (<span class="text-danger">*</span>) son obligatorios.
+          </p>
+
+          <div class="col-md-12 mb-2">
+            <label class="form-label fw-bold">
+              <span class="badge bg-warning text-dark me-1">1</span> Selecciona la solicitud a modificar
+            </label>
+            <div class="px-4" id="container-selector-vacacion">
+              <select class="form-select" id="select-vacacion-a-editar">
+                <option value="" selected disabled>Elige una vacación...</option>
+                {% for v in todas_las_vacaciones %}
+                  <option value="{{ v.id }}"
+                    data-dias="{{ v.dias_seleccionados }}"
+                    data-estado="{{ v.estado }}"
+                    data-obs="{{ v.observaciones|default:'' }}"
+                    data-nombre="{{ v.empleado.nombre }}"
+                    data-autorizador-id="{{ v.autorizador.id|default:'' }}"
+                    data-respuesta-auto="{{ v.requiere_respuesta_automatica|yesno:'true,false' }}"
+                    data-redireccion="{{ v.requiere_redireccion|yesno:'true,false' }}"
+                    data-url-formato="{% if v.archivo_vacaciones %}{{ v.archivo_vacaciones.url }}{% endif %}"
+                    data-url-roles="{% if v.archivo_roles %}{{ v.archivo_roles.url }}{% endif %}">
+                    {{ v.empleado.nombre }} — {{ v.total_dias }} día{{ v.total_dias|pluralize }} | Solicitado: {{ v.fecha_solicitud|date:"d/m/Y" }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
+          <hr class="my-4">
+
+          <div class="col-md-12 mb-2">
+            <label class="form-label fw-bold">
+              <span class="badge bg-warning text-dark me-1">2</span> Modifica los datos de la solicitud
+            </label>
+
+            <div class="row px-4">
+              <div class="mb-3">
+
+                <label class="form-label fw-bold small">
+                  <i class="bi bi-calendar2-check me-1"></i> Días actualmente guardados
+                </label>
+                <div id="edit-dias-actuales" class="border rounded p-3 bg-light mb-3">
+                  <span class="text-muted small fst-italic">Selecciona una vacación para ver los días.</span>
+                </div>
+
+                <label class="form-label fw-bold small">
+                  <i class="bi bi-calendar-check me-1"></i> Selecciona los nuevos días <span class="text-danger">*</span>
+                </label>
+                <div id="edit-calendar-container" class="d-flex justify-content-center border rounded bg-light"></div>
+                <input type="hidden" name="dias_seleccionados" id="edit_dias_seleccionados" required>
+
+                <div class="mt-2 d-flex justify-content-between align-items-center">
+                  <div class="form-text">
+                    <i class="bi bi-info-circle me-1"></i> Haz clic para seleccionar/deseleccionar días.
+                  </div>
+                  <span class="badge bg-warning text-dark">Días seleccionados: <span id="edit-contador-dias">0</span></span>
+                </div>
+
+              </div>
+            </div>
+
+            <div class="row px-4">
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold small">
+                  <i class="bi bi-shield-check me-1"></i> Estado Actual
+                </label>
+                
+                <input type="text" id="edit_estado_visual" class="form-control fw-bold bg-light" readonly disabled>
+                
+                <input type="hidden" name="estado" id="edit_estado">
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold small">
+                  <i class="bi bi-person-check me-1"></i> Autorizador (Jefe) <span class="text-danger">*</span>
+                </label>
+                <select name="autorizador" id="edit_autorizador" class="form-select" required>
+                  <option value="">Cargando jefes...</option>
+                </select>
+                <div id="edit-autorizador-feedback" class="form-text"></div>
+              </div>
+            </div>
+
+            <div class="row px-4">
+              <div class="mb-3">
+                <label class="form-label fw-bold small">Observaciones</label>
+                <textarea name="observaciones" id="edit_observaciones" class="form-control" rows="2"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <hr class="my-4">
+
+          <div class="col-md-12 mb-2">
+            <label class="form-label fw-bold">
+              <span class="badge bg-warning text-dark me-1">3</span> Configuración de correo
+            </label>
+
+            <div class="row px-4 mt-2">
+              <div class="col-md-6 mb-3">
+                <label class="form-label d-block fw-bold small">¿Respuesta automática?</label>
+                <div class="form-check form-switch">
+                  <input class="form-check-input" type="checkbox" name="requiere_respuesta_automatica" id="editCheckRespuestaAuto">
+                  <label class="form-check-label" for="editCheckRespuestaAuto" id="editLabelRespuestaAuto">No</label>
+                </div>
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label class="form-label d-block fw-bold small">¿Requieres redirección?</label>
+                <div class="form-check form-switch">
+                  <input class="form-check-input" type="checkbox" name="requiere_redireccion" id="editCheckRedireccion">
+                  <label class="form-check-label" for="editCheckRedireccion" id="editLabelRedireccion">No</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="row px-4 d-none" id="editContainerSeleccionarEmpleado">
+              <div class="col-12 mb-3">
+                <label class="form-label fw-bold small text-primary">
+                  <i class="bi bi-people-fill me-1"></i> Selecciona los empleados para redireccionar
+                </label>
+                <select name="empleados_redireccion" id="edit_select_redireccion" class="form-select" multiple style="height: 100px;">
+                  {% for emp in empleados_mi_depto %}
+                    <option value="{{ emp.id }}">{{ emp.nombre }}</option>
+                  {% endfor %}
+                </select>
+                <div class="form-text small">Ctrl + Clic para selección múltiple.</div>
+              </div>
+            </div>
+          </div>
+
+          <hr class="my-4">
+
+          <div class="col-md-12 mb-2">
+            <label class="form-label fw-bold">
+              <span class="badge bg-warning text-dark me-1">4</span> Documentos adjuntos
+            </label>
+
+            <div class="px-4 mb-3">
+              <p class="mb-1 small text-muted text-uppercase fw-bold" style="font-size: 0.65rem;">Documentos actuales</p>
+              <div class="d-flex flex-column gap-2 mb-3" id="preview-docs-editar"></div>
+            </div>
+
+            <div class="row px-4">
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold small">Reemplazar Formato Vacaciones</label>
+                <input type="file" name="archivo_vacaciones" class="form-control form-control-sm" accept=".pdf">
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold small">Reemplazar Formato Roles</label>
+                <input type="file" name="archivo_roles" class="form-control form-control-sm" accept=".pdf">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-warning text-white fw-bold" id="btnGuardarVacacion" disabled>
+            <i class="bi bi-save me-1"></i>Guardar Cambios
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal fade" id="previewModal" tabindex="-1" style="z-index: 1060;">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content" style="height: 90vh;">
+            <div class="modal-header bg-dark text-white py-2">
+                <h5 class="modal-title fs-6">Vista Previa</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-0 bg-secondary">
+                <iframe id="previewFrame" src="about:blank" 
+                        style="width:100%; height:100%; border:none;"
+                        allowfullscreen>
+                </iframe>
+            </div>
+        </div>
+    </div>
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
+
 <script>
-  document.addEventListener("DOMContentLoaded", () => {
-    // --- Variables de Filtros y Paginación ---
-    const filterForm = document.getElementById('filter-form');
-    const searchInput = document.getElementById('search-query-empleado');
-    const deptoSelect = document.getElementById('filter-depto-empleado');
-    const estacionSelect = document.getElementById('filter-estacion-empleado');
-    const loadMoreBtn = document.getElementById('load-more-btn');
-    const employeeContainer = document.getElementById('employee-list-container');
-    let currentPage = 1;
-    let isLoading = false;
 
-    const searchUrl = "{% url 'employees:search_employees' %}"; 
+  function bloquearBoton() {
+    var btn = document.getElementById('btnEnviarVacaciones');
+    btn.disabled = true;
+    btn.innerHTML = 'Enviando... <i class="fa fa-spinner fa-spin"></i>'; // Opcional, para dar feedback visual
+    return true;
+  }
 
-    // --- 1. FUNCIÓN DE DEBOUNCE ---
-    let debounceTimer;
-    const debounce = (func, delay) => {
-      clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(func, delay);
-    };
+  (function() { // Protección contra colisión de variables
+    document.addEventListener("DOMContentLoaded", () => {
+      
+      // --- 0.8 Configuración de advertencias al guardar cambios en vacaciones ---
+      // --- VALIDACIÓN: Advertencia antes de guardar vacaciones con aprobación vigente ---
 
-    // --- 2. FUNCIÓN PRINCIPAL PARA CARGAR EMPLEADOS ---
-    async function fetchEmployees(page = 1, append = false) {
-      if (isLoading) return;
-      isLoading = true;
+      const formEditarVacacion = document.getElementById('formEditarVacacion');
 
-      const query = searchInput.value;
-      const deptoId = deptoSelect.value;
-      const estacionId = estacionSelect.value;
+      if (formEditarVacacion) {
+        formEditarVacacion.addEventListener('submit', function(e) {
+          // Extraemos el valor del input OCULTO donde guardamos el estado
+          const estadoElement = document.getElementById('edit_estado');
+          const estadoActual = estadoElement ? estadoElement.value : '';
+          
+          const autorizadorSelect = document.getElementById('edit_autorizador');
+          const nombreAutorizador = autorizadorSelect && autorizadorSelect.selectedIndex >= 0 
+                                    ? autorizadorSelect.options[autorizadorSelect.selectedIndex].text 
+                                    : 'el autorizador';
 
-      if (loadMoreBtn) {
-        const btnSpinner = loadMoreBtn.querySelector('.spinner-border');
-        const btnText = loadMoreBtn.querySelector('.btn-text');
-        if (btnSpinner) btnSpinner.style.display = 'inline-block';
-        if (btnText) btnText.textContent = 'Cargando...';
-        loadMoreBtn.disabled = true;
+          // Función segura para inyectar datos al form
+          const inyectarDatoOculto = (nombre, valor) => {
+            let inputExistente = formEditarVacacion.querySelector(`input[name="${nombre}"]`);
+            if (inputExistente) {
+                inputExistente.value = valor;
+            } else {
+                const inputNuevo = document.createElement('input');
+                inputNuevo.type = 'hidden';
+                inputNuevo.name = nombre;
+                inputNuevo.value = valor;
+                formEditarVacacion.appendChild(inputNuevo);
+            }
+          };
+
+          if (estadoActual === 'APROBADO' || estadoActual === 'RECHAZADO') {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+
+            const esAprobado = estadoActual === 'APROBADO';
+            const tipoAviso = esAprobado ? 'aprobado' : 'rechazado';
+
+            mostrarModalAdvertenciaVacacion({
+              tipo: tipoAviso,
+              autorizador: nombreAutorizador,
+              onConfirmar: () => {
+                // Modificamos el valor directamente en el DOM y lo inyectamos de respaldo
+                if (estadoElement) estadoElement.value = 'PENDIENTE';
+                inyectarDatoOculto('estado', 'PENDIENTE');
+                inyectarDatoOculto('reset_firmas', 'true'); // <-- LA CLAVE PARA EL BACKEND
+                
+                formEditarVacacion.submit();
+              }
+            });
+            return;
+          }
+
+          // Escenario 3: PENDIENTE o sin autorizador → flujo normal
+        });
       }
 
-      const url = new URL(searchUrl, window.location.origin);
-      url.searchParams.append('page', page);
-      if (query) url.searchParams.append('q', query);
-      if (deptoId) url.searchParams.append('depto_id', deptoId);
-      if (estacionId) url.searchParams.append('estacion_id', estacionId);
+      function mostrarModalAdvertenciaVacacion({ tipo, autorizador, onConfirmar }) {
+        // Limpiar modal previo si existe
+        const prevModal = document.getElementById('modalAdvertenciaVacacion');
+        if (prevModal) prevModal.remove();
 
-      try {
-        const response = await fetch(url);
-        if (!response.ok) throw new Error('Error de red al cargar empleados.');
+        const esAprobado = tipo === 'aprobado';
+
+        const titulo = esAprobado
+          ? '<i class="bi bi-shield-exclamation me-2 text-danger"></i>Vacación autorizada — ¿Estás seguro?'
+          : '<i class="bi bi-arrow-clockwise me-2 text-warning"></i>La solicitud volverá a revisión';
+
+        const cuerpo = esAprobado
+          ? `<p class="mb-3">Esta vacación fue <strong class="text-success">aprobada</strong> y actualmente tiene la firma de:</p>
+            <div class="alert alert-warning d-flex align-items-center gap-2 py-2">
+              <i class="bi bi-person-check-fill fs-5"></i>
+              <strong>${autorizador}</strong>
+            </div>
+            <p class="mb-0 text-muted small">Si guardas los cambios, <strong>la aprobación quedará sin efecto</strong> y la solicitud regresará a estado <span class="badge bg-warning text-dark">PENDIENTE</span> para una nueva autorización.</p>`
+          : `<p class="mb-3">Esta solicitud fue <strong class="text-danger">rechazada</strong> anteriormente por:</p>
+            <div class="alert alert-secondary d-flex align-items-center gap-2 py-2">
+              <i class="bi bi-person-fill fs-5"></i>
+              <strong>${autorizador}</strong>
+            </div>
+            <p class="mb-0 text-muted small">Al guardar, la solicitud volverá a estado <span class="badge bg-warning text-dark">PENDIENTE</span> para que el autorizador la revise nuevamente.</p>`;
+
+        const btnConfirmarClase = esAprobado ? 'btn-danger' : 'btn-warning text-white';
+        const btnTexto = esAprobado ? 'Sí, guardar y desautorizar' : 'Entendido, guardar cambios';
+
+        const modalHtml = `
+          <div class="modal fade" id="modalAdvertenciaVacacion" tabindex="-1" style="z-index: 1080;">
+            <div class="modal-dialog modal-dialog-centered">
+              <div class="modal-content border-0 shadow">
+                <div class="modal-header ${esAprobado ? 'bg-danger' : 'bg-warning'} text-white">
+                  <h5 class="modal-title fw-bold">${titulo}</h5>
+                  <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body px-4 py-3">
+                  ${cuerpo}
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-lg me-1"></i>Cancelar, no guardar
+                  </button>
+                  <button type="button" class="btn ${btnConfirmarClase} fw-bold" id="btn-confirmar-guardar-vac">
+                    <i class="bi bi-save me-1"></i>${btnTexto}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>`;
+
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+        const modalEl = document.getElementById('modalAdvertenciaVacacion');
+        const modalInstance = new bootstrap.Modal(modalEl, { backdrop: 'static', keyboard: false });
+
+        document.getElementById('btn-confirmar-guardar-vac').addEventListener('click', () => {
+          modalInstance.hide();
+          modalEl.addEventListener('hidden.bs.modal', () => {
+            modalEl.remove();
+            onConfirmar(); // ← Ejecuta el submit real
+          }, { once: true });
+        });
+
+        // Al cancelar, limpiar el DOM
+        modalEl.addEventListener('hidden.bs.modal', () => {
+          if (document.getElementById('modalAdvertenciaVacacion')) {
+            modalEl.remove();
+          }
+        });
+
+        modalInstance.show();
+      }
+    
+      // --- 0.9 Configuración de opciones avanzadas de correo ---
+      const checkRespuesta = document.getElementById('checkRespuestaAuto');
+      const labelRespuesta = document.getElementById('labelRespuestaAuto');
+      
+      const checkRedir = document.getElementById('checkRedireccion');
+      const containerEmpleado = document.getElementById('containerSeleccionarEmpleado');
+      const selectRedir = document.getElementById('select_redireccion');
+
+      // Manejo de Respuesta Automática
+      checkRespuesta.addEventListener('change', function() {
+          labelRespuesta.textContent = this.checked ? 'Si' : 'No';
+      });
+
+      // Manejo de Redirección
+      checkRedir.addEventListener('change', function() {
+      if (this.checked) {
+        document.getElementById('labelRedireccion').textContent = 'Si';
+        containerEmpleado.classList.remove('d-none');
+      } else {
+        document.getElementById('labelRedireccion').textContent = 'No';
+        containerEmpleado.classList.add('d-none');
         
-        const data = await response.json();
-        
-        if (append) {
-          employeeContainer.insertAdjacentHTML('beforeend', data.html);
-        } else {
-          employeeContainer.innerHTML = data.html;
+        // Deseleccionar todo al apagar el interruptor
+        Array.from(selectRedir.options).forEach(option => option.selected = false);
         }
+      });
 
-        if (loadMoreBtn) {
-          if (data.has_next) {
-            loadMoreBtn.style.display = 'block';
+      // Manejo de Respuesta Automática (MODAL EDICIÓN)
+      document.getElementById('editCheckRespuestaAuto')?.addEventListener('change', function() {
+          document.getElementById('editLabelRespuestaAuto').textContent = this.checked ? 'Si' : 'No';
+      });
+
+      // Manejo de Redirección (MODAL EDICIÓN)
+      document.getElementById('editCheckRedireccion')?.addEventListener('change', function() {
+          const container = document.getElementById('editContainerSeleccionarEmpleado');
+          document.getElementById('editLabelRedireccion').textContent = this.checked ? 'Si' : 'No';
+          if (this.checked) container.classList.remove('d-none');
+          else container.classList.add('d-none');
+      });
+
+      // --- 1. CONFIGURACIÓN Y MENSAJES (TOASTS) ---
+      const toastElList = [].slice.call(document.querySelectorAll('.toast'));
+      const toastList = toastElList.map(function(toastEl) {
+          const t = new bootstrap.Toast(toastEl, { autohide: true, delay: 5000 });
+          t.show();
+          return t;
+      });
+
+      // --- 2. SELECTORES Y ELEMENTOS DEL DOM ---
+      const btnAdd = document.getElementById('btn-main-add');
+      const btnEdit = document.getElementById('btn-main-edit');
+      const btnPhotos = document.getElementById('btn-main-photos');
+      const tabEls = document.querySelectorAll('button[data-bs-toggle="tab"]');
+      const modalEditar = document.getElementById('modalEditarEmpleado');
+      const formEditar = document.getElementById('formEditarEmpleado');
+      const empleadoSelector = document.getElementById('select-empleado-a-editar');
+      const btnFormatoVac = document.getElementById('btn-main-formato-vac');
+
+      // --- 3. CONFIGURACIÓN DE PESTAÑAS (TABS) ---
+      const tabConfig = {
+          'general-tab': { 
+              addText: 'Añadir un empleado', 
+              editText: 'Modificar un empleado', 
+              addModal: '#modalCrearEmpleado', 
+              editModal: '#modalEditarEmpleado', 
+              showEdit: true, 
+              showPhotos: true 
+          },
+          'vacaciones-tab': { 
+              editText: 'Modificar vacaciones', 
+              editModal: '#modalEditarVacaciones', 
+              showEdit: true, 
+              showPhotos: false 
+          },
+          'incapacidades-tab': { 
+              addText: 'Registrar incapacidad', 
+              editText: 'Modificar incapacidad', 
+              addModal: '#modalAddIncapacidad', 
+              editModal: '#modalEditarIncapacidad', 
+              showEdit: false, 
+              showPhotos: false 
+          },
+          'permisos-tab': { 
+              addText: 'Añadir permiso', 
+              editText: 'Modificar permiso', 
+              addModal: '#modalCrearPermiso', 
+              editModal: '#modalEditarPermiso', 
+              showEdit: true, 
+              showPhotos: false 
+          }
+      };
+
+      function updateInterfaceState(tabId) {
+        const config = tabConfig[tabId];
+        if (!config) return;
+
+        if (btnAdd) {
+          if (config.addModal) {
+            btnAdd.querySelector('span').textContent = config.addText;
+            btnAdd.setAttribute('data-bs-target', config.addModal);
+            btnAdd.style.setProperty('display', 'flex', 'important');
+            btnAdd.classList.remove('d-none');
           } else {
-            loadMoreBtn.style.display = 'none';
+            btnAdd.style.setProperty('display', 'none', 'important');
+            btnAdd.classList.add('d-none'); // ← Ocultar si no hay modal para esta pestaña
           }
         }
-        currentPage = page;
 
-      } catch (error) {
-        console.error("Error en fetchEmployees:", error);
-        if (loadMoreBtn) loadMoreBtn.querySelector('.btn-text').textContent = 'Error al cargar';
-      } finally {
-        if (loadMoreBtn && loadMoreBtn.style.display !== 'none') {
-          const btnSpinner = loadMoreBtn.querySelector('.spinner-border');
-          const btnText = loadMoreBtn.querySelector('.btn-text');
-          if (btnSpinner) btnSpinner.style.display = 'none';
-          if (btnText) btnText.textContent = 'Cargar más empleados';
-          loadMoreBtn.disabled = false;
-        }
-        isLoading = false;
-      }
-    }
-
-    // 1. Botón "Cargar Más"
-    if (loadMoreBtn) {
-      loadMoreBtn.addEventListener('click', () => {
-        fetchEmployees(currentPage + 1, true); 
-      });
-    }
-
-    // 2. Submit del formulario (al presionar Enter)
-    if (filterForm) {
-      filterForm.addEventListener('submit', (e) => {
-        e.preventDefault(); 
-        debounce(() => {}, 0); 
-        fetchEmployees(1, false); 
-      });
-    }
-
-    // 3. Búsqueda "en vivo" al teclear
-    if (searchInput) {
-      searchInput.addEventListener('input', () => {
-        debounce(() => {
-          fetchEmployees(1, false);
-        }, 300);
-      });
-    }
-    
-    // 4. Filtro de Departamento
-    if (deptoSelect) {
-      deptoSelect.addEventListener('change', () => {
-        fetchEmployees(1, false);
-      });
-    }
-
-    if (estacionSelect) {
-      estacionSelect.addEventListener('change', () => {
-        fetchEmployees(1, false);
-      });
-    }
-
-    // --- Variables Modales (Empleados) ---
-    const modalCrearEmpleadoEl = document.getElementById('modalCrearEmpleado');
-    const myModalCrearEmpleado = new bootstrap.Modal(modalCrearEmpleadoEl);
-
-    const modalEditarEmpleadoEl = document.getElementById('modalEditarEmpleado');
-    const myModalEditarEmpleado = new bootstrap.Modal(modalEditarEmpleadoEl);
-    
-    // Elementos del modal de EDICIÓN
-    const empleadoSelector = document.getElementById('select-empleado-a-editar');
-    const empleadoFormContainer = document.getElementById('empleado-form-container');
-    const loadingSpinnerEditarEmpleado = document.getElementById('loading-spinner-editar-empleado');
-
-
-    // --- Lógica para reabrir modal con errores ---
-    const modalToReopen = "{{ form_with_errors|default:'none' }}";
-    
-    if (modalToReopen === 'empleado') {
-        myModalCrearEmpleado.show();
-    }
-
-    // --- Lógica modal EDITAR EMPLEADO ---
-    const getEmpleadoFormUrlBase = "{% url 'employees:edit_empleado' 0 %}";
-    
-    async function loadEmpleadoEditForm(empleadoId) {
-      if (!empleadoId) return;
-
-      // Mostrar spinner y ocultar/limpiar formulario anterior
-      if (loadingSpinnerEditarEmpleado) loadingSpinnerEditarEmpleado.style.display = "block";
-      if (empleadoFormContainer) empleadoFormContainer.style.display = "none";
-      if (empleadoFormContainer) empleadoFormContainer.innerHTML = "";
-
-      try {
-        // Construir la URL y hacer la petición
-        const url = getEmpleadoFormUrlBase.replace('0', empleadoId);
-        const response = await fetch(url);
-
-        if (!response.ok) {
-          throw new Error(`Error ${response.status}: ${response.statusText}`);
+        if (btnEdit) {
+          btnEdit.querySelector('span').textContent = config.editText;
+          btnEdit.setAttribute('data-bs-target', config.editModal);
+          btnEdit.style.setProperty('display', config.showEdit ? 'flex' : 'none', 'important');
         }
 
-        const html = await response.text();
-
-        // Inyectar el formulario HTML en el contenedor
-        if (empleadoFormContainer) {
-          empleadoFormContainer.innerHTML = html;
-          empleadoFormContainer.style.display = "block";
+        if (btnPhotos) {
+          if (config.showPhotos) {
+            btnPhotos.classList.remove('d-none');
+            btnPhotos.style.setProperty('display', 'flex', 'important');
+          } else {
+            btnPhotos.classList.add('d-none');
+            btnPhotos.style.setProperty('display', 'none', 'important');
+          }
         }
 
-      } catch (error) {
-        // Manejar errores de red o del servidor
-        console.error("Error cargando el form de editar (empleado):", error);
-        if (empleadoFormContainer) {
-          empleadoFormContainer.innerHTML = `<div class="alert alert-danger">No se pudo cargar el formulario. ${error.message}</div>`;
-          empleadoFormContainer.style.display = "block";
+        if (btnFormatoVac) {
+          if (tabId === 'vacaciones-tab') {
+            btnFormatoVac.style.setProperty('display', 'flex', 'important');
+          } else {
+            btnFormatoVac.style.setProperty('display', 'none', 'important');
+          }
         }
-      } finally {
-        // Ocultar el spinner en cualquier caso
-        if (loadingSpinnerEditarEmpleado) loadingSpinnerEditarEmpleado.style.display = "none";
+
+        // Fetch automático según la pestaña activa
+        if (tabId === 'incapacidades-tab') fetchTabData(configInca);
+        else if (tabId === 'vacaciones-tab') fetchTabData(configVac);
+        else if (tabId === 'general-tab') fetchTabData(configGral);
       }
-    }
 
-    // 2. Listener para cuando se MUESTRA el modal de edición
-    modalEditarEmpleadoEl.addEventListener('show.bs.modal', function(event) {
-      const triggerButton = event.relatedTarget; // El botón que abrió el modal
-      const selectorContainer = document.getElementById('empleado-selector-container');
-
-      // Resetear estado inicial
-      if (empleadoSelector) empleadoSelector.value = "";
-      if (empleadoFormContainer) empleadoFormContainer.style.display = "none";
-      if (empleadoFormContainer) empleadoFormContainer.innerHTML = "";
-      if (loadingSpinnerEditarEmpleado) loadingSpinnerEditarEmpleado.style.display = "none";
-
-      // Lógica para (futuros) botones de "editar" en una tabla
-      if (triggerButton && triggerButton.classList.contains('btn-edit-empleado')) {
-        const empleadoId = triggerButton.dataset.empleadoId; // data-empleado-id="123"
-        if (selectorContainer) selectorContainer.style.display = "none"; // Oculta el selector
-        loadEmpleadoEditForm(empleadoId); // Carga el form directamente
-      } else {
-        // Si se abre desde el menú general (tu caso actual)
-        if (selectorContainer) selectorContainer.style.display = "block"; // Muestra el selector
-      }
-    });
-
-    // 3. Listener para el dropdown SELECTOR de empleados
-    if (empleadoSelector) {
-      empleadoSelector.addEventListener('change', function() {
-        loadEmpleadoEditForm(this.value);
+      tabEls.forEach(tab => {
+        tab.addEventListener('shown.bs.tab', (event) => {
+          updateInterfaceState(event.target.id);
+          const target = event.target.getAttribute('data-bs-target');
+          if (target) history.replaceState(null, null, target);
+        });
       });
-    }
 
-    // --- Lógica Toasts ---
-    const toastElements = document.querySelectorAll('.toast');
-    if (toastElements.length > 0) {
-      toastElements.forEach(function (toastEl) {
-        const toast = new bootstrap.Toast(toastEl, { autohide: true, delay: 5000 });
-        toast.show();
+      // --- 4. GESTIÓN DE VACACIONES ---
+      function inicializarCalendarioEdicion(fechasIniciales = []) {
+        const calContainer = document.getElementById('edit-calendar-container');
+        const inputDias    = document.getElementById('edit_dias_seleccionados');
+        const contador     = document.getElementById('edit-contador-dias');
+
+        if (!calContainer) return;
+
+        // 1. Cargar las fechas previas en el input oculto y en el contador numérico
+        if (inputDias) inputDias.value = JSON.stringify(fechasIniciales);
+        if (contador)  contador.innerText = fechasIniciales.length;
+
+        // 2. Destruir instancias previas para evitar duplicados en el DOM
+        if (window._flatpickrEdit) {
+            window._flatpickrEdit.destroy();
+            window._flatpickrEdit = null;
+            calContainer.innerHTML = '';
+        }
+
+        // 3. Inicializar Flatpickr CON las fechas pre-seleccionadas
+        requestAnimationFrame(() => {
+          window._flatpickrEdit = flatpickr(calContainer, {
+              inline: true,
+              mode: "multiple",
+              dateFormat: "Y-m-d",
+              locale: "es",
+              defaultDate: fechasIniciales, // <--- ESTO PINTA LOS DÍAS EN EL CALENDARIO
+              onChange: function(selectedDates, dateStr, instance) {
+                  const datesArray = selectedDates.map(d => instance.formatDate(d, "Y-m-d"));
+                  if (inputDias) inputDias.value = JSON.stringify(datesArray);
+                  if (contador)  contador.innerText = selectedDates.length;
+              }
+          });
+        });
+      }
+
+      function llenarFormularioVacacion(data) {
+        const form = document.getElementById('formEditarVacacion');
+        if (form) form.action = "{% url 'employees:editar_vacacion' 0 %}".replace('0', data.id);
+
+        // Estado
+        // Estado
+        const hiddenEstado = document.getElementById('edit_estado');
+        const visualEstado = document.getElementById('edit_estado_visual');
+        const estadoActual = data.estado || 'PENDIENTE';
+
+        if (hiddenEstado) hiddenEstado.value = estadoActual;
+        
+        if (visualEstado) {
+            visualEstado.value = estadoActual;
+            
+            // Le damos color al texto visual dependiendo de su estado
+            visualEstado.classList.remove('text-warning', 'text-success', 'text-danger');
+            if (estadoActual === 'APROBADO') visualEstado.classList.add('text-success');
+            else if (estadoActual === 'RECHAZADO') visualEstado.classList.add('text-danger');
+            else visualEstado.classList.add('text-warning');
+        }
+        
+        // Observaciones
+        const txtObs = document.getElementById('edit_observaciones');
+        if (txtObs) txtObs.value = (data.obs && data.obs !== 'None') ? data.obs : '';
+
+        // Subtitle
+        const subtitle = document.getElementById('editVacationSubtitle');
+        if (subtitle) subtitle.innerHTML = `Editando solicitud de: <strong class="text-primary">${data.nombre}</strong>`;
+
+        // Configuración de checkboxes de correo
+        const checkRes = document.getElementById('editCheckRespuestaAuto');
+        const checkRed = document.getElementById('editCheckRedireccion');
+
+        if (checkRes) {
+          const valorRes = String(data.respuestaAuto) === 'true';
+          checkRes.checked = valorRes;
+          document.getElementById('editLabelRespuestaAuto').textContent = valorRes ? 'Si' : 'No';
+        }
+        if (checkRed) {
+          const valorRed = String(data.redireccion) === 'true';
+          checkRed.checked = valorRed;
+          document.getElementById('editLabelRedireccion').textContent = valorRed ? 'Si' : 'No';
+          document.getElementById('editContainerSeleccionarEmpleado').classList.toggle('d-none', !valorRed);
+        }
+
+        cargarJefesEdicion(data.autorizadorId);
+
+        const btnGuardar = document.getElementById('btnGuardarVacacion');
+        if (btnGuardar) btnGuardar.disabled = false;
+
+        // Preview de documentos
+        const previewDocs = document.getElementById('preview-docs-editar');
+        if (previewDocs) {
+            let htmlFormato = '';
+            if (data.urlFormato && data.urlFormato.trim() !== '') {
+                htmlFormato = `
+                    <a href="${data.urlFormato}" target="_blank" class="btn btn-outline-primary btn-sm w-100 d-flex align-items-center gap-2">
+                        <i class="bi bi-file-earmark-pdf-fill"></i> Ver Formato de Vacaciones
+                        <i class="bi bi-box-arrow-up-right ms-auto" style="font-size: 0.75rem;"></i>
+                    </a>`;
+            } else {
+                htmlFormato = `<span class="text-muted small fst-italic"><i class="bi bi-file-earmark-x me-1"></i>Sin formato Vacaciones</span>`;
+            }
+            
+            let htmlRoles = '';
+            if (data.urlRoles && data.urlRoles.trim() !== '') {
+                htmlRoles = `
+                    <a href="${data.urlRoles}" target="_blank" class="btn btn-outline-primary btn-sm w-100 d-flex align-items-center gap-2">
+                        <i class="bi bi-file-earmark-person-fill"></i> Ver Formato de Roles
+                        <i class="bi bi-box-arrow-up-right ms-auto" style="font-size: 0.75rem;"></i>
+                    </a>`;
+            } else {
+                htmlRoles = `<span class="text-muted small fst-italic"><i class="bi bi-file-earmark-x me-1"></i>Sin formato Roles</span>`;
+            }
+
+            // Inyectamos todo envuelto en una sola fila (row) dividida a la mitad (col-6)
+            previewDocs.innerHTML = `
+                <div class="row g-2 w-100 m-0">
+                    <div class="col-6 d-flex align-items-center justify-content-center px-1">
+                        ${htmlFormato}
+                    </div>
+                    <div class="col-6 d-flex align-items-center justify-content-center px-1">
+                        ${htmlRoles}
+                    </div>
+                </div>
+            `;
+        }
+
+        // --- SOLUCIÓN: Inyectar el diseño exacto de las cards ---
+        const diasCard = document.getElementById('edit-dias-actuales');
+          let diasArray = [];
+          
+          try {
+              if (Array.isArray(data.dias)) {
+                  diasArray = data.dias;
+              } else if (typeof data.dias === 'string' && data.dias.trim() !== '') {
+                  // TRUCO VITAL: Convertir comillas simples de Python a comillas dobles de JSON
+                  const jsonValido = data.dias.replace(/'/g, '"');
+                  diasArray = JSON.parse(jsonValido);
+              }
+          } catch(e) { 
+              console.error("Error al parsear las fechas:", e);
+              diasArray = []; 
+          }
+
+          if (diasCard) {
+            if (diasArray.length === 0) {
+                diasCard.innerHTML = '<span class="text-muted small fst-italic">Sin días registrados.</span>';
+            } else {
+              // Generar los badges visuales ordenados
+              const badges = diasArray.sort().map(d => {
+                  // Opcional: Convertir YYYY-MM-DD a DD/MM/YYYY para una mejor lectura
+                  const partes = d.split('-');
+                  const fechaElegante = partes.length === 3 ? `${partes[2]}/${partes[1]}/${partes[0]}` : d;
+                  
+                  return `<span class="badge bg-secondary text-white me-1 mb-1 px-2 py-2 shadow-sm border" style="font-size: 0.85rem;">
+                              <i class="bi bi-calendar-event me-1"></i>${fechaElegante}
+                          </span>`;
+              }).join('');
+              
+              diasCard.innerHTML = `
+                  <div class="mb-2">
+                      <span class="small text-muted fw-bold text-uppercase" style="font-size: 0.7rem;">
+                          <i class="bi bi-check-circle-fill text-success me-1"></i> ${diasArray.length} día(s) actualmente guardado(s):
+                      </span>
+                  </div>
+                  <div class="d-flex flex-wrap gap-1">${badges}</div>`;
+          }
+        }
+      }
+
+      // show.bs.modal → Capturar el nuevo atributo desde el botón de la card seleccionada
+      document.addEventListener('show.bs.modal', function(event) {
+        if (event.target.id !== 'modalEditarVacaciones') return;
+
+        const button = event.relatedTarget;
+        const containerSelector = document.getElementById('container-selector-vacacion');
+
+        if (button && button.getAttribute('data-vacacion-id')) {
+          if (containerSelector) containerSelector.style.display = 'none';
+
+          llenarFormularioVacacion({
+              id:             button.getAttribute('data-vacacion-id'),
+              nombre:         button.getAttribute('data-empleado'),
+              dias:           button.getAttribute('data-dias'), 
+              periodosHtml:   button.getAttribute('data-periodos-html'), // NUEVO: Atrapamos el HTML de la card
+              estado:         button.getAttribute('data-estado'),
+              obs:            button.getAttribute('data-obs'),
+              autorizadorId:  button.getAttribute('data-autorizador-id'),
+              respuestaAuto:  button.getAttribute('data-respuesta-auto'),
+              redireccion:    button.getAttribute('data-redireccion'),
+              urlFormato:     button.getAttribute('data-url-formato'),
+              urlRoles:       button.getAttribute('data-url-roles')
+          });
+        } else {
+          if (containerSelector) containerSelector.style.display = 'block';
+          
+          const subtitle = document.getElementById('editVacationSubtitle');
+          if (subtitle) subtitle.textContent = "Selecciona una solicitud de la lista.";
+
+          const btnGuardar = document.getElementById('btnGuardarVacacion');
+          if (btnGuardar) btnGuardar.disabled = true;
+        }
       });
-    }
 
-    // --- Lógica Botón Móvil (Historial - adaptada) ---
-    modalCrearEmpleadoEl.addEventListener('show.bs.modal', function () {
-      if (window.location.hash !== '#modalCreateEmpleado') {
-        history.pushState({ modal: 'createEmpleado' }, '', '#modalCreateEmpleado');
-      }
-    });
-    modalCrearEmpleadoEl.addEventListener('hide.bs.modal', function () {
-      if (history.state && history.state.modal === 'createEmpleado') {
-        history.back();
-      }
-    });
-    
-    modalEditarEmpleadoEl.addEventListener('show.bs.modal', function () {
-      if (window.location.hash !== '#modalEditEmpleado') {
-        history.pushState({ modal: 'editEmpleado' }, '', '#modalEditEmpleado');
-      }
-    });
-    modalEditarEmpleadoEl.addEventListener('hide.bs.modal', function () {
-      if (history.state && history.state.modal === 'editEmpleado') {
-        history.back();
-      }
-      // Limpiar al cerrar
-      if (empleadoFormContainer) empleadoFormContainer.innerHTML = "";
-      if (empleadoFormContainer) empleadoFormContainer.style.display = "none";
-      if (empleadoSelector) empleadoSelector.value = ""; 
-    });
+      let diasParaFlatpickr = [];
 
-    // Listener para el botón "atrás" del navegador
-    window.addEventListener('popstate', function (event) {
-      if (!event.state || !event.state.modal) { 
-        if (modalCrearEmpleadoEl.classList.contains('show')) myModalCrearEmpleado.hide();
-        if (modalEditarEmpleadoEl.classList.contains('show')) myModalEditarEmpleado.hide();
-      }
-    });
+      // Listener del select interno (por si se cambia de registro dentro del modal)
+      document.getElementById('select-vacacion-a-editar')?.addEventListener('change', function() {
+        const opt = this.options[this.selectedIndex];
+        if (!opt || !opt.value) return;
 
-  }); 
+        llenarFormularioVacacion({
+          id:            opt.value,
+          nombre:        opt.getAttribute('data-nombre'),
+          dias:          opt.getAttribute('data-dias'),
+          periodosHtml:  opt.getAttribute('data-periodos-html'), // NUEVO: Atrapamos el HTML de la opción elegida
+          estado:        opt.getAttribute('data-estado'),
+          obs:           opt.getAttribute('data-obs'),
+          autorizadorId: opt.getAttribute('data-autorizador-id'),
+          respuestaAuto: opt.getAttribute('data-respuesta-auto'),
+          redireccion:   opt.getAttribute('data-redireccion'),
+          urlFormato:    opt.getAttribute('data-url-formato') || '',
+          urlRoles:      opt.getAttribute('data-url-roles') || ''
+        });
+
+        inicializarCalendarioEdicion();
+      });
+
+      // show.bs.modal → El modal se está abriendo.
+      document.addEventListener('show.bs.modal', function(event) {
+        if (event.target.id !== 'modalEditarVacaciones') return;
+
+        const button = event.relatedTarget;
+        const containerSelector = document.getElementById('container-selector-vacacion');
+
+        if (button && button.getAttribute('data-vacacion-id')) {
+          if (containerSelector) containerSelector.style.display = 'none';
+
+          // --- EXTRAEMOS LAS FECHAS PARA EL CALENDARIO ---
+          try {
+              const rawDias = button.getAttribute('data-dias');
+              if (rawDias && rawDias.trim() !== '') {
+                  diasParaFlatpickr = JSON.parse(rawDias.replace(/'/g, '"'));
+              } else {
+                  diasParaFlatpickr = [];
+              }
+          } catch(e) { diasParaFlatpickr = []; }
+
+          llenarFormularioVacacion({
+              id:             button.getAttribute('data-vacacion-id'),
+              nombre:         button.getAttribute('data-empleado'),
+              dias:           button.getAttribute('data-dias'), 
+              estado:         button.getAttribute('data-estado'),
+              obs:            button.getAttribute('data-obs'),
+              autorizadorId:  button.getAttribute('data-autorizador-id'),
+              respuestaAuto:  button.getAttribute('data-respuesta-auto'),
+              redireccion:    button.getAttribute('data-redireccion'),
+              urlFormato:     button.getAttribute('data-url-formato'),
+              urlRoles:       button.getAttribute('data-url-roles')
+          });
+        } else {
+          if (containerSelector) containerSelector.style.display = 'block';
+          diasParaFlatpickr = []; // Reseteamos si se abre en blanco desde el botón superior
+          
+          const subtitle = document.getElementById('editVacationSubtitle');
+          if (subtitle) subtitle.textContent = "Selecciona una solicitud de la lista.";
+
+          const btnGuardar = document.getElementById('btnGuardarVacacion');
+          if (btnGuardar) btnGuardar.disabled = true;
+        }
+      });
+
+      // shown.bs.modal → El modal ya es visible. Inicializamos Flatpickr con las fechas
+      document.addEventListener('shown.bs.modal', function(event) {
+        if (event.target.id !== 'modalEditarVacaciones') return;
+        
+        inicializarCalendarioEdicion(diasParaFlatpickr); // Le pasamos los días
+      });
+
+      // hidden.bs.modal → Limpieza absoluta al cerrar el modal
+      document.addEventListener('hidden.bs.modal', function(event) {
+        if (event.target.id !== 'modalEditarVacaciones') return;
+        
+        diasParaFlatpickr = []; // Limpiamos memoria
+
+        if (window._flatpickrEdit) {
+            window._flatpickrEdit.destroy();
+            window._flatpickrEdit = null;
+            const container = document.getElementById('edit-calendar-container');
+            if (container) container.innerHTML = '';
+        }
+          
+        const contador = document.getElementById('edit-contador-dias');
+        if (contador) contador.innerText = '0';
+
+        const inputDias = document.getElementById('edit_dias_seleccionados');
+        if (inputDias) inputDias.value = '';
+
+        const diasCard = document.getElementById('edit-dias-actuales');
+        if (diasCard) diasCard.innerHTML = '<span class="text-muted small fst-italic">Selecciona una vacación para ver los días.</span>';
+        
+        const selectVacacion = document.getElementById('select-vacacion-a-editar');
+        if (selectVacacion) selectVacacion.value = '';
+      });
+
+      // Listener del select interno (por si se cambia de registro desde la lista desplegable)
+      document.getElementById('select-vacacion-a-editar')?.addEventListener('change', function() {
+        const opt = this.options[this.selectedIndex];
+        if (!opt || !opt.value) return;
+
+        // --- EXTRAEMOS LAS FECHAS PARA EL CALENDARIO ---
+        try {
+            const rawDias = opt.getAttribute('data-dias');
+            if (rawDias && rawDias.trim() !== '') {
+                diasParaFlatpickr = JSON.parse(rawDias.replace(/'/g, '"'));
+            } else {
+                diasParaFlatpickr = [];
+            }
+        } catch(e) { diasParaFlatpickr = []; }
+
+        llenarFormularioVacacion({
+          id:            opt.value,
+          nombre:        opt.getAttribute('data-nombre'),
+          dias:          opt.getAttribute('data-dias'),
+          estado:        opt.getAttribute('data-estado'),
+          obs:           opt.getAttribute('data-obs'),
+          autorizadorId: opt.getAttribute('data-autorizador-id'),
+          respuestaAuto: opt.getAttribute('data-respuesta-auto'),
+          redireccion:   opt.getAttribute('data-redireccion'),
+          urlFormato:    opt.getAttribute('data-url-formato') || '',
+          urlRoles:      opt.getAttribute('data-url-roles') || ''
+        });
+
+        inicializarCalendarioEdicion(diasParaFlatpickr); // Le pasamos los días
+      });
+
+      // --- 5. LÓGICA AJAX (FILTROS Y BÚSQUEDA) ---
+      const debounce = (func, delay) => {
+          let timer;
+          return (...args) => {
+              clearTimeout(timer);
+              timer = setTimeout(() => func.apply(this, args), delay);
+          };
+      };
+
+      async function fetchTabData({ url, container, input, depto, estacion, estado, fecha_desde, fecha_hasta, loadBtn, append = false }) {
+          if (!container || !url) return;
+          let page = append ? (parseInt(loadBtn.dataset.nextPage) || 1) : 1;
+          const params = new URLSearchParams({
+              page: page,
+              q: input ? input.value : '',
+              depto_id: depto ? depto.value : '',
+              estacion_id: estacion ? estacion.value : '',
+              estado: estado ? estado.value : '',
+              fecha_desde: fecha_desde ? fecha_desde.value : '',
+              fecha_hasta: fecha_hasta ? fecha_hasta.value : '',
+          });
+
+          if (loadBtn) {
+              loadBtn.disabled = true;
+              const spinner = loadBtn.querySelector('.spinner-border');
+              if (spinner) spinner.style.display = 'inline-block';
+          }
+
+          try {
+              const response = await fetch(`${url}?${params.toString()}`);
+              const data = await response.json();
+
+              if (append) container.insertAdjacentHTML('beforeend', data.html);
+              else container.innerHTML = data.html;
+
+              if (loadBtn) {
+                  loadBtn.style.display = data.has_next ? 'inline-block' : 'none';
+                  loadBtn.dataset.nextPage = page + 1;
+              }
+          } catch (error) {
+              console.error("Error AJAX:", error);
+          } finally {
+              if (loadBtn) {
+                  loadBtn.disabled = false;
+                  const spinner = loadBtn.querySelector('.spinner-border');
+                  if (spinner) spinner.style.display = 'none';
+              }
+          }
+      }
+
+      // Configuración de módulos AJAX
+      const configGral = {
+          url: "{% url 'employees:search_employees' %}",
+          container: document.getElementById('employee-list-container'),
+          input: document.getElementById('search-query-empleado'),
+          depto: document.getElementById('filter-depto-empleado'),
+          estacion: document.getElementById('filter-estacion-empleado'),
+          loadBtn: document.getElementById('load-more-btn')
+      };
+
+      const configVac = {
+          url: "{% url 'employees:search_vacations' %}",
+          container: document.getElementById('vacation-list-container'),
+          input: document.getElementById('search-query-vacaciones'),
+          depto: document.getElementById('filter-depto-vacaciones'),
+          estacion: document.getElementById('filter-estacion-vacaciones'),
+          estado: document.getElementById('filter-estado-vacaciones'),
+          fecha_desde: document.getElementById('filter-fecha-desde-vacaciones'),
+          fecha_hasta: document.getElementById('filter-fecha-hasta-vacaciones'),
+          loadBtn: document.getElementById('load-more-vacations-btn')
+      };
+
+      const configInca = {
+          url: "{% url 'employees:search_incapacidades' %}",
+          container: document.getElementById('incapacidad-list-container'),
+          input: document.getElementById('search-query-incapacidades'),
+          depto: document.getElementById('filter-depto-incapacidades'),
+          estacion: document.getElementById('filter-estacion-incapacidades'),
+          loadBtn: document.getElementById('load-more-incapacidades-btn')
+      };
+
+      // ↓ AQUÍ la función de scroll
+      function scrollToCard(cardElement) {
+          const main = document.querySelector('main.overflow-auto');
+          if (!main) return;
+          const mainRect = main.getBoundingClientRect();
+          const cardRect = cardElement.getBoundingClientRect();
+          const offset = cardRect.top - mainRect.top + main.scrollTop - 100;
+          main.scrollTo({ top: offset, behavior: 'smooth' });
+      }
+      
+      // --- REABRIR MODAL TRAS REDIRECT ---
+      const urlParams = new URLSearchParams(window.location.search);
+      const empleadoIdReabrir = urlParams.get('open_modal');
+
+      if (empleadoIdReabrir) {
+        window.history.replaceState({}, document.title, window.location.pathname);
+
+        (async function buscarYAbrirModal(id) {
+            const modalElement = document.getElementById('modalExpedientes' + id);
+            
+            if (modalElement) {
+                modalElement.closest('.col-12')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                setTimeout(() => new bootstrap.Modal(modalElement).show(), 150);
+                return;
+            }
+
+            let pagina = 2;
+            while (true) {
+                const params = new URLSearchParams({
+                    page: pagina,
+                    q: configGral.input?.value || '',
+                    depto_id: configGral.depto?.value || '',
+                    estacion_id: configGral.estacion?.value || '',
+                });
+
+                try {
+                    const response = await fetch(`${configGral.url}?${params.toString()}`);
+                    const data = await response.json();
+
+                    configGral.container.insertAdjacentHTML('beforeend', data.html);
+
+                    const modal = document.getElementById('modalExpedientes' + id);
+                    if (modal) {
+                        if (configGral.loadBtn) {
+                            configGral.loadBtn.style.display = data.has_next ? 'inline-block' : 'none';
+                            configGral.loadBtn.dataset.nextPage = pagina + 1;
+                        }
+                        modal.closest('.col-12')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        setTimeout(() => new bootstrap.Modal(modal).show(), 150);
+                        break;
+                    } else if (!data.has_next) {
+                        break;
+                    } else {
+                        pagina++;
+                    }
+                } catch (e) {
+                    console.error('Error buscando empleado:', e);
+                    break;
+                }
+            }
+        })(empleadoIdReabrir);
+      }
+
+      // --- 6. FIRMA DIGITAL ---
+      let signaturePadInstance = null;
+
+      function initSignature() {
+        const canvas = document.getElementById('signature-canvas');
+        if (!canvas) return;
+
+        // Si ya existe una instancia, no la duplicamos
+        if (!signaturePadInstance) {
+            signaturePadInstance = new SignaturePad(canvas, {
+                penColor: 'rgb(0, 0, 0)',
+                backgroundColor: 'rgba(255, 255, 255, 0)'
+            });
+        }
+
+        // Función vital para recalcular coordenadas
+        const ratio = Math.max(window.devicePixelRatio || 1, 1);
+        canvas.width = canvas.offsetWidth * ratio;
+        canvas.height = canvas.offsetHeight * ratio;
+        canvas.getContext("2d").scale(ratio, ratio);
+        signaturePadInstance.clear(); // Resetea el lienzo y activa el dibujado
+      }
+
+      // Escuchar el evento de apertura del modal
+      const modalCrear = document.getElementById('modalCrearEmpleado');
+      if (modalCrear) {
+          modalCrear.addEventListener('shown.bs.modal', function () {
+              initSignature();
+          });
+      }
+
+      // Botón borrar
+      document.getElementById('clear-signature-btn')?.addEventListener('click', (e) => {
+          e.preventDefault();
+          signaturePadInstance?.clear();
+      });
+
+      // Guardar al enviar el form
+      document.getElementById('formCrearEmpleado')?.addEventListener('submit', async function(e) {
+        e.preventDefault(); // Evita el submit tradicional
+
+        // Guarda la firma antes de enviar
+        const inputHidden = document.getElementById('firma_b64');
+        if (signaturePadInstance && !signaturePadInstance.isEmpty()) {
+            inputHidden.value = signaturePadInstance.toDataURL();
+        }
+
+        const formData = new FormData(this);
+        const submitBtn = this.querySelector('[type="submit"]');
+        submitBtn.disabled = true;
+
+        try {
+            const response = await fetch(this.action || window.location.pathname, {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                // Cierra el modal
+                bootstrap.Modal.getInstance(document.getElementById('modalCrearEmpleado')).hide();
+
+                // Muestra toast de éxito
+                showToast(data.message || 'Empleado guardado correctamente.', 'success');
+
+                // Refresca la lista SIN perder los filtros
+                fetchTabData(configGral);
+            } else {
+                // Muestra errores dentro del modal
+                showFormErrors(this, data.errors);
+            }
+        } catch (err) {
+            console.error('Error al guardar empleado:', err);
+            showToast('Ocurrió un error inesperado.', 'error');
+        } finally {
+            submitBtn.disabled = false;
+        }
+      });
+
+      // --- LOGICA PARA FIRMA EN EDICIÓN ---
+      let signaturePadEdit = null;
+
+      window.initEditSignaturePad = function() {
+        const canvas = document.getElementById('signature-canvas-edit');
+        const inputHidden = document.getElementById('firma_b64_edit');
+        const containerFirmaActual = document.getElementById('container-firma-actual');
+        const containerCanvas = document.getElementById('container-canvas-edit');
+        const btnCambiar = document.getElementById('btn-cambiar-firma');
+        const btnCancelar = document.getElementById('btn-cancelar-cambio');
+        const clearBtn = document.getElementById('clear-signature-btn-edit');
+        const form = document.getElementById('formEditarEmpleado');  // ← Este ID debe existir
+
+        if (!canvas || !inputHidden) return;
+
+        // Destruir instancia previa si existe
+        if (window._signaturePadEditInstance) {
+          window._signaturePadEditInstance.off();
+          window._signaturePadEditInstance = null;
+        }
+
+        const pad = new SignaturePad(canvas, {
+          penColor: 'rgb(0, 0, 0)',
+          backgroundColor: 'rgba(255, 255, 255, 0)'
+        });
+        window._signaturePadEditInstance = pad;
+
+        function activarCanvas() {
+          const ratio = Math.max(window.devicePixelRatio || 1, 1);
+          canvas.width = canvas.offsetWidth * ratio;
+          canvas.height = canvas.offsetHeight * ratio;
+          canvas.getContext("2d").scale(ratio, ratio);
+          pad.clear();
+        }
+
+        // Si el canvas ya está visible (sin firma previa), inicializarlo
+        if (containerCanvas && !containerCanvas.classList.contains('d-none')) {
+          activarCanvas();
+        }
+
+        btnCambiar?.addEventListener('click', () => {
+          containerFirmaActual?.classList.add('d-none');
+          containerCanvas?.classList.remove('d-none');
+          activarCanvas();
+        });
+
+        btnCancelar?.addEventListener('click', () => {
+          containerCanvas?.classList.add('d-none');
+          containerFirmaActual?.classList.remove('d-none');
+          pad.clear();
+          inputHidden.value = "";
+        });
+
+        clearBtn?.addEventListener('click', (e) => {
+          e.preventDefault();
+          pad.clear();
+          inputHidden.value = "";
+        });
+      };  
+
+      // --- HELPERS ---
+      function showToast(message, type = 'success') {
+        const container = document.querySelector('.toast-container');
+        const colorMap = { success: 'bg-success', error: 'bg-danger', warning: 'bg-warning', info: 'bg-primary' };
+        const toastEl = document.createElement('div');
+        toastEl.className = 'toast';
+        toastEl.setAttribute('role', 'alert');
+        toastEl.innerHTML = `
+            <div class="toast-header text-white ${colorMap[type] || 'bg-success'}">
+                <i class="bi bi-bell-fill me-2"></i>
+                <strong class="me-auto">Notificación</strong>
+                <small>Ahora</small>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body">${message}</div>`;
+        container.appendChild(toastEl);
+        new bootstrap.Toast(toastEl, { autohide: true, delay: 5000 }).show();
+        toastEl.addEventListener('hidden.bs.toast', () => toastEl.remove());
+      }
+
+      document.addEventListener('submit', async function(e) {
+          const form = e.target.closest('#formEditarEmpleado');
+          if (!form) return;
+
+          e.preventDefault();
+
+          // Captura la firma si existe y no está vacía
+          const inputHidden = document.getElementById('firma_b64_edit');
+          if (window._signaturePadEditInstance && !window._signaturePadEditInstance.isEmpty()) {
+              if (inputHidden) inputHidden.value = window._signaturePadEditInstance.toDataURL();
+          }
+
+          const submitBtn = form.querySelector('[type="submit"]');
+          if (submitBtn) submitBtn.disabled = true;
+
+          try {
+              const response = await fetch(form.action, {
+                  method: 'POST',
+                  body: new FormData(form),
+                  headers: { 'X-Requested-With': 'XMLHttpRequest' }
+              });
+
+              const data = await response.json();
+
+              if (data.success) {
+                  bootstrap.Modal.getInstance(document.getElementById('modalEditarEmpleado'))?.hide();
+                  showToast(data.message, 'success');
+                  fetchTabData(configGral); // ✅ Refresca sin perder filtros
+              } else {
+                  // Muestra errores en el modal
+                  Object.entries(data.errors).forEach(([field, msgs]) => {
+                      const input = form.querySelector(`[name$="${field}"]`);
+                      if (input) {
+                          input.classList.add('is-invalid');
+                          let fb = input.closest('.mb-3')?.querySelector('.invalid-feedback');
+                          if (!fb) {
+                              fb = document.createElement('div');
+                              fb.className = 'invalid-feedback d-block';
+                              input.closest('.mb-3')?.appendChild(fb);
+                          }
+                          fb.textContent = msgs[0];
+                      }
+                  });
+              }
+          } catch (err) {
+              console.error('Error al editar empleado:', err);
+              showToast('Ocurrió un error inesperado.', 'error');
+          } finally {
+              if (submitBtn) submitBtn.disabled = false;
+          }
+      });
+
+
+      // --- 7. EDICIÓN DE EMPLEADOS (AJAX FORM) ---
+      const getEmpleadoFormUrlBase = "{% url 'employees:edit_empleado' 0 %}";
+
+      async function loadEmpleadoEditForm(id) {
+        if (!id) return;
+        const container = document.getElementById('empleado-form-container');
+        const spinner = document.getElementById('loading-spinner-editar-empleado');
+
+        if (spinner) spinner.style.display = "block";
+        if (container) container.style.display = "none";
+
+        try {
+            const response = await fetch(getEmpleadoFormUrlBase.replace('0', id));
+            const html = await response.text();
+            if (container) {
+                container.innerHTML = html;
+                container.style.display = "block";
+                
+                // Damos un pequeño margen para que el DOM reconozca los nuevos elementos
+                setTimeout(() => {
+                    window.initEditSignaturePad();
+                }, 400); 
+            }
+        } catch (e) {
+            console.error("Error al cargar formulario de edición:", e);
+        } finally {
+            if (spinner) spinner.style.display = "none";
+        }
+      }
+
+      empleadoSelector?.addEventListener('change', function() { loadEmpleadoEditForm(this.value); });
+
+      modalEditarEmpleado?.addEventListener('show.bs.modal', function(event) {
+          const button = event.relatedTarget;
+          if (!button) return;
+          const idEmpleado = button.getAttribute('data-id');
+
+          if (idEmpleado) {
+              if (empleadoSelector) empleadoSelector.value = idEmpleado;
+              loadEmpleadoEditForm(idEmpleado);
+          } else {
+              if (empleadoSelector) empleadoSelector.value = "";
+              const formCont = document.getElementById('empleado-form-container');
+              if (formCont) formCont.style.display = "none";
+          }
+      });
+
+      // --- 8. VISTA PREVIA DE DOCUMENTOS ---
+      // --- 8. LÓGICA UNIVERSAL DE VISTA PREVIA ---
+      const previewModalEl = document.getElementById('previewModal');
+      const previewFrame = document.getElementById('previewFrame');
+
+      if (previewModalEl && previewFrame) {
+        // Escuchamos clics en cualquier parte del documento (Delegación)
+        document.addEventListener('click', function(event) {
+            // Buscamos si el clic fue en un botón que apunta al previewModal
+            const button = event.target.closest('[data-bs-target="#previewModal"]');
+            
+            if (button) {
+                const fileUrl = button.getAttribute('data-src');
+                const fileTitle = button.getAttribute('data-title');
+                const returnId = button.getAttribute('data-return-id'); // Opcional (para edición)
+
+                // 1. Cambiamos el título y guardamos el ID de retorno si existe
+                previewModalEl.querySelector('.modal-title').textContent = fileTitle || 'Vista Previa';
+                previewModalEl.dataset.returnTo = returnId || ''; 
+
+                // 2. Si venimos de otro modal (ej. Editar), lo cerramos temporalmente
+                if (returnId) {
+                    const parentEl = document.querySelector(returnId);
+                    const parentInstance = bootstrap.Modal.getInstance(parentEl);
+                    if (parentInstance) parentInstance.hide();
+                }
+
+                // 3. Cargamos el PDF en el iframe
+                previewFrame.src = "about:blank"; // Limpiamos rastro anterior
+                setTimeout(() => { 
+                    previewFrame.src = fileUrl; 
+                }, 150);
+            }
+        });
+
+        // Al cerrar el preview...
+        previewModalEl.addEventListener('hidden.bs.modal', function() {
+            const returnId = this.dataset.returnTo;
+            previewFrame.src = 'about:blank';
+
+            // 4. Si teníamos un modal de origen, lo reabrimos automáticamente
+            if (returnId) {
+                this.dataset.returnTo = ''; // Limpiamos la referencia
+                setTimeout(() => {
+                    const parentEl = document.querySelector(returnId);
+                    if (parentEl) {
+                        const parentInstance = bootstrap.Modal.getOrCreateInstance(parentEl);
+                        parentInstance.show();
+                    }
+                }, 400); // Tiempo para que el primer modal termine de cerrar
+            }
+        });
+      }
+      
+      // Manejo de Hash en URL al cargar
+      const activarTabPorHash = (hash) => {
+          if (!hash) return;
+          const tabTriggerEl = document.querySelector(`button[data-bs-target="${hash}"]`);
+          if (tabTriggerEl) {
+              new bootstrap.Tab(tabTriggerEl).show();
+              updateInterfaceState(tabTriggerEl.id);
+          }
+      };
+
+      // Al cargar la página
+      setTimeout(() => activarTabPorHash(window.location.hash), 100);
+
+      // Al cambiar el hash (hashchange ya no sirve para mismo hash, usamos click del sidebar)
+      window.addEventListener('hashchange', () => activarTabPorHash(window.location.hash));
+
+      // ✅ NUEVO: Interceptar clics en links del sidebar con hash
+      document.addEventListener('click', (e) => {
+          const link = e.target.closest('a[href*="#"]');
+          if (!link) return;
+
+          const url = new URL(link.href, window.location.origin);
+          
+          // Solo actuar si es la misma página
+          if (url.pathname !== window.location.pathname) return;
+          
+          const hash = url.hash;
+          if (!hash) return;
+
+          // Solo si el hash corresponde a uno de nuestros tabs
+          const tabTriggerEl = document.querySelector(`button[data-bs-target="${hash}"]`);
+          if (!tabTriggerEl) return;
+
+          e.preventDefault();
+          history.replaceState(null, null, url.pathname + hash);
+          activarTabPorHash(hash);
+      });
+
+      // Listeners para filtros
+      if (configGral.input) configGral.input.addEventListener('input', debounce(() => fetchTabData(configGral), 300));
+      [configGral.depto, configGral.estacion].forEach(el => el?.addEventListener('change', () => fetchTabData(configGral)));
+
+      if (configVac.input) configVac.input.addEventListener('input', debounce(() => fetchTabData(configVac), 300));
+      [configVac.depto, configVac.estacion, configVac.estado].forEach(el => el?.addEventListener('change', () => fetchTabData(configVac)));
+
+      if (configInca.input) configInca.input.addEventListener('input', debounce(() => fetchTabData(configInca), 300));
+      [configInca.depto, configInca.estacion].forEach(el => el?.addEventListener('change', () => fetchTabData(configInca)));
+
+      // --- RESET FILTERS ---
+      document.getElementById('btn-reset-filters-form')?.addEventListener('click', () => {
+          if (configGral.input) configGral.input.value = '';
+          if (configGral.depto) configGral.depto.value = '';
+          if (configGral.estacion) configGral.estacion.value = '';
+          fetchTabData(configGral);
+      });
+
+      document.getElementById('btn-reset-filters-vac')?.addEventListener('click', () => {
+          if (configVac.input) configVac.input.value = '';
+          if (configVac.depto) configVac.depto.value = '';
+          if (configVac.estacion) configVac.estacion.value = '';
+          if (configVac.estado) configVac.estado.value = '';
+          if (configVac.fecha_desde) configVac.fecha_desde.value = '';
+          if (configVac.fecha_hasta) configVac.fecha_hasta.value = '';
+          fetchTabData(configVac);
+      });
+
+      document.getElementById('btn-reset-filters-inca')?.addEventListener('click', () => {
+          if (configInca.input) configInca.input.value = '';
+          if (configInca.depto) configInca.depto.value = '';
+          if (configInca.estacion) configInca.estacion.value = '';
+          fetchTabData(configInca);
+      });
+
+      [configVac.fecha_desde, configVac.fecha_hasta].forEach(el => el?.addEventListener('change', () => fetchTabData(configVac)));
+
+
+
+      // --- LOAD MORE BUTTONS ---
+      const loadMoreBtn = document.getElementById('load-more-btn');
+      if (loadMoreBtn) {
+        loadMoreBtn.addEventListener('click', () => {
+          fetchTabData({ ...configGral, append: true });
+        });
+      }
+
+      const loadMoreVacBtn = document.getElementById('load-more-vacations-btn');
+      if (loadMoreVacBtn) {
+        loadMoreVacBtn.addEventListener('click', () => {
+          fetchTabData({ ...configVac, append: true });
+        });
+      }
+
+      const loadMoreIncaBtn = document.getElementById('load-more-incapacidades-btn');
+      if (loadMoreIncaBtn) {
+        loadMoreIncaBtn.addEventListener('click', () => {
+          fetchTabData({ ...configInca, append: true });
+        });
+      }
+
+      
+      // --- 9. AUTORIZADOR EN MODAL SOLICITAR VACACIONES ---
+
+      const URL_JEFES_DEPARTAMENTO = "{% url 'employees:get_jefes_departamento' %}";
+      
+      async function cargarJefesSolicitar() {
+        const select   = document.getElementById('solicitar_autorizador');
+        const depto    = document.getElementById('solicitar-autorizador-depto');
+        const feedback = document.getElementById('solicitar-autorizador-feedback');
+
+        if (!select) return; // Seguridad: si el modal no existe en este contexto
+
+        select.disabled = true;
+        select.innerHTML = '<option value="">Cargando...</option>';
+
+        try {
+          const response = await fetch(URL_JEFES_DEPARTAMENTO);
+          const data = await response.json();
+
+          if (data.success) {
+            if (depto) depto.textContent = data.departamento;
+
+            const opciones = data.jefes.map(j =>
+              `<option value="${j.id}">${j.nombre}</option>`
+            );
+
+            select.innerHTML = `
+              <option value="">Selecciona al jefe de tu departamento...</option>
+              ${opciones.join('')}
+            `;
+
+            // Si solo hay un jefe, se selecciona automáticamente
+            if (data.jefes.length === 1) {
+              select.value = data.jefes[0].id;
+              if (feedback) {
+                feedback.textContent = `Autorizador asignado: ${data.jefes[0].nombre}`;
+                feedback.className = 'form-text text-success';
+              }
+            } else {
+              if (feedback) {
+                feedback.textContent = `${data.jefes.length} autorizadores disponibles en tu departamento.`;
+                feedback.className = 'form-text text-success';
+              }
+            }
+
+          } else {
+            if (depto) depto.textContent = 'No determinado';
+            select.innerHTML = '<option value="">Sin jefes disponibles</option>';
+            if (feedback) {
+              feedback.textContent = data.mensaje;
+              feedback.className = 'form-text text-warning';
+            }
+          }
+
+        } catch (e) {
+          select.innerHTML = '<option value="">Error al cargar</option>';
+          if (feedback) {
+            feedback.textContent = 'No se pudo conectar con el servidor.';
+            feedback.className = 'form-text text-danger';
+          }
+        } finally {
+          select.disabled = false;
+        }
+      }
+      
+      async function cargarJefesEdicion(autorizadorIdActual = null) {
+        const select = document.getElementById('edit_autorizador');
+        const feedback = document.getElementById('edit-autorizador-feedback');
+        if (!select) return;
+
+        select.disabled = true;
+        select.innerHTML = '<option value="">Cargando jefes...</option>';
+
+        try {
+          const response = await fetch("{% url 'employees:get_jefes_departamento' %}");
+          const data = await response.json();
+
+          if (data.success) {
+            const opciones = data.jefes.map(j => 
+              `<option value="${j.id}" ${autorizadorIdActual == j.id ? 'selected' : ''}>${j.nombre}</option>`
+            );
+            select.innerHTML = `<option value="">Selecciona al jefe...</option>${opciones.join('')}`;
+            if (feedback) feedback.textContent = "";
+          }
+        } catch (e) {
+          console.error("Error cargando jefes:", e);
+          select.innerHTML = '<option value="">Error al cargar</option>';
+        } finally {
+          select.disabled = false;
+        }
+      }
+
+      document.getElementById('modalSolicitarVacaciones')
+        ?.addEventListener('show.bs.modal', cargarJefesSolicitar);
+      
+      // --- 10. INICIALIZACIÓN ÚNICA DEL CALENDARIO (FLATPICKR) ---
+      const modalSolicitar = document.getElementById('modalSolicitarVacaciones');
+      let flatpickrInstance = null;
+
+      if (modalSolicitar) {
+        modalSolicitar.addEventListener('shown.bs.modal', function() {
+            const calendarContainer = document.querySelector("#calendar-container");
+            if (!calendarContainer) return;
+
+            if (flatpickrInstance) {
+                flatpickrInstance.redraw();
+                return;
+            }
+
+            flatpickrInstance = flatpickr(calendarContainer, {
+                inline: true,
+                mode: "multiple",
+                dateFormat: "Y-m-d",
+                locale: "es",
+                minDate: "today",
+                onChange: function(selectedDates, dateStr, instance) {
+                    const datesArray = selectedDates.map(d => instance.formatDate(d, "Y-m-d"));
+                    
+                    // Guardar JSON para el modelo
+                    const inputJSON = document.getElementById('id_create_vacaciones-dias_seleccionados');
+                    if (inputJSON) inputJSON.value = JSON.stringify(datesArray);
+                    
+                    const contador = document.getElementById('contador-dias');
+                    if (contador) contador.innerText = selectedDates.length;
+
+                    // Guardar Inicio y Fin (para nombres de archivos)
+                    if (selectedDates.length > 0) {
+                        const sorted = [...selectedDates].sort((a, b) => a - b);
+                        const start = instance.formatDate(sorted[0], "Y-m-d");
+                        const end = instance.formatDate(sorted[sorted.length - 1], "Y-m-d");
+                        if (document.getElementById('hidden_fecha_inicio')) document.getElementById('hidden_fecha_inicio').value = start;
+                        if (document.getElementById('hidden_fecha_fin')) document.getElementById('hidden_fecha_fin').value = end;
+                    }
+                }
+            });
+        });
+
+        modalSolicitar.addEventListener('hidden.bs.modal', function() {
+            if (flatpickrInstance) {
+                flatpickrInstance.clear();
+                document.getElementById('contador-dias').innerText = '0';
+            }
+        });
+      }
+
+
+      // Espacio para nueva función
+    });
+})();
 </script>
-
 {% endblock %}

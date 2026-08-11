@@ -1,6 +1,8 @@
 from django import forms
 from .models import Curso, Documento, VideoCurso, Slide
 from employees.models import Empleado, Departamento
+from .models import TipoDocumento, Documento
+
 from django.core.exceptions import ValidationError
 
 class SlideForm(forms.ModelForm):
@@ -31,7 +33,7 @@ class CursoForm(forms.ModelForm):
         widgets = {
             'titulo': forms.TextInput(attrs={'class': 'form-control'}),
             'descripcion': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
-            'fecha': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'fecha': forms.DateInput(format='%Y-%m-%d', attrs={'class': 'form-control', 'type': 'date'}),
             'horario': forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),
             'duracion_horas': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1'}),
             'plataforma': forms.TextInput(attrs={'class': 'form-control'}),
@@ -61,6 +63,8 @@ class CursoForm(forms.ModelForm):
         super(CursoForm, self).__init__(*args, **kwargs)
         self.fields['departamentos_destinados'].queryset = Departamento.objects.all()
         self.fields['inscritos'].queryset = Empleado.objects.all().order_by('nombre')
+        if self.instance and self.instance.fecha:
+            self.initial['fecha'] = self.instance.fecha.strftime('%Y-%m-%d')
 
     def clean(self):
         cleaned_data = super().clean()
@@ -73,7 +77,6 @@ class CursoForm(forms.ModelForm):
         return cleaned_data
 
 class DocumentoForm(forms.ModelForm):
-    
     departamentos_destinados = forms.ModelMultipleChoiceField(
         queryset=Departamento.objects.all(),
         required=False,
@@ -87,10 +90,33 @@ class DocumentoForm(forms.ModelForm):
         help_text="Departamentos que pueden ver esto (si no es 'general')."
     )
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # 1. Definir los grupos
+        choices = [('', '---------')] # Opción por defecto
+        
+        # Obtenemos los QuerySets
+        # Nota: Ajusta los filtros según cómo identifiques internos de externos en tu DB
+        internos = TipoDocumento.objects.filter(categoria='interno').values_list('id', 'nombre')
+        externos = TipoDocumento.objects.filter(categoria='externo').values_list('id', 'nombre')
+        
+        # Construimos la lista con optgroups (Django lo reconoce por ser una lista de tuplas anidadas)
+        grouped_choices = [('', '---------')]
+        
+        if internos.exists():
+            grouped_choices.append(('Documentación Interna', list(internos)))
+        
+        if externos.exists():
+            grouped_choices.append(('Marco Normativo / Externo', list(externos)))
+            
+        # 2. Asignamos las nuevas opciones al widget
+        self.fields['tipo_documento'].choices = grouped_choices
+
     class Meta:
         model = Documento
         fields = [
-            'nombre', 'descripcion', 'codigo_documento', 'tipo_documento',
+            'nombre', 'descripcion', 'codigo_documento', 'tipo_documento', 'procedimiento',
             'archivo', 'enlace_externo', 'palabras_clave', 'estado', 
             'es_general', 'departamentos_destinados'
         ]
@@ -100,11 +126,12 @@ class DocumentoForm(forms.ModelForm):
             'descripcion': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
             'codigo_documento': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej. RRHH-FOR-001'}),
             'tipo_documento': forms.Select(attrs={'class': 'form-select'}),
+            'procedimiento': forms.Select(attrs={'class': 'form-select'}),
             'archivo': forms.FileInput(attrs={'class': 'form-control'}),
             'enlace_externo': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'https://...'}),
             'palabras_clave': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej. vacaciones, permiso, solicitud'}),
             'estado': forms.Select(attrs={'class': 'form-select'}),
-            'es_general': forms.CheckboxInput(attrs={'class': 'form-check-input', 'id': 'id_es_general_doc'}), # ID único
+            'es_general': forms.CheckboxInput(attrs={'class': 'form-check-input', 'id': 'id_es_general_doc'}),
         }
 
     def clean(self):
@@ -137,6 +164,7 @@ class VideoCursoForm(forms.ModelForm):
             'video_url', 
             'ponente', 
             'fecha_grabacion', 
+            'tematica',
             'curso', 
             'estado', 
             'es_general', 
@@ -146,13 +174,15 @@ class VideoCursoForm(forms.ModelForm):
             'titulo': forms.TextInput(attrs={'class': 'form-control'}),
             'video_url': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'https://www.youtube.com/watch?v=...'}),
             'ponente': forms.TextInput(attrs={'class': 'form-control'}),
-            'fecha_grabacion': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'fecha_grabacion': forms.DateInput(format='%Y-%m-%d', attrs={'class': 'form-control', 'type': 'date'}),
+            'tematica': forms.Select(attrs={'class': 'form-select'}),
             'curso': forms.Select(attrs={'class': 'form-select'}),
             'estado': forms.Select(attrs={'class': 'form-select'}),
             'es_general': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'departamentos_destinados': forms.SelectMultiple(attrs={'class': 'form-select', 'size': '5'}),
         }
         labels = {
+            'tematica': 'Temática del Contenido',
             'video_url': 'URL del Video',
             'fecha_grabacion': 'Fecha de Grabación',
             'es_general': 'Contenido General',
@@ -161,6 +191,9 @@ class VideoCursoForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(VideoCursoForm, self).__init__(*args, **kwargs)
         self.fields['departamentos_destinados'].queryset = Departamento.objects.all()
+
+        if self.instance and self.instance.fecha_grabacion:
+            self.initial['fecha_grabacion'] = self.instance.fecha_grabacion.strftime('%Y-%m-%d')
 
     def clean(self):
         cleaned_data = super().clean()

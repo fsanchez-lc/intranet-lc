@@ -1,0 +1,407 @@
+{% load static %}
+
+{% for vacacion in vacaciones_page %}
+<div class="col-12 col-md-6 col-lg-4 mb-4">
+    <div class="card h-100 shadow-sm border-light-subtle overflow-hidden">
+        
+        <div class="{% if vacacion.estado == 'PENDIENTE' %}bg-warning{% elif vacacion.estado == 'APROBADO' %}bg-success{% elif vacacion.estado == 'RECHAZADO' %}bg-danger{% else %}bg-info{% endif %}" 
+             style="height: 60px; opacity: 0.15;"></div>
+
+        <div class="card-body pt-0 text-center">
+            <div class="position-relative d-inline-block" style="margin-top: -45px;">
+                {% if vacacion.empleado.foto %}
+                    <img src="{{ vacacion.empleado.foto.url }}"
+                         class="rounded-circle border border-4 border-white shadow-sm object-fit-cover"
+                         style="width: 120px; height: 120px;">
+                {% else %}
+                    <div class="rounded-circle border border-4 border-white shadow-sm bg-white d-flex align-items-center justify-content-center"
+                         style="width: 120px; height: 120px;">
+                        <i class="bi bi-person-circle display-4 
+                            {% if vacacion.estado == 'PENDIENTE' %}text-warning
+                            {% elif vacacion.estado == 'APROBADO' %}text-success
+                            {% elif vacacion.estado == 'RECHAZADO' %}text-danger
+                            {% else %}text-info{% endif %}"></i>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="mt-3">
+                <h5 class="card-title fw-bold mb-1 text-dark">{{ vacacion.empleado.nombre }}</h5>
+                <p class="text-muted small mb-1">{{ vacacion.empleado.posicion|default:"Sin Posición"|upper }}</p>
+                <p class="text-muted small mb-2">Solicitud #VAC-{{ vacacion.id }}</p>
+
+                {% if vacacion.estado == 'PENDIENTE' %}
+                    <span class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill">Pendiente</span>
+                {% elif vacacion.estado == 'APROBADO' %}
+                    <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill">Aprobado</span>
+                {% elif vacacion.estado == 'RECHAZADO' %}
+                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill">Rechazado</span>
+                {% else %}
+                    <span class="badge bg-info-subtle text-info border border-info-subtle rounded-pill">{{ vacacion.get_estado_display }}</span>
+                {% endif %}
+            </div>
+
+            <ul class="list-group list-group-flush text-start border-top pt-2 mt-3">
+                <li class="list-group-item px-0 py-2 border-0">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="bi bi-calendar-range-fill text-primary fs-6 me-2"></i>
+                        <h6 class="fw-bold mb-0" style="font-size: 0.9rem; color: #444;">Días de vacaciones solicitados:</h6>
+                    </div>
+
+                    <div class="d-flex flex-column gap-1">
+                        {% for periodo in vacacion.periodos_agrupados %}
+                            <div class="border rounded-2 bg-white shadow-sm px-2 py-1" style="border-left: 3px solid #0d6efd !important;">
+                                <div class="d-flex align-items-center flex-wrap" style="font-size: 0.85rem;">
+                                    {% if periodo.es_rango %}
+                                        <span class="text-capitalize fw-bold text-dark">{{ periodo.inicio|date:"l" }},</span>
+                                        <span class="text-muted ms-1">{{ periodo.inicio|date:"d/m/Y" }}</span>
+                                        
+                                        <span class="mx-1 text-primary opacity-30">-</span>
+                                        
+                                        <span class="text-capitalize fw-bold text-dark">{{ periodo.fin|date:"l" }},</span>
+                                        <span class="text-muted ms-1">{{ periodo.fin|date:"d/m/Y" }}</span>
+                                    {% else %}
+                                        <span class="text-capitalize fw-bold text-dark">{{ periodo.inicio|date:"l" }},</span>
+                                        <span class="text-muted ms-1">{{ periodo.inicio|date:"d/m/Y" }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% empty %}
+                            <div class="ps-4 text-muted small fst-italic">No hay fechas seleccionadas.</div>
+                        {% endfor %}
+                    </div>
+                </li>
+
+                <li class="list-group-item px-0 py-2 d-flex align-items-center border-0">
+                    
+                    <i class="bi bi-pen-fill me-2 text-muted"></i>
+                    <span class="small">
+                        <strong class="text-dark">Jefe:</strong> {% if vacacion.autorizador %}
+                            {{ vacacion.autorizador }}
+                            {% if vacacion.autorizador_firmado %}
+                                <span class="badge bg-success ms-1">Firmado</span>
+                            {% else %}
+                                <span class="badge bg-warning text-dark ms-1">Pendiente</span>
+                            {% endif %}
+                        {% else %}
+                            <span class="fst-italic text-muted">Sin autorizador asignado</span>
+                        {% endif %}
+                    </span>
+                </li>
+
+                <li class="list-group-item px-0 py-2 d-flex align-items-center border-0">
+                    <i class="bi bi-pen-fill me-2 text-muted"></i>
+                    <span class="small">
+                        <strong class="text-dark">Gerente:</strong> {% if vacacion.gerente_autorizador %}
+                            {{ vacacion.gerente_autorizador }}
+                            {% if vacacion.gerente_firmado %}
+                                <span class="badge bg-success ms-1">Firmado</span>
+                            {% else %}
+                                <span class="badge bg-warning text-dark ms-1">Pendiente</span>
+                            {% endif %}
+                        {% else %}
+                            <span class="fst-italic text-muted">Sin gerente asignado</span>
+                        {% endif %}
+                    </span>
+                </li>
+
+                <li class="list-group-item px-0 py-2 d-flex align-items-center border-0">
+                    <i class="bi bi-file-earmark-pdf-fill me-2 text-muted"></i>
+                    {% if vacacion.archivo_vacaciones %}
+                        <a href="{{ vacacion.archivo_vacaciones.url }}" target="_blank"
+                        class="btn btn-link btn-sm p-0 text-decoration-none small d-flex align-items-center gap-1">
+                            Ver formato de Vacaciones
+                            <i class="bi bi-box-arrow-up-right" style="font-size: 0.7rem;"></i>
+                        </a>
+                    {% else %}
+                        <span class="text-muted small fst-italic">Sin formato de Vacaciones</span>
+                    {% endif %}
+                </li>
+                <li class="list-group-item px-0 py-2 d-flex align-items-center border-0">
+                    <i class="bi bi-file-earmark-pdf-fill me-2 text-muted"></i>
+                    {% if vacacion.archivo_roles %}
+                        <a href="{{ vacacion.archivo_roles.url }}" target="_blank"
+                        class="btn btn-link btn-sm p-0 text-decoration-none small d-flex align-items-center gap-1">
+                            Ver formato de Roles
+                            <i class="bi bi-box-arrow-up-right" style="font-size: 0.7rem;"></i>
+                        </a>
+                    {% else %}
+                        <span class="text-muted small fst-italic">Sin formato de Roles</span>
+                    {% endif %}
+                </li>
+            </ul>
+        </div>
+
+        <div class="card-footer bg-white border-0 pb-3 pt-2">
+            <div class="d-flex flex-column gap-2">
+
+                {% if perms.employees.view_vacacion %}
+                <button type="button" class="btn btn-outline-secondary btn-sm w-100"
+                        data-bs-toggle="modal" data-bs-target="#modalDetalleVacacion{{ vacacion.id }}">
+                    <i class="bi bi-info-circle-fill me-1"></i> Ver solicitud
+                </button>
+                {% endif %}
+
+                {% if perms.employees.change_vacacion %}
+                <button type="button" class="btn btn-outline-warning btn-sm w-100"
+                    data-bs-toggle="modal"
+                    data-bs-target="#modalEditarVacaciones"
+                    data-vacacion-id="{{ vacacion.id }}"
+                    data-empleado="{{ vacacion.empleado.nombre }}"
+                    data-dias="{{ vacacion.dias_seleccionados|safe }}"
+                    data-estado="{{ vacacion.estado }}"
+                    data-obs="{{ vacacion.observaciones|default:'' }}"
+                    data-autorizador-id="{{ vacacion.autorizador.id|default:'' }}"
+                    data-respuesta-auto="{{ vacacion.requiere_respuesta_automatica|yesno:'true,false' }}"
+                    data-redireccion="{{ vacacion.requiere_redireccion|yesno:'true,false' }}"
+                    data-url-formato="{% if vacacion.archivo_vacaciones %}{{ vacacion.archivo_vacaciones.url }}{% endif %}"
+                    data-url-roles="{% if vacacion.archivo_roles %}{{ vacacion.archivo_roles.url }}{% endif %}">
+                    <i class="bi bi-pencil-square me-1"></i> Modificar solicitud
+                </button>
+                {% endif %}
+                
+
+                {% if perms.employees.change_vacacion and vacacion.estado == 'PENDIENTE' %}
+
+                    {% if vacacion.autorizador == empleado and not vacacion.autorizador_firmado %}
+                    <form method="POST" action="{% url 'employees:firmar_vacacion' vacacion.id %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="accion" value="FIRMAR">
+                        <button type="submit" class="btn btn-outline-primary btn-sm w-100">
+                            <i class="bi bi-pen-fill me-1"></i> Firmar como Jefe
+                        </button>
+                    </form>
+
+                    {% elif vacacion.autorizador == empleado and vacacion.autorizador_firmado %}
+                    <button class="btn btn-success btn-sm w-100" disabled>
+                        <i class="bi bi-check-circle-fill me-1"></i> Firmado ✓
+                    </button>
+                    {% endif %}
+
+                    {% if vacacion.gerente_autorizador == empleado and not vacacion.gerente_firmado %}
+                    <form method="POST" action="{% url 'employees:firmar_vacacion' vacacion.id %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="accion" value="FIRMAR">
+                        <button type="submit" class="btn btn-outline-success btn-sm w-100">
+                            <i class="bi bi-pen-fill me-1"></i> Firmar como Gerente
+                        </button>
+                    </form>
+
+                    {% elif vacacion.gerente_autorizador == empleado and vacacion.gerente_firmado %}
+                    <button class="btn btn-success btn-sm w-100" disabled>
+                        <i class="bi bi-check-circle-fill me-1"></i> Firmado ✓
+                    </button>
+                    {% endif %}
+
+                    {% if vacacion.autorizador == empleado or vacacion.gerente_autorizador == empleado %}
+                    <form method="POST" action="{% url 'employees:firmar_vacacion' vacacion.id %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="accion" value="RECHAZAR">
+                        <button type="submit" class="btn btn-outline-danger btn-sm w-100"
+                                onclick="return confirm('¿Seguro que deseas rechazar esta solicitud?')">
+                            <i class="bi bi-x-circle-fill me-1"></i> Rechazar
+                        </button>
+                    </form>
+                    {% endif %}
+
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalDetalleVacacion{{ vacacion.id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-light border-bottom-0 py-3">
+                <h5 class="modal-title fw-bold text-dark">
+                    <i class="bi bi-info-circle-fill text-success me-2"></i>Detalles de la Solicitud
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body pt-0">
+                <div class="d-flex align-items-center p-3 mb-3 bg-light rounded-3">
+                    {% if vacacion.empleado.foto %}
+                        <img src="{{ vacacion.empleado.foto.url }}"
+                             class="rounded-circle object-fit-cover border me-3 flex-shrink-0"
+                             style="width: 52px; height: 52px;">
+                    {% else %}
+                        <div class="bg-success bg-opacity-10 p-2 rounded-circle me-3">
+                            <i class="bi bi-person-badge-fill text-success fs-3"></i>
+                        </div>
+                    {% endif %}
+                    <div>
+                        <h6 class="mb-0 fw-bold">{{ vacacion.empleado.nombre }}</h6>
+                        <small class="text-muted">{{ vacacion.empleado.posicion|default:"Empleado" }}</small>
+                    </div>
+                    <div class="ms-auto">
+                        {% if vacacion.estado == 'PENDIENTE' %}
+                            <span class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill">Pendiente</span>
+                        {% elif vacacion.estado == 'APROBADO' %}
+                            <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill">Aprobado</span>
+                        {% elif vacacion.estado == 'RECHAZADO' %}
+                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill">Rechazado</span>
+                        {% else %}
+                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill">{{ vacacion.get_estado_display }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <p class="mb-2 small text-muted text-uppercase fw-bold" style="font-size: 0.65rem;">
+                        <i class="bi bi-calendar-range me-1"></i> Desglose de días solicitados
+                    </p>
+                    <div class="d-flex flex-column gap-2">
+                        {% for periodo in vacacion.periodos_agrupados %}
+                            <div class="border rounded-3 bg-white shadow-sm p-2" style="border-left: 4px solid #198754 !important;">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    
+                                    <div class="d-flex align-items-center flex-grow-1">
+                                        {% if periodo.es_rango %}
+                                            <div class="text-start">
+                                                <small class="text-muted d-block text-uppercase" style="font-size: 0.6rem;">Desde</small>
+                                                <span class="fw-bold text-dark text-capitalize" style="font-size: 0.85rem;">{{ periodo.inicio|date:"l, d M Y" }}</span>
+                                            </div>
+                                            
+                                            <i class="bi bi-arrow-right mx-3 text-muted opacity-50"></i>
+                                            
+                                            <div class="text-start">
+                                                <small class="text-muted d-block text-uppercase" style="font-size: 0.6rem;">Hasta</small>
+                                                <span class="fw-bold text-dark text-capitalize" style="font-size: 0.85rem;">{{ periodo.fin|date:"l, d M Y" }}</span>
+                                            </div>
+                                        {% else %}
+                                            <div class="text-start">
+                                                <small class="text-muted d-block text-uppercase" style="font-size: 0.6rem;">Día Único</small>
+                                                <span class="fw-bold text-dark text-capitalize" style="font-size: 0.85rem;">{{ periodo.inicio|date:"l, d M Y" }}</span>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="ms-3">
+                                        <div class="px-3 py-1 border rounded-3 bg-success text-white text-center shadow-sm" style="min-width: 65px;">
+                                            <small class="text-white-50 d-block text-uppercase" style="font-size: 0.55rem;">Días</small>
+                                            <span class="fw-bold" style="font-size: 0.9rem;">{{ periodo.cantidad }}</span>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        {% empty %}
+                            <div class="p-2 bg-light rounded-3 text-muted small fst-italic text-center">No hay fechas seleccionadas.</div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="list-group list-group-flush mb-3">
+                    <div class="list-group-item px-0 border-0">
+                        <p class="mb-1 small text-muted text-uppercase fw-bold" style="font-size: 0.65rem;">Jefe de Departamento</p>
+                        <p class="mb-0 text-dark small">
+                            {% if vacacion.autorizador %}
+                                <i class="bi bi-patch-check-fill text-success me-2"></i>{{ vacacion.autorizador }}
+                                {% if vacacion.autorizador_firmado %}
+                                    <span class="badge bg-success-subtle text-success ms-2">Firmado</span>
+                                {% else %}
+                                    <span class="badge bg-warning-subtle text-warning ms-2">Pendiente</span>
+                                {% endif %}
+                            {% else %}
+                                <span class="text-muted italic">Sin asignar</span>
+                            {% endif %}
+                        </p>
+                    </div>
+
+                    <div class="list-group-item px-0 border-0">
+                        <p class="mb-1 small text-muted text-uppercase fw-bold" style="font-size: 0.65rem;">Gerente General</p>
+                        <p class="mb-0 text-dark small">
+                            {% if vacacion.gerente_autorizador %}
+                                <i class="bi bi-patch-check-fill text-success me-2"></i>{{ vacacion.gerente_autorizador }}
+                                {% if vacacion.gerente_firmado %}
+                                    <span class="badge bg-success-subtle text-success ms-2">Firmado</span>
+                                {% else %}
+                                    <span class="badge bg-warning-subtle text-warning ms-2">Pendiente</span>
+                                {% endif %}
+                            {% else %}
+                                <span class="text-muted">Sin asignar</span>
+                            {% endif %}
+                        </p>
+                    </div>
+
+                    <div class="list-group-item px-0 border-0 pt-3">
+                        <p class="mb-2 small text-muted text-uppercase fw-bold" style="font-size: 0.65rem;">Configuración de Ausencia</p>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <div class="p-2 border rounded-3 {% if vacacion.requiere_respuesta_automatica %}bg-info-subtle{% else %}bg-light{% endif %} text-center">
+                                    <small class="d-block text-muted" style="font-size: 0.6rem;">RESPUESTA AUTOMÁTICA</small>
+                                    <span class="small fw-bold" style="font-size: 0.75rem;">
+                                        {% if vacacion.requiere_respuesta_automatica %}Activada{% else %}No requerida{% endif %}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="p-2 border rounded-3 {% if vacacion.requiere_redireccion %}bg-info-subtle{% else %}bg-light{% endif %} text-center">
+                                    <small class="d-block text-muted" style="font-size: 0.6rem;">REDIRECCIÓN</small>
+                                    <span class="small fw-bold" style="font-size: 0.75rem;">
+                                        {% if vacacion.requiere_redireccion %}Activada{% else %}No requerida{% endif %}
+                                    </span>
+                                </div>
+                            </div>
+                            {% if vacacion.requiere_redireccion and vacacion.empleados_redireccion.all %}
+                            <div class="col-12">
+                                <div class="p-2 border rounded-3 bg-white">
+                                    <small class="d-block text-muted mb-1" style="font-size: 0.6rem;">REDIRIGIR CORREOS A:</small>
+                                    <div class="d-flex flex-wrap gap-1">
+                                        {% for emp in vacacion.empleados_redireccion.all %}
+                                            <span class="badge bg-secondary-subtle text-secondary fw-normal border" style="font-size: 0.7rem;">
+                                                {{ emp.nombre }}
+                                            </span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="list-group-item px-0 border-0 pt-3">
+                        <p class="mb-1 small text-muted text-uppercase fw-bold" style="font-size: 0.65rem;">Observaciones</p>
+                        <div class="border rounded-3 p-2 bg-light">
+                            <p class="mb-0 text-dark small" style="font-size: 0.8rem;">
+                                {{ vacacion.observaciones|default:"Sin comentarios adicionales." }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="list-group-item px-0 border-0">
+                    <p class="mb-2 small text-muted text-uppercase fw-bold" style="font-size: 0.65rem;">Documentos adjuntos</p>
+                    <div class="d-flex flex-column gap-2">
+                        {% if vacacion.archivo_vacaciones %}
+                            <a href="{{ vacacion.archivo_vacaciones.url }}" target="_blank" class="btn btn-outline-primary btn-sm d-flex align-items-center gap-2">
+                                <i class="bi bi-file-earmark-pdf-fill"></i> Formato de Vacaciones
+                                <i class="bi bi-box-arrow-up-right ms-auto" style="font-size: 0.7rem;"></i>
+                            </a>
+                        {% endif %}
+                        {% if vacacion.archivo_roles %}
+                            <a href="{{ vacacion.archivo_roles.url }}" target="_blank" class="btn btn-outline-primary btn-sm d-flex align-items-center gap-2">
+                                <i class="bi bi-file-earmark-person-fill"></i> Formato de Roles
+                                <i class="bi bi-box-arrow-up-right ms-auto" style="font-size: 0.7rem;"></i>
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-top-0 pt-0 pb-4 justify-content-center">
+                <button type="button" class="btn btn-secondary px-5 rounded-pill shadow-sm" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% empty %}
+<div class="col-12 text-center py-5">
+    <div class="alert alert-info border-0 shadow-sm" role="alert">
+        <h4 class="alert-heading fw-bold"><i class="bi bi-calendar-x me-2"></i> Sin Solicitudes</h4>
+        <p class="mb-0">No se han registrado vacaciones para este criterio.</p>
+    </div>
+</div>
+{% endfor %}
+

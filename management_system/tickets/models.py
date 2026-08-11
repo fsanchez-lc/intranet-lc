@@ -10,9 +10,19 @@ class Ticket(models.Model):
 
     class Estado(models.TextChoices):
         ABIERTO = 'ABIERTO', 'Abierto'
+        ASIGNADO = 'ASIGNADO', 'Asignado'
         EN_PROCESO = 'EN_PROCESO', 'En Proceso'
         CERRADO = 'CERRADO', 'Cerrado'
 
+    folio = models.CharField(
+        max_length=20, 
+        unique=True, 
+        blank=True, 
+        null=True, 
+        verbose_name="Folio",
+        help_text="Folio único generado automáticamente (Ej. TKT-00001)."
+    )
+    
     titulo = models.CharField(max_length=200, help_text="Título breve y descriptivo del ticket.")
     descripcion = models.TextField(help_text="Descripción detallada del problema o solicitud.")
     
@@ -30,6 +40,24 @@ class Ticket(models.Model):
     observaciones = models.TextField(
         blank=True, 
         help_text="Notas de seguimiento, comentarios o resolución del ticket."
+    )
+
+    departamento_destino = models.ForeignKey(
+        'employees.Departamento',
+        on_delete=models.PROTECT,
+        related_name="tickets_recibidos",
+        verbose_name="Departamento Destino",
+        help_text="Área corporativa responsable de solucionar este ticket."
+    )
+    
+    asignado_a = models.ForeignKey(
+        'employees.Empleado',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="tickets_asignados",
+        verbose_name="Asignado a",
+        help_text="Empleado específico del departamento que resolverá el problema."
     )
 
     # --- Relaciones con otros modelos ---

@@ -1,11 +1,29 @@
 from django.db import models
 from django.utils import timezone
+from datetime import timedelta
+import os
+from django.core.files.storage import FileSystemStorage
+
+# 1. Almacenamiento personalizado: Sobreescribe archivos si tienen el mismo nombre
+class OverwriteStorage(FileSystemStorage):
+    def get_available_name(self, name, max_length=None):
+        if self.exists(name):
+            os.remove(os.path.join(self.location, name))
+        return name
+    
+def slide_upload_path(instance, filename):
+    # Si por alguna razón no hay mes/año, usamos el actual
+    anio = instance.anio or timezone.now().year
+    mes = instance.mes or timezone.now().month
+    # Retorna la ruta limpia
+    return f"slides/{anio}/{mes}/{filename}"
 
 class Curso(models.Model):
     class Estado(models.TextChoices):
         ACTIVO = 'activo', 'Activo'
         INACTIVO = 'inactivo', 'Inactivo'
-    
+        FINALIZADO = 'finalizado', 'Finalizado'
+        
     class Modalidad(models.TextChoices):
         AUTOINSCRIPCION = 'auto', 'Autoinscripción'
         SOLICITUD = 'solicitud', 'Pedir inscribirse'
@@ -114,11 +132,21 @@ class Curso(models.Model):
 class Slide(models.Model):
     title = models.CharField(max_length=100, verbose_name="Título")
     description = models.TextField(verbose_name="Descripción", blank=True, null=True)
-    image = models.ImageField(upload_to='slides/', verbose_name="Imagen")
+    
+    # 3. Campos nuevos para control de carpetas y almacenamiento
+    mes = models.IntegerField(null=True, blank=True, verbose_name="Mes")
+    anio = models.IntegerField(null=True, blank=True, verbose_name="Año")
+    
+    image = models.ImageField(
+        upload_to=slide_upload_path, 
+        storage=OverwriteStorage(), 
+        verbose_name="Imagen"
+    )
+    
     alt_text = models.CharField(
         max_length=150, 
         verbose_name="Texto Alternativo (Alt)",
-        blank=True,                   # Permite que el campo esté vacío (opcional)
+        blank=True, 
         null=True,  
     )
     order = models.PositiveIntegerField(default=0, verbose_name="Orden")
@@ -130,11 +158,32 @@ class Slide(models.Model):
         ordering = ['order']
 
     def __str__(self):
-        return self.title
+        return f"{self.title} ({self.mes}/{self.anio})"
     
 class TipoDocumento(models.Model):
+    class Categoria(models.TextChoices):
+        INTERNO = 'interno', 'Documentación Interna'
+        EXTERNO = 'externo', 'Marco Normativo / Externo'
+    
+    class SubCategoria(models.TextChoices):
+        PROCEDIMIENTO = 'procedimiento', 'Procedimiento / Manual'
+        FORMATO = 'formato', 'Formato / Plantilla'
+        OTRO = 'otro', 'Otro'
+
     nombre = models.CharField(max_length=100, unique=True, verbose_name="Nombre del Tipo")
     descripcion = models.TextField(blank=True, null=True, verbose_name="Descripción")
+    categoria = models.CharField(
+        max_length=20, 
+        choices=Categoria.choices, 
+        default=Categoria.INTERNO
+    )
+
+    sub_categoria = models.CharField(
+        max_length=20,
+        choices=SubCategoria.choices,
+        default=SubCategoria.FORMATO,
+        verbose_name="Subcategoría"
+    )
 
     class Meta:
         verbose_name = "Tipo de Documento"
@@ -143,7 +192,52 @@ class TipoDocumento(models.Model):
 
     def __str__(self):
         return self.nombre
+    
+class Area(models.Model):
+    """📍 Nivel 1: Representa las grandes divisiones (ej. Operaciones, Administración)"""
+    nombre = models.CharField(max_length=100, unique=True, verbose_name="Nombre del Área")
+    descripcion = models.TextField(blank=True, null=True, verbose_name="Descripción")
 
+    class Meta:
+        verbose_name = "Área"
+        verbose_name_plural = "Áreas"
+        ordering = ['nombre']
+
+    def __str__(self):
+        return f"📍 {self.nombre}"
+
+class Proceso(models.Model):
+    """⚙️ Nivel 2: Conjunto de actividades (ej. Reclutamiento, Ventas, Mantenimiento)"""
+    area = models.ForeignKey(Area, on_delete=models.CASCADE, related_name="procesos", null=True, blank=True) # Añade null=True
+    nombre = models.CharField(max_length=100, verbose_name="Nombre del Proceso")
+    descripcion = models.TextField(blank=True, null=True, verbose_name="Descripción")
+
+    class Meta:
+        verbose_name = "Proceso"
+        verbose_name_plural = "Procesos"
+        ordering = ['nombre']
+        unique_together = ('area', 'nombre') # Evita procesos duplicados en la misma área
+
+    def __str__(self):
+        return f"⚙️ {self.nombre} ({self.area.nombre})"
+    
+class Procedimiento(models.Model):
+    """📑 Nivel 3: El 'paso a paso' específico (ej. Solicitud de Vacaciones, Arqueo de Caja)"""
+    proceso = models.ForeignKey(Proceso, on_delete=models.CASCADE, related_name="procedimientos", null=True, blank=True)
+    nombre = models.CharField(max_length=100, verbose_name="Nombre del Procedimiento")
+    descripcion = models.TextField(blank=True, null=True, verbose_name="Descripción")
+    
+    # Quitamos la relación ManyToMany con Departamento para que sea puramente jerárquico
+    # pero si quieres filtros por departamento en RRHH, lo manejamos vía Documento.
+
+    class Meta:
+        verbose_name = "Procedimiento"
+        verbose_name_plural = "Procedimientos"
+        ordering = ['nombre']
+
+    def __str__(self):
+        return f"📑 {self.nombre}"
+    
 class Documento(models.Model):
     class Estado(models.TextChoices):
         ACTIVO = 'activo', 'Activo'
@@ -179,6 +273,15 @@ class Documento(models.Model):
         on_delete=models.PROTECT,
         related_name="documentos",
         help_text="Clasificación: Formato, Plantilla, Manual, etc."
+    )
+
+    procedimiento = models.ForeignKey(
+        Procedimiento,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="documentos",
+        help_text="¿A qué flujo de trabajo pertenece? (Ej: Onboarding, Solicitud de Vacaciones)"
     )
 
     estado = models.CharField(
@@ -230,14 +333,40 @@ class Documento(models.Model):
             return f"[{self.codigo_documento}] {self.nombre}"
         return f"{self.nombre}" 
     
-class VideoCurso(models.Model):
+class TematicaVideo(models.Model):
+    nombre = models.CharField(max_length=100, unique=True, verbose_name="Nombre de la Temática")
+    descripcion = models.TextField(blank=True, null=True)
 
+    class Meta:
+        verbose_name = "Temática de Video"
+        verbose_name_plural = "Temáticas de Videos"
+
+    def __str__(self):
+        return self.nombre
+
+class VideoCurso(models.Model):
+    @property
+    def es_reciente(self):
+        # Retorna True si se subió en los últimos 4 días
+        # Usa 'created_at' o el campo de fecha que tengas de registro
+        if self.fecha_registro:
+            return self.fecha_registro >= timezone.now() - timedelta(days=4)
+        return False
+    
     ESTADO_CHOICES = (
         ('activo', 'Activo'),
         ('inactivo', 'Inactivo'),
     )
 
-    # RELACIÓN: ¿A qué curso pertenece este video?
+    tematica = models.ForeignKey(
+        TematicaVideo, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True,
+        related_name="videos",
+        verbose_name="Temática"
+    )
+
     curso = models.ForeignKey(
         Curso, 
         on_delete=models.SET_NULL, 
@@ -278,6 +407,11 @@ class VideoCurso(models.Model):
         verbose_name="Fecha de Grabación",
         blank=True,
         null=True
+    )
+
+    fecha_registro = models.DateTimeField(
+        default=timezone.now, 
+        verbose_name="Fecha de Registro/Subida"
     )
     
     # ESTADO: Para activar o desactivar
@@ -336,7 +470,7 @@ class VideoCurso(models.Model):
     class Meta:
         verbose_name = "Video de Curso"
         verbose_name_plural = "Videoteca de Cursos"
-        ordering = ['-fecha_grabacion', 'titulo']
+        ordering = ['-fecha_registro']
 
     def __str__(self):
         return self.titulo
@@ -376,7 +510,7 @@ class InscripcionCurso(models.Model):
     )
     
     calificacion = models.DecimalField(
-        max_digits=4, 
+        max_digits=5, 
         decimal_places=2, 
         null=True, 
         blank=True, 

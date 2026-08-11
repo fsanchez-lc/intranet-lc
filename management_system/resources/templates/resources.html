@@ -30,6 +30,70 @@
         visibility: visible;
         transform: scale(1);
       }
+
+
+      /* Efecto de elevación para las tarjetas de video */
+      .video-card {
+          transition: all 0.3s cubic-bezier(.25,.8,.25,1);
+          border: none;
+          cursor: pointer;
+          background: #fff;
+      }
+
+      .video-card:hover {
+          transform: translateY(-8px);
+          box-shadow: 0 14px 28px rgba(0,0,0,0.15), 0 10px 10px rgba(0,0,0,0.10) !important;
+      }
+
+      /* Icono de Play sutil que aparece en Hover */
+      .video-card .play-overlay {
+          background: rgba(18, 37, 91, 0.7); /* Tu color corporativo con transparencia */
+          border-radius: 50%;
+          width: 60px;
+          height: 60px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+      }
+
+      /* Badge de temática arriba a la izquierda */
+      .badge-tematica {
+          position: absolute;
+          top: 10px;
+          left: 10px;
+          z-index: 5;
+          font-size: 0.75rem;
+          padding: 5px 10px;
+          border-radius: 20px;
+          backdrop-filter: blur(4px);
+      }
+
+      #subcategoriaTabs .nav-link {
+        color: #12255B; /* Tu color corporativo */
+        border: 1px solid transparent;
+      }
+
+      #subcategoriaTabs .nav-link.active {
+          background-color: #12255B !important;
+          color: white !important;
+      }
+
+      .badge-nuevo-video {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 10;
+        background-color: #198754; /* Verde Bootstrap */
+        color: white;
+        font-size: 0.65rem;
+        font-weight: 800;
+        padding: 4px 10px;
+        border-radius: 50px;
+        text-transform: uppercase;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        border: 1px solid rgba(255,255,255,0.2);
+        pointer-events: none; /* Para que no interfiera si alguien intenta hacer clic al video */
+      }
     </style>
 
     <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1100">
@@ -55,6 +119,7 @@
       {% endif %}
     </div>
 
+
     <div class="d-flex justify-content-between align-items-start">
       <div>
         <h2 class="h3 fw-bold mb-2">Repositorio de conocimiento</h2>
@@ -63,8 +128,7 @@
     </div>
 
     <div class="position-fixed bottom-0 end-0 m-3 d-md-none d-flex flex-column gap-2" style="z-index: 1030;">
-    {% if is_admin %}
-    
+    {% if perms.resources.add_curso %}
       <div class="btn-group dropstart">
         <button type="button" class="btn btn-color btn-lg rounded-circle shadow d-flex align-items-center justify-content-center bg-success dropdown-toggle" 
                 data-bs-toggle="dropdown" 
@@ -73,28 +137,37 @@
           <i class="bi bi-plus-lg fs-4"></i>
         </button>
         <ul class="dropdown-menu">
+        {% if perms.resources.add_slide %}
           <li>
             <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#modalCrearSlide">
               Añadir slide
             </a>
           </li>
+        {% endif %}
+        {% if perms.resources.add_curso %}
           <li>
             <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#modalCrearCurso">
               Añadir curso
             </a>
           </li>
+        {% endif %}
+        {% if perms.resources.add_documento %}
           <li>
             <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#modalCrearDocumento">
               Añadir documento
             </a>
           </li>
+        {% endif %}
+        {% if perms.resources.add_videocurso %}
           <li>
             <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#modalCrearContenido">
               Añadir contenido
             </a>
           </li>
+        {% endif %}
         </ul>
       </div>
+      
 
       <div class="btn-group dropstart">
         <button type="button" class="btn btn-color btn-lg rounded-circle shadow d-flex align-items-center justify-content-center bg-warning dropdown-toggle" 
@@ -105,107 +178,114 @@
           <i class="bi bi-pencil fs-4"></i>
         </button>
         <ul class="dropdown-menu">
+          {% if perms.resources.change_slide %}          
           <li>
             <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#modalEditarSlide">
               Modificar slide
             </a>
           </li>
+          {% endif %}
+          {% if perms.resources.change_slide %}  
           <li>
             <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#modalEditarCurso">
               Modificar curso
             </a>
           </li>
+          {% endif %}
+          {% if perms.resources.change_documento %}
           <li>
             <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#modalEditarDocumento">
               Modificar documento
             </a>
           </li>
+          {% endif %}
+          {% if perms.resources.change_videocurso %}
           <li>
             <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#modalEditarContenido">
               Modificar contenido
             </a>
           </li>
+          {% endif %}
         </ul>
       </div>
       
-      {% endif %}
+    {% endif %}
     </div>
 
     <hr class="my-4">
 
-    {% if slides %}
-    <div class="position-relative">
-
-      {% if is_admin %}
-      <div class="position-absolute top-0 start-0 p-3 d-none d-md-block" style="z-index: 10;">
-          <button class="btn btn-success btn-sm shadow" data-bs-toggle="modal" data-bs-target="#modalCrearSlide">
-              <i class="bi bi-plus-lg"></i> Añadir slide
-          </button>
+    <div class="position-relative mb-4">
+      
+      {% if perms.resources.add_slide %}
+      <div class="mb-3 d-flex gap-2">
+        <button class="btn btn-success btn-sm shadow d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#modalCrearSlide">
+            <i class="bi bi-plus-lg"></i> Carga Masiva de Slides
+        </button>
       </div>
       {% endif %}
 
-      <div id="carouselCaptions" class="carousel slide carousel-fade carousel-bienvenida shadow-lg rounded-3" data-bs-ride="carousel" data-bs-interval="4000">
-      
-        <div class="carousel-indicators">
-          {% for slide in slides %}
-            <button type="button" 
-                    data-bs-target="#carouselCaptions" 
-                    data-bs-slide-to="{{ forloop.counter0 }}"
-                    {% if forloop.first %}class="active" aria-current="true"{% endif %}
-                    aria-label="Slide {{ forloop.counter }}">
-            </button>
-          {% endfor %}
-        </div>
+      {% if slides %}
+        <div id="carouselCaptions" class="carousel slide carousel-fade carousel-bienvenida shadow-lg rounded-3" data-bs-ride="carousel" data-bs-interval="4000">
+          <div class="carousel-indicators">
+            {% for slide in slides %}
+              <button type="button" 
+                      data-bs-target="#carouselCaptions" 
+                      data-bs-slide-to="{{ forloop.counter0 }}"
+                      {% if forloop.first %}class="active" aria-current="true"{% endif %}
+                      aria-label="Slide {{ forloop.counter }}">
+              </button>
+            {% endfor %}
+          </div>
 
-        <div class="carousel-inner">
-          {% for slide in slides %}
-            <div class="carousel-item {% if forloop.first %}active{% endif %}">
-              
-              {% if is_admin %}
-              <div class="position-absolute top-0 end-0 p-3" style="z-index: 5;">
-                  <button class="btn btn-warning btn-sm shadow btn-edit-slide" 
-                          data-bs-toggle="modal" 
-                          data-bs-target="#modalEditarSlide" 
-                          data-slide-id="{{ slide.id }}">
-                      <i class="bi bi-pencil"></i> Modificar slide
-                  </button>
+          <div class="carousel-inner">
+            {% for slide in slides %}
+              <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                <a href="#" data-bs-toggle="modal" data-bs-target="#modalSlide{{ slide.id }}">
+                  <img src="{{ slide.image.url }}" class="d-block w-100 rounded-3" alt="{{ slide.alt_text|default:slide.title }}" style="max-height: 700px; object-fit: cover;">
+                </a>          
               </div>
-              {% endif %}
+            {% endfor %}
+          </div>
 
-              <a href="#" data-bs-toggle="modal" data-bs-target="#modalSlide{{ forloop.counter0 }}">
-                <img src="{{ slide.image.url }}" class="d-block w-100" alt="{{ slide.alt_text }}" style="cursor: pointer;">
-              </a>          
-              <div class="carousel-caption d-md-block">
-                <h5 class="">{{ slide.title }}</h5>
-                <p>{{ slide.description }}</p>
-              </div>
-            </div>
-          {% endfor %}
+          <button class="carousel-control-prev" type="button" data-bs-target="#carouselCaptions" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Anterior</span>
+          </button>
+          <button class="carousel-control-next" type="button" data-bs-target="#carouselCaptions" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Siguiente</span>
+          </button>
         </div>
-
-        <button class="carousel-control-prev" type="button" data-bs-target="#carouselCaptions" data-bs-slide="prev">
-          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-          <span class="visually-hidden">Previous</span>
-        </button>
-        <button class="carousel-control-next" type="button" data-bs-target="#carouselCaptions" data-bs-slide="next">
-          <span class="carousel-control-next-icon" aria-hidden="true"></span>
-          <span class="visually-hidden">Next</span>
-        </button>
-      </div>
-    </div> {% endif %}
+      {% else %}
+        {% if perms.slides.add_slide %}
+        <div class="bg-light border border-dashed rounded-3 p-5 text-center my-3">
+          <div class="mb-3">
+            <i class="bi bi-images fs-1 text-muted"></i>
+          </div>
+          <h5 class="text-muted">No hay slides activos</h5>
+          <p class="text-secondary small">Suba las imágenes numeradas para el carrusel de este mes.</p>
+          <button class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#modalCrearSlide">
+            <i class="bi bi-upload me-1"></i> Subir imágenes ahora
+          </button>
+        </div>
+        {% endif %}
+      {% endif %}
+    </div>
 
     {% for slide in slides %}
-    <div class="modal fade" id="modalSlide{{ forloop.counter0 }}" tabindex="-1" aria-labelledby="modalLabel{{ forloop.counter0 }}" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="modalLabel{{ forloop.counter0 }}">{{ slide.title }}</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    <div class="modal fade" id="modalSlide{{ slide.id }}" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content border-0 bg-transparent">
+          <div class="modal-header border-0 p-0 justify-content-end">
+            <button type="button" class="btn-close btn-close-white shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
-          <div class="modal-body">
-            <img src="{{ slide.image.url }}" class="img-fluid w-100" alt="{{ slide.alt_text }}">
+          <div class="modal-body p-0 text-center">
+            <img src="{{ slide.image.url }}" class="img-fluid rounded shadow-lg" alt="{{ slide.title }}">
             {% if slide.description %}
-              <p class="mt-2">{{ slide.description }}</p>
+              <div class="bg-white p-3 rounded-bottom mt-n1 mx-auto" style="max-width: 90%;">
+                 <h5 class="fw-bold mb-1">{{ slide.title }}</h5>
+                 <p class="text-muted mb-0">{{ slide.description }}</p>
+              </div>
             {% endif %}
           </div>
         </div>
@@ -233,6 +313,9 @@
             <li class="nav-item border-lg-end px-lg-2">
               <a class="nav-link" href="#CursosDisponibles">Cursos disponibles</a>
             </li>
+            <li class="nav-item px-lg-2">
+              <a class="nav-link" href="#Contenido">Biblioteca Virtual</a>
+            </li>
             <li class="nav-item border-lg-end px-lg-2">
               <a class="nav-link" href="#Formatos">Formatos</a>
             </li>
@@ -240,7 +323,7 @@
               <a class="nav-link" href="#Documentos">Documentos</a>
             </li>
             <li class="nav-item px-lg-2">
-              <a class="nav-link" href="#Contenido">Biblioteca Virtual</a>
+              <a class="nav-link" href="#Cuestionarios">Cuestionarios</a>
             </li>
             <li class="nav-item px-lg-2">
               <a class="nav-link" href="#DesarrolloProfesional">Desarrollo profesional</a>
@@ -256,13 +339,15 @@
       <h2>Cursos</h2>
       
       <div class="d-flex gap-2">
-        {% if is_admin %}
+        {% if perms.resources.add_curso %}
         <a href="#" class="btn bg-success d-flex align-items-center gap-2 d-none d-md-flex fw-medium text-white"
                 data-bs-toggle="modal" 
                 data-bs-target="#modalCrearCurso">
         <i class="bi bi-plus-lg"></i>
         Añadir un curso
         </a>
+        {% endif %}
+        {% if perms.resources.change_curso %}
         <a href="#" class="btn d-flex bg-warning align-items-center gap-2 d-none d-md-flex fw-medium text-white"
                 data-bs-toggle="modal" 
                 data-bs-target="#modalEditarCurso">
@@ -285,80 +370,74 @@
       <div class="bg-body-secondary p-1 p-md-3 rounded-3">
         <div id="cursosCarousel" class="carousel slide">
           <div class="carousel-inner">
-
             {% for chunk in mis_cursos_chunks %}
             <div class="carousel-item {% if forloop.first %}active{% endif %}">
               <div class="row g-3">
-                
                 {% for curso in chunk %}
                 <div class="col-md-4">
-                    <div class="card border-0 rounded-0 course-card">
-                      
-                      {% if is_admin %}
-                      <a href="#" 
-                          class="btn btn-warning btn-sm rounded-circle shadow-sm btn-edit-curso" 
-                          data-bs-toggle="modal" 
-                          data-bs-target="#modalEditarCurso" 
-                          data-curso-id="{{ curso.id }}"
-                          aria-label="Editar curso"
-                          style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
-                          <i class="bi bi-gear-fill fs-5"></i>
-                      </a>
-                      {% endif %}
-
-                      {% if curso.imagen %}
-                        <img src="{{ curso.imagen.url }}" 
-                            class="card-img-top" 
-                            alt="Portada de {{ curso.titulo }}" 
-                            style="height: 200px; object-fit: cover;"> {% else %}
-                        <div class="card-img-placeholder">
-                            <i class="bi bi-mortarboard-fill"></i>
-                        </div>
-                      {% endif %}
-                      
-                      <div class="card-body text-white" style="background-color: #12255B;">
-                        <h5 class="card-title h6">{{ curso.titulo }}</h5>
-                        
-                        <p class="card-text small mb-0">
-                          Fecha: {{ curso.fecha|date:"d/m/Y"|default:"No definida" }}
-                        </p>
-                        <p class="card-text small">
-                          Horario: {{ curso.horario|time:"H:i"|default:"No definido" }} hrs
-                        </p>
+                  <div class="card border-0 rounded-0 course-card h-100">
+                    {% if perms.resources.change_curso %}
+                    <a href="#" 
+                        class="btn btn-warning btn-sm rounded-circle shadow-sm btn-edit-curso" 
+                        data-bs-toggle="modal" 
+                        data-bs-target="#modalEditarCurso" 
+                        data-curso-id="{{ curso.id }}"
+                        aria-label="Editar curso"
+                        style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-gear-fill fs-5"></i>
+                    </a>
+                    {% endif %}
+                    {% if curso.imagen %}
+                      <img src="{{ curso.imagen.url }}" 
+                          class="card-img-top" 
+                          alt="Portada de {{ curso.titulo }}" 
+                          style="height: 250px; object-fit: cover;"> {% else %}
+                      <div class="card-img-placeholder d-flex align-items-center justify-content-center" 
+                        style="height: 250px;">
+                        <i class="bi bi-mortarboard-fill fs-1 text-muted"></i>
                       </div>
-
-                      <div style="background-color: rgba(18, 37, 91, 0.9);" class="course-info-overlay p-5 text-center d-flex flex-column justify-content-center align-items-center">
-                        <h5 class="fw-bold">{{ curso.titulo }}</h5>
-                        {% if curso.descripcion %}
-                          <p class="text-white-50 small">{{ curso.descripcion|truncatechars:100 }}</p>
-                        {% endif %}
-                        <p class="small mb-1">
-                          <i class="bi bi-calendar"></i> {{ curso.fecha|date:"d/m/Y"|default:"N/A" }}
-                          {% if curso.horario %} | <i class="bi bi-clock"></i> {{ curso.horario|time:"H:i" }} hrs {% endif %}
-                        </p>
-                        {% if curso.duracion_horas %}
-                          <p class="small mb-1"><i class="bi bi-hourglass-split"></i> {{ curso.duracion_horas|floatformat:1 }} horas</p>
-                        {% endif %}
-                        {% if curso.plataforma %}
-                          <p class="small mb-3"><i class="bi bi-geo-alt"></i> {{ curso.plataforma }}</p>
-                        {% endif %}
-                        {% if curso.link %}
-                          <a href="{{ curso.link }}" target="_blank" class="btn btn-sm mt-auto btn-color">
-                            Ir al Curso <i class="bi bi-box-arrow-up-right"></i>
-                          </a>
-                        {% else %}
-                          <span class="text-white-50 small mt-auto">Enlace no disponible</span>
-                        {% endif %}
-                      </div>
+                    {% endif %}
+                    <div class="card-body text-white d-flex flex-column" style="background-color: #12255B; flex-grow: 1;">
+                      <h5 class="card-title h6">{{ curso.titulo }}</h5>
+  
+                      <p class="card-text small mb-0">
+                        Fecha: {{ curso.fecha|date:"d/m/Y"|default:"No definida" }}
+                      </p>
+                      <p class="card-text small">
+                        Horario: {{ curso.horario|time:"H:i"|default:"No definido" }} hrs
+                      </p>
                     </div>
+
+                    <div style="background-color: rgba(18, 37, 91, 0.9);" class="course-info-overlay p-5 text-center d-flex flex-column justify-content-center align-items-center">
+                      <h6 class="fw-bold">{{ curso.titulo }}</h6>
+                      {% if curso.descripcion %}
+                        <p class="text-white-50 small">{{ curso.descripcion|truncatechars:100 }}</p>
+                      {% endif %}
+                      <p class="small mb-1">
+                        <i class="bi bi-calendar"></i> {{ curso.fecha|date:"d/m/Y"|default:"N/A" }}
+                        {% if curso.horario %} | <i class="bi bi-clock"></i> {{ curso.horario|time:"H:i" }} hrs {% endif %}
+                      </p>
+                      {% if curso.duracion_horas %}
+                        <p class="small mb-1"><i class="bi bi-hourglass-split"></i> {{ curso.duracion_horas|floatformat:1 }} horas</p>
+                      {% endif %}
+                      {% if curso.plataforma %}
+                        <p class="small mb-3"><i class="bi bi-geo-alt"></i> {{ curso.plataforma }}</p>
+                      {% endif %}
+                      {% if curso.link %}
+                        <a href="{{ curso.link }}" target="_blank" class="btn btn-sm mt-auto btn-color">
+                          Ir al Curso <i class="bi bi-box-arrow-up-right"></i>
+                        </a>
+                      {% else %}
+                        <span class="text-white-50 small mt-auto">Enlace no disponible</span>
+                      {% endif %}
+                    </div>
+                  </div>
                 </div>
                 {% endfor %}
-
               </div>
             </div>
             {% endfor %}
             </div>
-
           {% if mis_cursos_chunks|length > 1 %}
           <button class="carousel-control-prev" type="button" data-bs-target="#cursosCarousel" data-bs-slide="prev">
             <span class="carousel-control-prev-icon" aria-hidden="true"></span>
@@ -381,7 +460,7 @@
       
       <div class="bg-body-tertiary p-5 rounded-3 text-center">
         <p class="lead text-muted">
-          <i class="bi bi-info-circle me-2"></i>No te has registrado a ningún curso.
+          <i class="bi bi-info-circle me-2"></i>No tienes ningún curso por el momento.
         </p>
       </div>
     </div>
@@ -404,8 +483,8 @@
                 
                 {% for curso in chunk %}
                 <div class="col-md-4">
-                    <div class="card border-0 rounded-0 course-card">
-                      {% if is_admin %}
+                    <div class="card border-0 rounded-0 course-card h-100">
+                      {% if perms.resources.change_curso %}
                       <a href="#" 
                           class="btn btn-warning btn-sm rounded-circle shadow-sm btn-edit-curso" 
                           data-bs-toggle="modal" 
@@ -420,14 +499,14 @@
                         <img src="{{ curso.imagen.url }}" 
                             class="card-img-top" 
                             alt="Portada de {{ curso.titulo }}" 
-                            style="height: 200px; object-fit: cover;"> {% else %}
+                            style="height: 250px; object-fit: cover;"> {% else %}
                         <div class="card-img-placeholder d-flex align-items-center justify-content-center" 
-                          style="height: 200px;">
+                          style="height: 250px;">
                           <i class="bi bi-mortarboard-fill fs-1 text-muted"></i>
                         </div>
                       {% endif %}
                       
-                      <div class="card-body text-white" style="background-color: #12255B;">
+                      <div class="card-body text-white" style="background-color: #12255B; flex-grow: 1;">
                         <h5 class="card-title h6">{{ curso.titulo }}</h5>
                         <p class="card-text small mb-0">
                           Fecha: {{ curso.fecha|date:"d/m/Y"|default:"No definida" }}
@@ -437,8 +516,8 @@
                         </p>
                       </div>
 
-                      <div style="background-color: rgba(18, 37, 91, 0.9);" class="course-info-overlay p-5 text-center d-flex flex-column justify-content-center align-items-center">
-                        <h5 class="fw-bold">{{ curso.titulo }}</h5>
+                      <div style="background-color: rgba(18, 37, 91, 0.9);" class="course-info-overlay p-5 text-center d-flex flex-column justify-content-center align-items-center h-100">
+                        <h6 class="fw-bold">{{ curso.titulo }}</h6>
                         {% if curso.descripcion %}
                           <p class="text-white-50 small mb-2">{{ curso.descripcion|truncatechars:100 }}</p>
                         {% endif %}
@@ -512,151 +591,18 @@
     <hr class="my-1">
 
     <div class="d-flex justify-content-between align-items-center mt-3 mb-3">
-      <h2>Documentos</h2>
-      
-      <div class="d-flex gap-2">
-        {% if is_admin %}
-        <a href="#" class="btn bg-success d-flex align-items-center gap-2 d-none d-md-flex fw-medium text-white"
-                data-bs-toggle="modal" 
-                data-bs-target="#modalCrearDocumento">
-        <i class="bi bi-plus-lg"></i>
-        Añadir un documento
-        </a>
-        <a href="#" class="btn d-flex bg-warning align-items-center gap-2 d-none d-md-flex fw-medium text-white"
-                data-bs-toggle="modal" 
-                data-bs-target="#modalEditarDocumento">
-        <i class="bi bi-pencil"></i>
-        Modificar un documento
-        </a>
-        {% endif %}
-      </div>
-    </div>
-    <hr class="my-1"> 
-
-    <div class="mb-3 p-3" id="Formatos">
-      <h2 class="h4 mb-2">Formatos de interés</h2>
-      <p class="text-muted">
-          Documentos tales como formatos y plantillas.
-      </p>
-
-      <div class="row g-3 mb-4">
-
-          <div class="col-12 col-md-4">
-              <label for="form-filter-departamento" class="form-label">Departamento</label>
-              <select class="form-select" id="form-filter-departamento" aria-label="Filtrar por departamento">
-                  <option value="">Todos los Departamentos</option>
-                  {% for depto in all_departamentos %}
-                      <option value="{{ depto.id }}" {% if depto.id == user_depto_id %}selected{% endif %}>
-                          {{ depto.nombre }}
-                      </option>
-                  {% endfor %}
-              </select>
-          </div>
-
-          <div class="col-12 col-md-4">
-              <label for="form-filter-tipo" class="form-label">Tipo de Documento</label>
-              <select class="form-select" id="form-filter-tipo" aria-label="Filtrar por tipo de documento">
-                  <option selected value="">Todos los Tipos</option>
-                  {% for tipo in tipos_para_formatos %} <option value="{{ tipo.id }}">{{ tipo.nombre }}</option>
-                  {% endfor %}
-              </select>
-          </div>
-
-          <div class="col-12 col-md-4 d-flex align-items-end">
-              <div class="input-group w-100">
-                  <span class="input-group-text bg-body-tertiary border-0" id="search-icon-form">
-                      <i class="bi bi-search"></i>
-                  </span>
-                  <input type="text" 
-                        id="form-search-input" 
-                        class="form-control bg-body-secoda border-0" 
-                        placeholder="Buscar formatos..." 
-                        aria-label="Buscar" 
-                        aria-describedby="search-icon-form">
-              </div>
-          </div>
-      </div>
-      <div id="form-list-container" class="row row-cols-1 row-cols-md-2 g-3">
-          {% include '_documentos_partial.html' with documentos=formatos %}
-      </div>
-
-      <div class="d-flex justify-content-center align-items-center mt-4">
-          <button id="form-load-more-btn"
-                  class="btn btn-color px-4 py-2 fw-medium"
-                  {% if not formatos.has_next %}style="display: none;"{% endif %}>
-              Cargar más
-          </button>
-          
-          <div id="form-loading-spinner" class="spinner-border" role="status" style="display: none;">
-              <span class="visually-hidden">Loading...</span>
-          </div>
-      </div>
-    </div>
-
-    <div class="mb-3 p-3" id="Documentos">
-      <h2 class="h4 mb-2">Documentos de apoyo</h2>
-      <p class="text-muted">Documentos tales como guías, políticas y anexos.</p>
-      
-      <div class="row g-3 mb-4">
-        <div class="col-12 col-md-4">
-            <label for="doc-filter-departamento" class="form-label">Departamento</label>
-            <select class="form-select" id="doc-filter-departamento" aria-label="Filtrar por departamento">
-                <option value="">Todos los Departamentos</option>
-                {% for depto in all_departamentos %}
-                    <option value="{{ depto.id }}" {% if depto.id == user_depto_id %}selected{% endif %}>
-                        {{ depto.nombre }}
-                    </option>
-                {% endfor %}
-            </select>
-        </div>
-
-        <div class="col-12 col-md-4">
-            <label for="doc-filter-tipo" class="form-label">Tipo de Documento</label>
-            <select class="form-select" id="doc-filter-tipo" aria-label="Filtrar por tipo de documento">
-                <option selected value="">Todos los Tipos</option>
-                {% for tipo in tipos_para_documentos %} <option value="{{ tipo.id }}">{{ tipo.nombre }}</option>
-                {% endfor %}
-            </select>
-        </div>
-
-        <div class="col-12 col-md-4 d-flex align-items-end">
-            <div class="input-group w-100">
-                <span class="input-group-text bg-body-tertiary border-0" id="search-icon-doc">
-                    <i class="bi bi-search"></i>
-                </span>
-                <input type="text" id="doc-search-input" class="form-control bg-body-secondary border-0" 
-                      placeholder="Buscar documentos..." aria-label="Buscar">
-            </div>
-        </div>
-      </div>
-      <div id="doc-list-container" class="row row-cols-1 row-cols-md-2 g-3">
-          {% include '_documentos_partial.html' with documentos=documentos_generales %}
-      </div>
-
-      <div class="d-flex justify-content-center align-items-center mt-4">
-        <button id="doc-load-more-btn" class="btn btn-color px-4 py-2 fw-medium"
-                {% if not documentos_generales.has_next %}style="display: none;"{% endif %}>
-            Cargar más
-        </button>
-        <div id="doc-loading-spinner" class="spinner-border" role="status" style="display: none;">
-            <span class="visually-hidden">Loading...</span>
-        </div>
-      </div>
-    </div>
-
-    <hr class="my-1"> 
-
-    <div class="d-flex justify-content-between align-items-center mt-3 mb-3">
       <h2>Biblioteca Virtual</h2>
       
       <div class="d-flex gap-2">
-        {% if is_admin %}
+        {% if perms.resources.add_videocurso %}
         <a href="#" class="btn bg-success d-flex align-items-center gap-2 d-none d-md-flex fw-medium text-white"
                 data-bs-toggle="modal" 
                 data-bs-target="#modalCrearContenido">
         <i class="bi bi-plus-lg"></i>
         Añadir un contenido
         </a>
+        {% endif %}
+        {% if perms.resources.change_videocurso %}
         <a href="#" class="btn d-flex bg-warning align-items-center gap-2 d-none d-md-flex fw-medium text-white"
                 data-bs-toggle="modal" 
                 data-bs-target="#modalEditarContenido">
@@ -667,38 +613,50 @@
       </div>
     </div>
 
-    <hr class="my-1"> 
+    <hr class="my-1">
 
     <div class="mb-3 p-2 p-md-3" id="Contenido">
       <h2 class="h4 mb-2">Contenido digital</h2>
       <p class="text-muted">Consulta el contenido de cursos, videos de apoyo y sesiones anteriores.</p>
       
       <div class="row g-3 mb-4">
+
+        <div class="col-12 col-md-3">
+            <div class="input-group shadow-sm">
+                <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-primary"></i></span>
+                <input type="text" id="vid-search-input" class="form-control border-start-0 ps-0" placeholder="¿Qué deseas aprender?">
+            </div>
+        </div>
+
         <div class="col-12 col-md-4">
-            <label for="vid-filter-departamento" class="form-label">Departamento</label>
-            <select class="form-select" id="vid-filter-departamento" aria-label="Filtrar por departamento">
-                <option value="">Todos los Departamentos</option>
-                {% for depto in all_departamentos %}
-                    <option value="{{ depto.id }}" {% if depto.id == user_depto_id %}selected{% endif %}>
-                        {{ depto.nombre }}
-                    </option>
+            <select class="form-select shadow-sm" id="vid-filter-tematica">
+                <option value="" selected>📚 Todas las temáticas</option>
+                {% for tema in tematicas_video %}
+                    <option value="{{ tema.id }}">{{ tema.nombre }}</option>
                 {% endfor %}
             </select>
         </div>
-        
-        <div class="col-12 col-md-4 d-flex align-items-end">
-            <div class="input-group w-100">
-                <span class="input-group-text bg-body-tertiary border-0" id="search-icon-vid">
-                    <i class="bi bi-search"></i>
-                </span>
-                <input type="text" id="vid-search-input" class="form-control bg-body-secondary border-0" 
-                      placeholder="Buscar contenido..." aria-label="Buscar" aria-describedby="search-icon-vid">
-            </div>
+
+        <div class="col-12 col-md-4">
+            <select class="form-select shadow-sm" id="vid-filter-departamento">
+                <option value="" selected>🏢 Todos los departamentos</option>
+                {% for depto in all_departamentos %}
+                    <option value="{{ depto.id }}">{{ depto.nombre }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-12 col-md-1">
+          <button type="button" id="btn-reset-filters-vid" class="btn btn-outline-secondary shadow-sm w-100" title="Limpiar filtros">
+            <i class="bi bi-funnel-fill position-relative">
+              <small class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.5rem;">X</small>
+            </i>
+          </button>
         </div>
       </div>
 
       <div class="container my-5">
-        <div id="vid-list-container" class="row row-cols-1 row-cols-md-2 g-4">
+        <div id="vid-list-container" class="row row-cols-1 row-cols-md-3 g-4">
           {% include '_videos_partial.html' with videos=videos_videoteca %}
         </div>
         <div>
@@ -715,24 +673,170 @@
       </div>
     </div>
 
+    <hr class="my-1">
+
+    <div class="d-flex justify-content-between align-items-center mt-3 mb-3">
+      <h2>Documentos</h2>
+      
+      <div class="d-flex gap-2">
+        {% if perms.resources.add_documento %}
+        <a href="#" class="btn bg-success d-flex align-items-center gap-2 d-none d-md-flex fw-medium text-white"
+                data-bs-toggle="modal" 
+                data-bs-target="#modalCrearDocumento">
+        <i class="bi bi-plus-lg"></i>
+        Añadir un documento
+        </a>
+
+        {% if perms.resources.change_documento %}
+        {% endif %}
+        <a href="#" class="btn d-flex bg-warning align-items-center gap-2 d-none d-md-flex fw-medium text-white"
+                data-bs-toggle="modal" 
+                data-bs-target="#modalEditarDocumento">
+        <i class="bi bi-pencil"></i>
+        Modificar un documento
+        </a>
+        {% endif %}
+      </div>
+    </div>
+
     <hr class="my-1"> 
+
+    <div class="mb-3 p-3" id="Formatos">
+      <h2 class="h4 mb-2">Formatos internos de interés</h2>
+      <p class="text-muted">
+          Documentos tales como formatos, catálogos y políticas con relación a los procesos de la empresa.
+      </p>
+
+      <div class="row g-3 mb-3">
+
+        <div class="col-12 col-md-3">
+          <div class="input-group shadow-sm">
+              <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-primary"></i></span>
+              <input type="text" id="form-search-input" class="form-control border-start-0 ps-0" placeholder="Buscar...">
+          </div>
+        </div>
+
+        <div class="col-12 col-md-4">
+          <select class="form-select shadow-sm" id="form-filter-proceso">
+            <option value="" selected>🔄 Todos los procesos</option>
+          </select>
+        </div>
+
+        <div class="col-12 col-md-4">
+          <select class="form-select shadow-sm" id="form-filter-procedimiento" disabled>
+            <option value="" selected>⚙️ Todos los procedimientos</option>
+          </select>
+        </div>
+        
+        <div class="col-12 col-md-1">
+          <button type="button" id="btn-reset-filters-form" class="btn btn-outline-secondary shadow-sm w-100" title="Limpiar filtros">
+            <i class="bi bi-funnel-fill position-relative">
+              <small class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.5rem;">X</small>
+            </i>
+          </button>
+        </div>
+      </div>
+
+      <div id="subcategoria-tabs-container" class="mb-3" style="display: none;"> 
+        <ul class="nav nav-pills nav-fill bg-light p-1 rounded border shadow-sm" id="subcategoriaTabs" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link active fw-bold" id="tab-formato" data-sub="formato" type="button">
+              <i class="bi bi-file-earmark-text me-2"></i>Formatos y Plantillas
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link fw-bold" id="tab-procedimiento" data-sub="procedimiento" type="button">
+              <i class="bi bi-book me-2"></i>Manuales y Procedimientos
+            </button>
+          </li>
+        </ul>
+      </div>
+
+      <div id="form-list-container" class="row row-cols-1 row-cols-md-2 g-3">
+        {% include '_documentos_partial.html' with documentos=formatos %}
+      </div>
+
+      <div class="d-flex justify-content-center align-items-center mt-4">
+        <button id="form-load-more-btn"
+                class="btn btn-color px-4 py-2 fw-medium"
+                {% if not formatos.has_next %}style="display: none;"{% endif %}>
+            Cargar más
+        </button>
+        
+        <div id="form-loading-spinner" class="spinner-border" role="status" style="display: none;">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="mb-3 p-3" id="Documentos">
+      <h2 class="h4 mb-2">Documentos externos de apoyo</h2>
+      <p class="text-muted">Documentos tales como guías y anexos de normatividad externa.</p>
+      
+      <div class="row g-3 mb-4">
+        <div class="col-12 col-md-3">
+          <div class="input-group shadow-sm">
+              <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-primary"></i></span>
+              <input type="text" id="doc-search-input" class="form-control border-start-0 ps-0" placeholder="Buscar documentos...">
+          </div>
+        </div>
+
+        <div class="col-12 col-md-3">
+          <select class="form-select shadow-sm" id="doc-filter-departamento">
+            <option value="" selected>🏢 Todos los departamentos</option>
+            {% for depto in all_departamentos %}
+                <option value="{{ depto.id }}">
+                    {{ depto.nombre }}
+                </option>
+            {% endfor %}
+        </select>
+        </div>
+
+        <div class="col-12 col-md-3">
+          <select class="form-select shadow-sm" id="doc-filter-tipo">
+            <option value="" selected>📚 Todos los documentos</option>
+            {% for tipo in tipos_para_documentos %}
+                <option value="{{ tipo.id }}">{{ tipo.nombre }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-12 col-md-1">
+          <button type="button" id="btn-reset-filters-doc" class="btn btn-outline-secondary shadow-sm w-100" title="Limpiar filtros">
+            <i class="bi bi-funnel-fill position-relative">
+              <small class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.5rem;">X</small>
+            </i>
+          </button>
+        </div>
+
+      </div>
+      <div id="doc-list-container" class="row row-cols-1 row-cols-md-2 g-3">
+          {% include '_documentos_partial.html' with documentos=documentos_generales %}
+      </div>
+
+      <div class="d-flex justify-content-center align-items-center mt-4">
+        <button id="doc-load-more-btn" class="btn btn-color px-4 py-2 fw-medium"
+                {% if not documentos_generales.has_next %}style="display: none;"{% endif %}>
+            Cargar más
+        </button>
+        <div id="doc-loading-spinner" class="spinner-border" role="status" style="display: none;">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    </div>
+    
+        <hr class="my-1"> 
 
     <div class="d-flex justify-content-between align-items-center mt-3 mb-3">
       <h2>Desarrollo profesional</h2>
       
       <div class="d-flex gap-2">
-        {% if is_admin %}
-        <a href="#" class="btn bg-success d-flex align-items-center gap-2 d-none d-md-flex fw-medium text-white"
-                data-bs-toggle="modal" 
-                data-bs-target="#modalCrearCertificado">
-        <i class="bi bi-plus-lg"></i>
-        Añadir un certificado
-        </a>
+        {% if perms.resources.change_inscripcioncurso %}
         <a href="#" class="btn d-flex bg-warning align-items-center gap-2 d-none d-md-flex fw-medium text-white"
                 data-bs-toggle="modal" 
                 data-bs-target="#modalEditarCertificado">
         <i class="bi bi-pencil"></i>
-        Modificar un certificado
+        Modificar certificaciones de los cursos
         </a>
         {% endif %}
       </div>
@@ -758,24 +862,26 @@
       </ul>
 
       <div class="tab-content" id="myTabContent">
-
         <div class="tab-pane fade show active" id="historial-tab-pane" role="tabpanel" aria-labelledby="historial-tab" tabindex="0">
           <div class="p-2 mt-1 p-md-3 bg-body-tertiary rounded-bottom">
-            <div class="row g-3 align-items-end mb-4">
-              <div class="col-sm">
-                <label for="completed-filter-fecha-inicio" class="form-label">Desde</label>
-                <input type="date" class="form-control" id="completed-filter-fecha-inicio" aria-label="Fecha inicio">
-              </div>
 
-              <div class="col-sm">
-                <label for="completed-filter-fecha-fin" class="form-label">Hasta</label>
-                <input type="date" class="form-control" id="completed-filter-fecha-fin" aria-label="Fecha fin">
-              </div>
+            <h4><i class="bi bi-patch-check-fill me-2"></i>Mis cursos finalizados</h4>
+            <p class="text-muted">Los cursos que ya has tomado.</p>
+            <input type="hidden" id="historial-filter-dummy" value="">
 
-              <div class="col-sm">
-                <div class="input-group"> 
-                  <span class="input-group-text"><i class="bi bi-search"></i></span>
-                  <input type="text" class="form-control" placeholder="Buscar en historial...">
+            <div class="row g-3 mb-4 justify-content-start">
+              <div class="col-12 col-md-4">
+                <label for="cur-search-input" class="form-label">Buscar curso</label>
+                <div class="input-group w-100">
+                  <span class="input-group-text bg-body-tertiary border-0" id="search-icon-cur">
+                    <i class="bi bi-search"></i>
+                  </span>
+                  <input type="text" 
+                        id="cur-search-input" 
+                        class="form-control bg-body-secondary border-0" 
+                        placeholder="Buscar por curso o fecha..." 
+                        aria-label="Buscar" 
+                        aria-describedby="search-icon-cur">
                 </div>
               </div>
             </div>
@@ -784,41 +890,29 @@
               <table class="table table-striped table-hover align-middle">
                 <thead class="table-light">
                   <tr>
-                    <th scope="col">Curso</th>
+                    <th scope="col">Curso finalizado</th>
                     <th scope="col">Estado</th>
                     <th scope="col">Fecha de Finalización</th>
+                    <th scope="col">Calificación</th>
                     <th scope="col">Certificado</th>
                   </tr>
                 </thead>
-                <tbody>
-                  <tr>
-                    <td>Metodologías Ágiles (Scrum)</td>
-                    <td><span class="badge bg-success">Aprobado</span></td>
-                    <td>15/09/2025</td>
-                    <td>
-                      <a href="#" class="btn btn-sm btn-outline-primary">
-                        <i class="bi bi-download me-1"></i> Descargar Diploma
-                      </a>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>Taller de Oratoria</td>
-                    <td><span class="badge bg-secondary">Completado</span></td>
-                    <td>01/06/2025</td>
-                    <td>
-                      <a href="#" class="btn btn-sm btn-outline-primary">
-                        <i class="bi bi-download me-1"></i> Descargar Constancia
-                      </a>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>Compliance Anual 2024</td>
-                    <td><span class="badge bg-secondary">Completado</span></td>
-                    <td>15/01/2025</td>
-                    <td><span class="text-muted small">N/A</span></td>
-                  </tr>
+                <tbody id="historial-list-container">
+                  {% include '_historial_partial.html' with historial=historial_inicial %}
                 </tbody>
               </table>
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-center align-items-center mt-4">
+            <button id="historial-load-more-btn" 
+                    class="btn btn-color px-4 py-2 fw-medium" 
+                    {% if not historial_inicial.has_next %}style="display: none;"{% endif %}>
+              Cargar más
+            </button>
+
+            <div id="historial-loading-spinner" class="spinner-border" role="status" style="display: none;">
+              <span class="visually-hidden">Loading...</span>
             </div>
           </div>
         </div>
@@ -828,20 +922,74 @@
             
             <h4><i class="bi bi-patch-check-fill me-2"></i>Mis certificaciones</h4>
             <p class="text-muted">Los certificados de los cursos que has tomado.</p>
-            <div class="input-group mb-4"> 
-              <span class="input-group-text"><i class="bi bi-search"></i></span>
-              <input type="text" class="form-control" placeholder="Buscar en historial...">
-            </div>
-            <div class="row g-4 mb-4">
-              <div class="col-md-6 col-lg-4">
-                <div class="card h-100">
-                  <div class="card-body">
-                    <h5 class="card-title">Scrum Master Certified</h5>
-                    <h6 class="card-subtitle mb-2 text-muted">Otorgado por: Scrum Alliance</h6>
-                    <a href="#" class="btn btn-sm btn-primary">Vista Previa</a>
-                    <a href="#" class="btn btn-sm btn-primary">Descargar</a>
-                  </div>
+
+            <div class="row g-3 mb-4 justify-content-start">
+              <div class="col-12 col-md-4">
+                <label for="cert-search-input" class="form-label">Buscar certificado</label>
+                <div class="input-group w-100">
+                  <span class="input-group-text bg-body-tertiary border-0" id="search-icon-cert">
+                    <i class="bi bi-search"></i>
+                  </span>
+                  <input type="text" 
+                        id="cert-search-input" 
+                        class="form-control bg-body-secoda border-0" 
+                        placeholder="Buscar por título o curso..." 
+                        aria-label="Buscar" 
+                        aria-describedby="search-icon-cert">
                 </div>
+              </div>
+            </div>
+
+            <div id="cert-list-container" class="row g-4 mb-4">
+              {% for inscripcion in certificados_iniciales %}
+                {% if inscripcion.certificado %}
+                  <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 border-success">
+                      <div class="card-body d-flex flex-column">
+                        <div class="d-flex align-items-center mb-2">
+                          <i class="bi bi-award-fill text-warning me-2 fs-3"></i>
+                          <div>
+                            <h5 class="card-title mb-0">
+                              {{ inscripcion.curso.titulo }}
+                            </h5>
+                            <h6 class="card-subtitle text-muted small">
+                              Completado el: {{ inscripcion.fecha_finalizacion|date:"d M Y" }}
+                            </h6>
+                          </div>
+                        </div>
+
+                        <div class="mt-auto pt-2">
+                          <button type="button" class="btn btn-sm btn-outline-primary me-2" 
+                                  data-bs-toggle="modal" 
+                                  data-bs-target="#previewModal" 
+                                  data-src="{{ inscripcion.certificado.url }}" 
+                                  data-title="Certificado: {{ inscripcion.curso.titulo }}">
+                            <i class="bi bi-box-arrow-in-up-right me-1"></i> Vista Previa
+                          </button>
+                          <a href="{{ inscripcion.certificado.url }}" download class="btn btn-sm btn-primary">
+                            <i class="bi bi-download me-1"></i> Descargar
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                {% endif %}
+              {% empty %}
+                <div class="col-12">
+                  <p class="text-info small">Aún no tienes certificaciones completadas y registradas.</p>
+                </div>
+              {% endfor %}
+            </div>
+
+            <div class="d-flex justify-content-center align-items-center mt-4">
+              <button id="cert-load-more-btn" 
+                      class="btn btn-color px-4 py-2 fw-medium" 
+                      {% if not certificados_iniciales.has_next %}style="display: none;"{% endif %}>
+                Cargar más
+              </button>
+
+              <div id="cert-loading-spinner" class="spinner-border" role="status" style="display: none;">
+                <span class="visually-hidden">Loading...</span>
               </div>
             </div>
 
@@ -850,30 +998,206 @@
             <h4><i class="bi bi-tags-fill me-2"></i>Habilidades Desarrolladas</h4>
             <p class="text-muted">Competencias adquiridas a través de tus cursos.</p>
             <div class="d-flex flex-wrap gap-2">
-              
-              <span class="badge rounded-pill text-bg-primary fs-6 fw-normal px-3 py-2">
-                Gestión de Proyectos
-              </span>
-              <span class="badge rounded-pill text-bg-secondary fs-6 fw-normal px-3 py-2">
-                Liderazgo
-              </span>
-              <span class="badge rounded-pill text-bg-secondary fs-6 fw-normal px-3 py-2">
-                Comunicación Efectiva
-              </span>
-              <span class="badge rounded-pill text-bg-info fs-6 fw-normal px-3 py-2">
-                Metodologías Ágiles
-              </span>
-              <span class="badge rounded-pill text-bg-info fs-6 fw-normal px-3 py-2">
-                Scrum
-              </span>
-              <span class="badge rounded-pill text-bg-dark fs-6 fw-normal px-3 py-2">
-                Ciberseguridad
-              </span>
+              <span class="badge rounded-pill text-bg-primary fs-6 fw-normal px-3 py-2">Gestión de Proyectos</span>
+              <span class="badge rounded-pill text-bg-secondary fs-6 fw-normal px-3 py-2">Liderazgo</span>
+              <span class="badge rounded-pill text-bg-secondary fs-6 fw-normal px-3 py-2">Comunicación Efectiva</span>
+              <span class="badge rounded-pill text-bg-info fs-6 fw-normal px-3 py-2">Metodologías Ágiles</span>
+              <span class="badge rounded-pill text-bg-info fs-6 fw-normal px-3 py-2">Scrum</span>
+              <span class="badge rounded-pill text-bg-dark fs-6 fw-normal px-3 py-2">Ciberseguridad</span>
+            </div>
+
+          </div>
+        </div>
+      </div> 
+    </div>
+    
+    <hr class="my-1"> 
+
+    <div class="d-flex justify-content-between align-items-center mt-3 mb-3">
+      <h2>Desarrollo profesional</h2>
+      
+      <div class="d-flex gap-2">
+        {% if perms.resources.change_inscripcioncurso %}
+        <a href="#" class="btn d-flex bg-warning align-items-center gap-2 d-none d-md-flex fw-medium text-white"
+                data-bs-toggle="modal" 
+                data-bs-target="#modalEditarCertificado">
+        <i class="bi bi-pencil"></i>
+        Modificar certificaciones de los cursos
+        </a>
+        {% endif %}
+      </div>
+    </div>
+
+    <hr class="my-1"> 
+
+    <div class="mb-3 p-2 p-md-3" id="DesarrolloProfesional">
+      <h2 class="h4 mb-2">Cursos completados y certificaciones</h2>
+      <p class="text-muted">Consulta el contenido y certificaciones de tus cursos finalizados.</p>
+
+      <ul class="nav nav-tabs" id="myTab" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active" id="historial-tab" data-bs-toggle="tab" data-bs-target="#historial-tab-pane" type="button" role="tab" aria-controls="historial-tab-pane" aria-selected="true">
+            Historial de cursos
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="habilidades-tab" data-bs-toggle="tab" data-bs-target="#habilidades-tab-pane" type="button" role="tab" aria-controls="habilidades-tab-pane" aria-selected="false">
+            Certificados y habilidades
+          </button>
+        </li>
+      </ul>
+
+      <div class="tab-content" id="myTabContent">
+        <div class="tab-pane fade show active" id="historial-tab-pane" role="tabpanel" aria-labelledby="historial-tab" tabindex="0">
+          <div class="p-2 mt-1 p-md-3 bg-body-tertiary rounded-bottom">
+
+            <h4><i class="bi bi-patch-check-fill me-2"></i>Mis cursos finalizados</h4>
+            <p class="text-muted">Los cursos que ya has tomado.</p>
+            <input type="hidden" id="historial-filter-dummy" value="">
+
+            <div class="row g-3 mb-4 justify-content-start">
+              <div class="col-12 col-md-4">
+                <label for="cur-search-input" class="form-label">Buscar curso</label>
+                <div class="input-group w-100">
+                  <span class="input-group-text bg-body-tertiary border-0" id="search-icon-cur">
+                    <i class="bi bi-search"></i>
+                  </span>
+                  <input type="text" 
+                        id="cur-search-input" 
+                        class="form-control bg-body-secondary border-0" 
+                        placeholder="Buscar por curso o fecha..." 
+                        aria-label="Buscar" 
+                        aria-describedby="search-icon-cur">
+                </div>
+              </div>
+            </div>
+
+            <div class="table-responsive">
+              <table class="table table-striped table-hover align-middle">
+                <thead class="table-light">
+                  <tr>
+                    <th scope="col">Curso finalizado</th>
+                    <th scope="col">Estado</th>
+                    <th scope="col">Fecha de Finalización</th>
+                    <th scope="col">Calificación</th>
+                    <th scope="col">Certificado</th>
+                  </tr>
+                </thead>
+                <tbody id="historial-list-container">
+                  {% include '_historial_partial.html' with historial=historial_inicial %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-center align-items-center mt-4">
+            <button id="historial-load-more-btn" 
+                    class="btn btn-color px-4 py-2 fw-medium" 
+                    {% if not historial_inicial.has_next %}style="display: none;"{% endif %}>
+              Cargar más
+            </button>
+
+            <div id="historial-loading-spinner" class="spinner-border" role="status" style="display: none;">
+              <span class="visually-hidden">Loading...</span>
             </div>
           </div>
         </div>
-      </div>
+
+        <div class="tab-pane fade" id="habilidades-tab-pane" role="tabpanel" aria-labelledby="habilidades-tab" tabindex="0">
+          <div class="p-2 p-md-3 mt-1 bg-body-tertiary rounded-bottom">
+            
+            <h4><i class="bi bi-patch-check-fill me-2"></i>Mis certificaciones</h4>
+            <p class="text-muted">Los certificados de los cursos que has tomado.</p>
+
+            <div class="row g-3 mb-4 justify-content-start">
+              <div class="col-12 col-md-4">
+                <label for="cert-search-input" class="form-label">Buscar certificado</label>
+                <div class="input-group w-100">
+                  <span class="input-group-text bg-body-tertiary border-0" id="search-icon-cert">
+                    <i class="bi bi-search"></i>
+                  </span>
+                  <input type="text" 
+                        id="cert-search-input" 
+                        class="form-control bg-body-secoda border-0" 
+                        placeholder="Buscar por título o curso..." 
+                        aria-label="Buscar" 
+                        aria-describedby="search-icon-cert">
+                </div>
+              </div>
+            </div>
+
+            <div id="cert-list-container" class="row g-4 mb-4">
+              {% for inscripcion in certificados_iniciales %}
+                {% if inscripcion.certificado %}
+                  <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 border-success">
+                      <div class="card-body d-flex flex-column">
+                        <div class="d-flex align-items-center mb-2">
+                          <i class="bi bi-award-fill text-warning me-2 fs-3"></i>
+                          <div>
+                            <h5 class="card-title mb-0">
+                              {{ inscripcion.curso.titulo }}
+                            </h5>
+                            <h6 class="card-subtitle text-muted small">
+                              Completado el: {{ inscripcion.fecha_finalizacion|date:"d M Y" }}
+                            </h6>
+                          </div>
+                        </div>
+
+                        <div class="mt-auto pt-2">
+                          <button type="button" class="btn btn-sm btn-outline-primary me-2" 
+                                  data-bs-toggle="modal" 
+                                  data-bs-target="#previewModal" 
+                                  data-src="{{ inscripcion.certificado.url }}" 
+                                  data-title="Certificado: {{ inscripcion.curso.titulo }}">
+                            <i class="bi bi-box-arrow-in-up-right me-1"></i> Vista Previa
+                          </button>
+                          <a href="{{ inscripcion.certificado.url }}" download class="btn btn-sm btn-primary">
+                            <i class="bi bi-download me-1"></i> Descargar
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                {% endif %}
+              {% empty %}
+                <div class="col-12">
+                  <p class="text-info small">Aún no tienes certificaciones completadas y registradas.</p>
+                </div>
+              {% endfor %}
+            </div>
+
+            <div class="d-flex justify-content-center align-items-center mt-4">
+              <button id="cert-load-more-btn" 
+                      class="btn btn-color px-4 py-2 fw-medium" 
+                      {% if not certificados_iniciales.has_next %}style="display: none;"{% endif %}>
+                Cargar más
+              </button>
+
+              <div id="cert-loading-spinner" class="spinner-border" role="status" style="display: none;">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            </div>
+
+            <hr class="my-4">
+
+            <h4><i class="bi bi-tags-fill me-2"></i>Habilidades Desarrolladas</h4>
+            <p class="text-muted">Competencias adquiridas a través de tus cursos.</p>
+            <div class="d-flex flex-wrap gap-2">
+              <span class="badge rounded-pill text-bg-primary fs-6 fw-normal px-3 py-2">Gestión de Proyectos</span>
+              <span class="badge rounded-pill text-bg-secondary fs-6 fw-normal px-3 py-2">Liderazgo</span>
+              <span class="badge rounded-pill text-bg-secondary fs-6 fw-normal px-3 py-2">Comunicación Efectiva</span>
+              <span class="badge rounded-pill text-bg-info fs-6 fw-normal px-3 py-2">Metodologías Ágiles</span>
+              <span class="badge rounded-pill text-bg-info fs-6 fw-normal px-3 py-2">Scrum</span>
+              <span class="badge rounded-pill text-bg-dark fs-6 fw-normal px-3 py-2">Ciberseguridad</span>
+            </div>
+
+          </div>
+        </div>
+      </div> 
     </div>
+    
+
 
     <div class="modal fade" id="modalCrearSlide" tabindex="-1" aria-labelledby="modalCrearSlideLabel" aria-hidden="true">
       <div class="modal-dialog modal-lg">
@@ -881,8 +1205,8 @@
           
           <div class="modal-header">
             <div>
-              <h5 class="modal-title fw-bold" id="modalCrearSlideLabel">Añadir un Slide</h5>
-              <p class="mb-0 text-muted small">Agregar un nuevo banner al carrusel.</p>
+              <h5 class="modal-title fw-bold" id="modalCrearSlideLabel">Carga Masiva de Slides</h5>
+              <p class="mb-0 text-muted small">Los archivos existentes con el mismo número se archivarán automáticamente.</p>
             </div>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
@@ -892,81 +1216,54 @@
               {% csrf_token %}
               <input type="hidden" name="form_type" value="slide">
               
-              <p class="text-muted small">
-                Los campos con (<span class="text-danger">*</span>) son obligatorios.
-              </p>
-
-              <div class="mb-3">
-                <label for="{{ form_slide.title.id_for_label }}" class="form-label fw-bold">
-                    {{ form_slide.title.label }}<span class="text-danger"> *</span>
-                </label>
-                {{ form_slide.title }}
-                {% if form_slide.title.errors %}
-                    <div class="text-danger small">{{ form_slide.title.errors.0 }}</div>
-                {% endif %}
+              <div class="alert alert-info py-2 small">
+                <i class="bi bi-info-circle me-2"></i>
+                Suba los archivos numerados (ej: 1.jpg, 2.png). El sistema desactivará los slides anteriores de ese número y los guardará en el historial.
               </div>
 
-              <div class="mb-3">
-                <label for="{{ form_slide.image.id_for_label }}" class="form-label fw-bold">
-                    {{ form_slide.image.label }}<span class="text-danger"> *</span>
-                </label>
-                {{ form_slide.image }}
-                <div class="form-text">Se recomienda una imagen horizontal de alta resolución (ej. 1920x600).</div>
-                {% if form_slide.image.errors %}
-                    <div class="text-danger small">{{ form_slide.image.errors.0 }}</div>
-                {% endif %}
-              </div>
-
-              <div class="mb-3">
-                <label for="{{ form_slide.description.id_for_label }}" class="form-label fw-bold">
-                    {{ form_slide.description.label }}
-                </label>
-                {{ form_slide.description }}
-                {% if form_slide.description.errors %}
-                    <div class="text-danger small">{{ form_slide.description.errors.0 }}</div>
-                {% endif %}
-              </div>
-
-              <div class="row">
-                <div class="col-md-8 mb-3">
-                  <label for="{{ form_slide.alt_text.id_for_label }}" class="form-label fw-bold">
-                      {{ form_slide.alt_text.label }}
-                  </label>
-                  {{ form_slide.alt_text }}
-                  {% if form_slide.alt_text.errors %}
-                      <div class="text-danger small">{{ form_slide.alt_text.errors.0 }}</div>
-                  {% endif %}
+              <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                  <label class="form-label fw-bold">Mes de los Slides <span class="text-danger">*</span></label>
+                  <select name="mes" class="form-select" required>
+                    <option value="1">Enero</option>
+                    <option value="2">Febrero</option>
+                    <option value="3">Marzo</option>
+                    <option value="4">Abril</option>
+                    <option value="5">Mayo</option>
+                    <option value="6">Junio</option>
+                    <option value="7">Julio</option>
+                    <option value="8">Agosto</option>
+                    <option value="9">Septiembre</option>
+                    <option value="10">Octubre</option>
+                    <option value="11">Noviembre</option>
+                    <option value="12">Diciembre</option>
+                  </select>
                 </div>
-                <div class="col-md-4 mb-3">
-                  <label for="{{ form_slide.order.id_for_label }}" class="form-label fw-bold">
-                      {{ form_slide.order.label }}
-                  </label>
-                  {{ form_slide.order }}
-                  {% if form_slide.order.errors %}
-                      <div class="text-danger small">{{ form_slide.order.errors.0 }}</div>
-                  {% endif %}
+                <div class="col-md-6">
+                  <label class="form-label fw-bold">Año <span class="text-danger">*</span></label>
+                  <input type="number" name="anio" class="form-control" value="2026" min="2024" max="2030" required>
                 </div>
+              </div>
+
+              <div class="mb-4">
+                <label for="imagenes_lote" class="form-label fw-bold">Seleccionar archivos numerados <span class="text-danger">*</span></label>
+                <input type="file" name="imagenes_lote" id="imagenes_lote" class="form-control" multiple accept="image/*" required>
+                <div class="form-text">Puedes seleccionar varios archivos a la vez manteniendo presionado Ctrl o arrastrándolos.</div>
               </div>
 
               <hr class="my-4">
 
               <div class="form-check mb-3">
-                {{ form_slide.is_active }}
-                <label class="form-check-label" for="{{ form_slide.is_active.id_for_label }}">
-                    ¿Mostrar este slide inmediatamente?
+                <input class="form-check-label" type="checkbox" name="activar_ahora" id="activar_ahora" checked>
+                <label class="form-check-label" for="activar_ahora">
+                    ¿Activar estos slides inmediatamente? (Reemplazarán a los actuales)
                 </label>
               </div>
 
-              {% if form_slide.non_field_errors %}
-                <div class="alert alert-danger">
-                    {{ form_slide.non_field_errors }}
-                </div>
-              {% endif %}
-
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-              <button type="submit" class="btn btn-primary">Guardar Slide</button>
-            </div>
+              <div class="modal-footer px-0 pb-0">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" class="btn btn-primary px-4">Subir y Actualizar Carrusel</button>
+              </div>
             </form>
           </div>
         </div>
@@ -1134,14 +1431,25 @@
                 Los campos con (<span class="text-danger">*</span>) son obligatorios.
               </p>
 
-              <div class="mb-3">
-                <label for="{{ form_documento.nombre.id_for_label }}" class="form-label fw-bold">
-                  {{ form_documento.nombre.label }}<span class="text-danger"> *</span>
-                </label>
-                {{ form_documento.nombre }}
-                <div class="form-text">{{ form_documento.nombre.help_text }}</div>
-                {% if form_documento.nombre.errors %}<div class="invalid-feedback d-block">{{ form_documento.nombre.errors.0 }}</div>{% endif %}
+              <div class="row">
+                <div class="col-md-8 mb-3">
+                  <label for="{{ form_documento.nombre.id_for_label }}" class="form-label fw-bold">
+                    {{ form_documento.nombre.label }}<span class="text-danger"> *</span>
+                  </label>
+                  {{ form_documento.nombre }}
+                  <div class="form-text">{{ form_documento.nombre.help_text }}</div>
+                  {% if form_documento.nombre.errors %}<div class="invalid-feedback d-block">{{ form_documento.nombre.errors.0 }}</div>{% endif %}
+                </div>
+
+                <div class="col-md-4 mb-3">
+                  <label for="{{ form_documento.codigo_documento.id_for_label }}" class="form-label fw-bold">
+                    {{ form_documento.codigo_documento.label }}
+                  </label>
+                  {{ form_documento.codigo_documento }}
+                  <div class="form-text">{{ form_documento.codigo_documento.help_text }}</div>
+                </div>
               </div>
+              
               
               <div class="mb-3">
                 <label for="{{ form_documento.descripcion.id_for_label }}" class="form-label fw-bold">
@@ -1153,19 +1461,19 @@
 
               <div class="row">
                 <div class="col-md-6 mb-3">
-                  <label for="{{ form_documento.codigo_documento.id_for_label }}" class="form-label fw-bold">
-                    {{ form_documento.codigo_documento.label }}
-                  </label>
-                  {{ form_documento.codigo_documento }}
-                  <div class="form-text">{{ form_documento.codigo_documento.help_text }}</div>
-                </div>
-                <div class="col-md-6 mb-3">
                   <label for="{{ form_documento.tipo_documento.id_for_label }}" class="form-label fw-bold">
                     {{ form_documento.tipo_documento.label }}<span class="text-danger"> *</span>
                   </label>
                   {{ form_documento.tipo_documento }}
                   <div class="form-text">{{ form_documento.tipo_documento.help_text }}</div>
                   {% if form_documento.tipo_documento.errors %}<div class="invalid-feedback d-block">{{ form_documento.tipo_documento.errors.0 }}</div>{% endif %}
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="{{ form_documento.procedimiento.id_for_label }}" class="form-label fw-bold">
+                    {{ form_documento.procedimiento.label }}
+                  </label>
+                  {{ form_documento.procedimiento }}
+                  <div class="form-text">{{ form_documento.procedimiento.help_text }}</div>
                 </div>
               </div>
 
@@ -1188,14 +1496,14 @@
               <p class="text-muted small text-center"><span class="text-danger">* * </span>Debes proporcionar al menos un archivo o un enlace externo.</p>
 
               <div class="row">
-                <div class="col-md-6 mb-3">
+                <div class="col-md-8 mb-3">
                     <label for="{{ form_documento.palabras_clave.id_for_label }}" class="form-label fw-bold">
                       {{ form_documento.palabras_clave.label }}
                     </label>
                     {{ form_documento.palabras_clave }}
                     <div class="form-text">{{ form_documento.palabras_clave.help_text }}</div>
                   </div>
-                <div class="col-md-6 mb-3">
+                <div class="col-md-4 mb-3">
                     <label for="{{ form_documento.estado.id_for_label }}" class="form-label fw-bold">
                       {{ form_documento.estado.label }}<span class="text-danger"> *</span>
                     </label>
@@ -1283,6 +1591,16 @@
               </div>
 
               <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="{{ form_video.tematica.id_for_label }}" class="form-label fw-bold">
+                    {{ form_video.tematica.label }}<span class="text-danger"> *</span>
+                  </label>
+                  {{ form_video.tematica }}
+                  <div class="form-text">
+                    Selecciona la categoría principal del video.
+                  </div>
+                </div>
+
                 <div class="col-md-6 mb-3">
                   <label for="{{ form_video.curso.id_for_label }}" class="form-label fw-bold">
                       {{ form_video.curso.label }}
@@ -1461,6 +1779,43 @@
       </div>
     </div>
 
+    <div class="modal fade" id="modalEditarCertificado" tabindex="-1" aria-labelledby="modalEditarCertificadoLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content p-1"> 
+          <div class="modal-header">
+            <div>
+              <h5 class="modal-title fw-bold" id="modalEditarCertificadoLabel">Modificar certificaciones</h5>
+              <p class="mb-0 text-muted small">Selecciona un empleado para gestionar sus cursos, calificaciones y certificados.</p>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+
+          <div class="modal-body">
+            <div id="empleado-selector-container">
+              <select class="form-select" id="select-empleado-a-editar">
+                <option value="" selected disabled>Elige un empleado...</option>
+                
+                {% for emp in all_empleados %}
+                  <option value="{{ emp.id }}">{{ emp.nombre }} {{ emp.apellidos }} ({{ emp.departamento.nombre }})</option>
+                {% endfor %}
+
+              </select>
+            </div>
+
+            <div id="loading-spinner-editar-certificado" class="text-center mt-4" style="display: none;">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Cargando...</span>
+              </div>
+              <p class="text-muted small mt-2">Cargando historial del empleado...</p>
+            </div>
+
+            <div id="historial-empleado-container" class="mt-4" style="display: none;">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="modal fade" id="previewModal" tabindex="-1" aria-labelledby="previewModalLabel" aria-hidden="true">
       <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content">
@@ -1480,33 +1835,108 @@
 
     <script>
       document.addEventListener("DOMContentLoaded", () => {
+        // 0. ESTADO GLOBAL 
+        let subcategoriaActiva = 'formato';
+
+        // ==========================================
+        // LOGICA PARA QUITAR FILTROS (RESET)
+        // ==========================================
+
+        // Selectores de la jerarquía
+        const procesoSelect = document.getElementById('form-filter-proceso');
+        const procedimientoSelect = document.getElementById('form-filter-procedimiento');
+        const tabsContainer = document.getElementById('subcategoria-tabs-container');
+        const tabButtons = document.querySelectorAll('#subcategoriaTabs .nav-link');
+
+        // Función genérica para resetear filtros
+        function bindResetButton(btnId, inputs) {
+          const btn = document.getElementById(btnId);
+          if (!btn) return;
+
+          btn.addEventListener('click', function() {
+            inputs.forEach(id => {
+              const el = document.getElementById(id);
+              if (el) el.value = ''; 
+            });
+
+            // --- LÓGICA ESPECÍFICA PARA TABS Y JERARQUÍA DE FORMATOS ---
+            if (btnId === 'btn-reset-filters-form') {
+                if (tabsContainer) tabsContainer.style.display = 'none';
+                subcategoriaActiva = 'formato';
+                
+                // Solo deshabilitamos y limpiamos procedimientos.
+                // Ya no tocamos procesoSelect porque es nuestra categoría principal.
+                if (procedimientoSelect) {
+                    procedimientoSelect.innerHTML = '<option value="">⚙️ Todos los procedimientos</option>';
+                    procedimientoSelect.disabled = true;
+                }
+
+                // Reset visual de tabs
+                tabButtons.forEach(b => {
+                    b.classList.toggle('active', b.getAttribute('data-sub') === 'formato');
+                });
+            }
+
+            const searchInput = document.getElementById(inputs[0]);
+            if (searchInput) {
+                searchInput.dispatchEvent(new Event('input'));
+            }
+          });
+        }
+
+        // Aplicar a la sección de VIDEOS
+        bindResetButton('btn-reset-filters-vid', [
+            'vid-search-input',
+            'vid-filter-tematica',
+            'vid-filter-departamento'
+        ]);
+
+        // Aplicar a la sección de FORMATOS
+        bindResetButton('btn-reset-filters-form', [
+            'form-search-input', 
+            'form-filter-proceso', 
+            'form-filter-procedimiento'
+        ]);
+
+        // Aplicar a la sección de DOCUMENTOS
+        bindResetButton('btn-reset-filters-doc', [
+            'doc-search-input', 
+            'doc-filter-departamento', 
+            'doc-filter-tipo'
+        ]);
+
+
+        // ==========================================
+        // 1. LÓGICA DEL MODAL DE VISTA PREVIA
+        // ==========================================
         const previewModal = document.getElementById('previewModal');
         if (previewModal) {
           const iframe = document.getElementById('previewIframe');
           const modalTitle = document.getElementById('previewModalLabel');
 
-          previewModal.addEventListener('show.bs.modal', function (event) {
+          previewModal.addEventListener('show.bs.modal', function(event) {
             const button = event.relatedTarget;
             const fileUrl = button.getAttribute('data-src');
             const fileTitle = button.getAttribute('data-title');
-            
+
             if (fileUrl) {
               modalTitle.textContent = fileTitle;
               iframe.src = fileUrl;
             }
           });
 
-          previewModal.addEventListener('hidden.bs.modal', function () {
+          previewModal.addEventListener('hidden.bs.modal', function() {
             iframe.src = '';
           });
         }
-        
-        const solicitarBotones = document.querySelectorAll('.btn-solicitar-inscripcion');
 
+        // ==========================================
+        // 2. BOTONES DE SOLICITAR INSCRIPCIÓN (MAILTO)
+        // ==========================================
+        const solicitarBotones = document.querySelectorAll('.btn-solicitar-inscripcion');
         solicitarBotones.forEach(boton => {
           boton.addEventListener('click', function(e) {
-            e.preventDefault(); // Evita que el enlace navegue inmediatamente
-
+            e.preventDefault();
             const mailtoLink = this.getAttribute('data-mailto');
             const confirmacion = confirm("Se abrirá tu aplicación de correo con un mensaje pre-redactado.\n\nPor favor, revisa la información y haz clic en 'Enviar' para completar tu solicitud.\n\n¿Deseas continuar?");
 
@@ -1516,629 +1946,874 @@
           });
         });
 
-
-        // --- Variables Modales ---
+        // ==========================================
+        // 3. VARIABLES DE MODALES (CREAR/EDITAR)
+        // ==========================================
+        
+        // --- Crear Slide ---
         const modalCrearSlideEl = document.getElementById('modalCrearSlide');
         const myModalCrearSlide = new bootstrap.Modal(modalCrearSlideEl);
 
+        // --- Crear Curso ---
         const modalCrearCursoEl = document.getElementById('modalCrearCurso');
         const myModalCrearCurso = new bootstrap.Modal(modalCrearCursoEl);
         const esGeneralCheckCurso = document.getElementById("{{ form_curso.es_general.id_for_label }}");
         const deptoFieldCurso = document.getElementById("campoDepartamentos");
 
+        // --- Crear Documento ---
         const modalCrearDocumentoEl = document.getElementById('modalCrearDocumento');
         const myModalCrearDocumento = new bootstrap.Modal(modalCrearDocumentoEl);
         const esGeneralCheckDoc = document.getElementById("{{ form_documento.es_general.id_for_label }}");
         const deptoFieldDoc = document.getElementById("campoDepartamentosDoc");
 
+        // --- Crear Contenido (Video) ---
         const modalCrearContenidoEl = document.getElementById('modalCrearContenido');
         const myModalCrearContenido = new bootstrap.Modal(modalCrearContenidoEl);
         const esGeneralCheckVideo = document.getElementById("{{ form_video.es_general.id_for_label }}");
         const deptoFieldVideo = document.getElementById("campoDepartamentosVideo");
 
+        // --- Editar Slide ---
         const modalEditarSlideEl = document.getElementById('modalEditarSlide');
-        // const myModalEditarSlide = new bootstrap.Modal(modalEditarSlideEl); // Opcional si necesitas control manual
         const slideSelector = document.getElementById('select-slide-a-editar');
         const slideFormContainer = document.getElementById('slide-form-container');
         const loadingSpinnerEditarSlide = document.getElementById('loading-spinner-editar-slide');
 
+        // --- Editar Curso ---
         const modalEditarCursoEl = document.getElementById('modalEditarCurso');
         const myModalEditarCurso = new bootstrap.Modal(modalEditarCursoEl);
         const cursoSelector = document.getElementById('select-curso-a-editar');
         const cursoFormContainer = document.getElementById('curso-form-container');
-        const loadingSpinnerEditarCurso = document.getElementById('loading-spinner-editar');  
+        const loadingSpinnerEditarCurso = document.getElementById('loading-spinner-editar');
 
+        // --- Editar Documento ---
         const modalEditarDocumentoEl = document.getElementById('modalEditarDocumento');
         const myModalEditarDocumento = new bootstrap.Modal(modalEditarDocumentoEl);
         const documentoSelector = document.getElementById('select-documento-a-editar');
         const documentoFormContainer = document.getElementById('documento-form-container');
         const loadingSpinnerEditarDocumento = document.getElementById('loading-spinner-editar-documento');
 
+        // --- Editar Contenido (Video) ---
         const modalEditarContenidoEl = document.getElementById('modalEditarContenido');
         const myModalEditarContenido = new bootstrap.Modal(modalEditarContenidoEl);
         const videoSelector = document.getElementById('select-video-a-editar');
         const videoFormContainer = document.getElementById('video-form-container');
         const loadingSpinnerEditarVideo = document.getElementById('loading-spinner-editar-video');
 
-        // --- Lógica para reabrir modal con errores ---
+        // --- Editar Certificado ---
+        const modalEditarCertificadoEl = document.getElementById('modalEditarCertificado');
+        const myModalEditarCertificado = new bootstrap.Modal(modalEditarCertificadoEl);
+        const certificadoSelector = document.getElementById('select-empleado-a-editar');
+        const certificadoContainer = document.getElementById('historial-empleado-container');
+        const loadingSpinnerEditarCertificado = document.getElementById('loading-spinner-editar-certificado');
+
+
+        // ==========================================
+        // 4. REABRIR MODAL CON ERRORES (BACKEND)
+        // ==========================================
         const modalToReopen = "{{ form_with_errors|default:'none' }}";
         if (modalToReopen === 'curso') {
-            myModalCrearCurso.show();
+          myModalCrearCurso.show();
         } else if (modalToReopen === 'documento') {
-            myModalCrearDocumento.show();
+          myModalCrearDocumento.show();
         } else if (modalToReopen === 'video') {
-            myModalCrearContenido.show();
+          myModalCrearContenido.show();
         } else if (modalToReopen === 'slide') {
-            myModalCrearSlide.show();
+          myModalCrearSlide.show();
         }
 
-        // --- Lógica modal CREAR CURSO (Toggle Deptos) ---
-        function toggleDepartamentosCurso() {
-          if (esGeneralCheckCurso && deptoFieldCurso) { 
-            deptoFieldCurso.style.display = esGeneralCheckCurso.checked ? "none" : "block";
-          }
-        }
-        if (esGeneralCheckCurso) {
-          toggleDepartamentosCurso(); // Run on load
-          esGeneralCheckCurso.addEventListener("change", toggleDepartamentosCurso);
-        }
-        
-        // --- Lógica modal CREAR DOCUMENTO (Toggle Deptos) ---
-        function toggleDepartamentosDoc() {
-          if (esGeneralCheckDoc && deptoFieldDoc) { 
-            deptoFieldDoc.style.display = esGeneralCheckDoc.checked ? "none" : "block";
-          }
-        }
-        if (esGeneralCheckDoc) {
-          toggleDepartamentosDoc(); // Run on load
-          esGeneralCheckDoc.addEventListener("change", toggleDepartamentosDoc);
+        // ==========================================
+        // 5. LÓGICA TOGGLE DEPARTAMENTOS (CREAR)
+        // ==========================================
+
+        /**
+         * Selecciona o deselecciona todas las opciones de un Select2
+         * @param {HTMLElement} checkbox - Checkbox 'es_general'
+         * @param {string} selectSelector - ID del select manejado por Select2
+         */
+        function setupBulkSelection(checkbox, selectSelector) {
+          if (!checkbox) return;
+          const $select = $(selectSelector);
+
+          // 1. Escuchar el cambio en el Checkbox (Hacia el Select)
+          checkbox.addEventListener("change", function() {
+              if (this.checked) {
+                  const allValues = $select.find('option').map(function() {
+                      return $(this).val();
+                  }).get();
+                  $select.val(allValues).trigger('change');
+              } else {
+                  // Solo limpiar si el usuario desmarcó manualmente el check
+                  // (evitamos bucles infinitos con la lógica inversa)
+                  if ($select.val() && $select.val().length === $select.find('option').length) {
+                      $select.val(null).trigger('change');
+                  }
+              }
+          });
+
+          // 2. Escuchar el cambio en el Select2 (Hacia el Checkbox)
+          $select.on('change', function() {
+              const totalOptions = $select.find('option').length;
+              const selectedOptions = ($select.val() || []).length;
+
+              if (selectedOptions < totalOptions) {
+                  // Si hay menos seleccionados que el total, el check debe ser falso
+                  checkbox.checked = false;
+              } else if (selectedOptions === totalOptions && totalOptions > 0) {
+                  // Si seleccionó todos manualmente, el check debe ser verdadero
+                  checkbox.checked = true;
+              }
+          });
         }
 
-        // --- 3. AÑADE LA LÓGICA 'TOGGLE' PARA EL MODAL DE CREAR VIDEO ---
-        function toggleDepartamentosVideo() {
-          if (esGeneralCheckVideo && deptoFieldVideo) { 
-            deptoFieldVideo.style.display = esGeneralCheckVideo.checked ? "none" : "block";
-          }
-        }
-        if (esGeneralCheckVideo) {
-            toggleDepartamentosVideo(); // Run on load
-            esGeneralCheckVideo.addEventListener("change", toggleDepartamentosVideo);
-        }
-        
-        // --- Inicialización Select2 (Modales de CREAR) ---
+        // Aplicar a los formularios de creación (IDs de Django por defecto)
+        setupBulkSelection(esGeneralCheckCurso, '#id_create_curso-departamentos_destinados');
+        setupBulkSelection(esGeneralCheckDoc, '#id_create_doc-departamentos_destinados');
+        setupBulkSelection(esGeneralCheckVideo, '#id_create_video-departamentos_destinados');
+
+        // ==========================================
+        // 6. INICIALIZACIÓN SELECT2 (MODALES CREAR)
+        // ==========================================
+
         try {
-            $('#modalCrearCurso #id_create_curso-departamentos_destinados').select2({       
-                theme: 'bootstrap-5',
-                allowClear: true, 
-                dropdownParent: $('#modalCrearCurso .modal-content')
-            });
-            $('#modalCrearCurso #id_create_curso-inscritos').select2({       
-                theme: 'bootstrap-5',
-                allowClear: true,
-                dropdownParent: $('#modalCrearCurso .modal-content')
-            });
+          const select2Config = {
+            theme: 'bootstrap-5',
+            allowClear: true,
+            width: '100%'
+          };
+
+          $('#modalCrearCurso #id_create_curso-departamentos_destinados').select2({
+            ...select2Config,
+            dropdownParent: $('#modalCrearCurso .modal-content')
+          });
+          
+          $('#modalCrearCurso #id_create_curso-inscritos').select2({
+            ...select2Config,
+            dropdownParent: $('#modalCrearCurso .modal-content')
+          });
+
+          $('#modalCrearDocumento #id_create_doc-departamentos_destinados').select2({
+            ...select2Config,
+            dropdownParent: $('#modalCrearDocumento .modal-content')
+          });
+          
+          $('#modalCrearContenido #id_create_video-departamentos_destinados').select2({
+            ...select2Config,
+            dropdownParent: $('#modalCrearContenido .modal-content')
+          });
         } catch (e) {
-            console.error("Error inicializando Select2 (Crear Curso):", e);
+          console.error("Error inicializando Select2:", e);
         }
 
-        try {
-            $('#modalCrearDocumento #id_create_doc-departamentos_destinados').select2({       
-                theme: 'bootstrap-5',
-                allowClear: true, 
-                dropdownParent: $('#modalCrearDocumento .modal-content')
-            });
-        } catch (e) {
-            console.error("Error inicializando Select2 (Crear Documento):", e);
+        setupSmartSelection(esGeneralCheckCurso, $('#id_create_curso-departamentos_destinados'));
+        setupSmartSelection(esGeneralCheckDoc, $('#id_create_doc-departamentos_destinados'));
+        setupSmartSelection(esGeneralCheckVideo, $('#id_create_video-departamentos_destinados'));
+        
+        // ==========================================
+        // 7. CARGA DINÁMICA DE FORMULARIOS (EDITAR)
+        // ==========================================
+        function setupSmartSelection(checkbox, $select) {
+          if (!checkbox || !$select.length) return;
+
+          const totalOptions = $select.find('option').length;
+
+          // LÓGICA 1: Validación inicial al cargar el formulario
+          if (checkbox.checked) {
+              const allValues = $select.find('option').map(function() { return $(this).val(); }).get();
+              $select.val(allValues).trigger('change');
+          }
+
+          // LÓGICA 2: Evento cuando el usuario cambia el checkbox
+          checkbox.addEventListener("change", function() {
+              if (this.checked) {
+                  const allValues = $select.find('option').map(function() { return $(this).val(); }).get();
+                  $select.val(allValues).trigger('change');
+              } else {
+                  // Solo limpia si actualmente están todos seleccionados (evita limpiar si el usuario ya quitó alguno)
+                  if (($select.val() || []).length === totalOptions) {
+                      $select.val(null).trigger('change');
+                  }
+              }
+          });
+
+          // LÓGICA 3: Evento cuando el usuario quita/pone departamentos manualmente
+          $select.on('change.select2', function() {
+              const selectedCount = ($(this).val() || []).length;
+              // Si quita uno solo, desmarcamos el check de "General"
+              if (selectedCount < totalOptions) {
+                  checkbox.checked = false;
+              } 
+              // Si por alguna razón selecciona todos a mano, marcamos el check
+              else if (selectedCount === totalOptions && totalOptions > 0) {
+                  checkbox.checked = true;
+              }
+          });
         }
 
-        // --- Lógica modal EDITAR SLIDE ---
-        const getSlideFormUrlBase = "{% url 'resources:edit_slide' 0 %}"; // Asegúrate de que esta URL exista en urls.py
+        // --- Editar Slide ---
+        const getSlideFormUrlBase = "{% url 'resources:edit_slide' 0 %}";
         async function loadSlideEditForm(slideId) {
-          if (!slideId) return;
+            if (!slideId) return;
+            if (loadingSpinnerEditarSlide) loadingSpinnerEditarSlide.style.display = "block";
+            if (slideFormContainer) slideFormContainer.style.display = "none";
+            if (slideFormContainer) slideFormContainer.innerHTML = "";
 
-          if (loadingSpinnerEditarSlide) loadingSpinnerEditarSlide.style.display = "block";
-          if (slideFormContainer) slideFormContainer.style.display = "none";
-          if (slideFormContainer) slideFormContainer.innerHTML = "";
+            try {
+                const url = getSlideFormUrlBase.replace('0', slideId);
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
+                const html = await response.text();
 
-          try {
-              const url = getSlideFormUrlBase.replace('0', slideId);
-              const response = await fetch(url);
-
-              if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
-
-              const html = await response.text();
-
-              if (slideFormContainer) {
-                  slideFormContainer.innerHTML = html;
-                  slideFormContainer.style.display = "block";
-                  // Si tus slides NO usan Select2 u otros plugins complejos, no necesitas el setTimeout aquí.
-              }
-
-          } catch (error) {
-              console.error("Error cargando el form de editar (slide):", error);
-              if (slideFormContainer) {
-                  slideFormContainer.innerHTML = `<div class="alert alert-danger">No se pudo cargar el formulario. ${error.message}</div>`;
-                  slideFormContainer.style.display = "block";
-              }
-          } finally {
-              if (loadingSpinnerEditarSlide) loadingSpinnerEditarSlide.style.display = "none";
-          }
+                if (slideFormContainer) {
+                    slideFormContainer.innerHTML = html;
+                    slideFormContainer.style.display = "block";
+                }
+            } catch (error) {
+                console.error("Error cargando el form de editar (slide):", error);
+                if (slideFormContainer) {
+                    slideFormContainer.innerHTML = `<div class="alert alert-danger">No se pudo cargar el formulario. ${error.message}</div>`;
+                    slideFormContainer.style.display = "block";
+                }
+            } finally {
+                if (loadingSpinnerEditarSlide) loadingSpinnerEditarSlide.style.display = "none";
+            }
         }
         modalEditarSlideEl.addEventListener('show.bs.modal', function(event) {
-            const triggerButton = event.relatedTarget;
-            const selectorContainer = document.getElementById('slide-selector-container');
+          const triggerButton = event.relatedTarget;
+          const selectorContainer = document.getElementById('slide-selector-container');
+          if (slideSelector) slideSelector.value = "";
+          if (slideFormContainer) slideFormContainer.style.display = "none";
+          if (loadingSpinnerEditarSlide) loadingSpinnerEditarSlide.style.display = "none";
 
-            // Resetear estado inicial
-            if (slideSelector) slideSelector.value = "";
-            if (slideFormContainer) slideFormContainer.style.display = "none";
-            if (loadingSpinnerEditarSlide) loadingSpinnerEditarSlide.style.display = "none";
-
-            // Si se abre desde un botón específico (ej. engranaje en el carrusel)
-            if (triggerButton && triggerButton.classList.contains('btn-edit-slide')) {
-                const slideId = triggerButton.dataset.slideId;
-                if (selectorContainer) selectorContainer.style.display = "none"; // Oculta el selector
-                loadSlideEditForm(slideId);
-            } else {
-                // Si se abre desde el menú general
-                if (selectorContainer) selectorContainer.style.display = "block"; // Muestra el selector
-            }
+          if (triggerButton && triggerButton.classList.contains('btn-edit-slide')) {
+            const slideId = triggerButton.dataset.slideId;
+            if (selectorContainer) selectorContainer.style.display = "none";
+            loadSlideEditForm(slideId);
+          } else {
+            if (selectorContainer) selectorContainer.style.display = "block";
+          }
         });
         if (slideSelector) {
-            slideSelector.addEventListener('change', function() {
-                loadSlideEditForm(this.value);
-            });
+          slideSelector.addEventListener('change', function() {
+            loadSlideEditForm(this.value);
+          });
         }
-        
-        // --- Lógica modal EDITAR CURSO ---
+
+        // --- Editar Curso ---
         const getFormUrlBase = "{% url 'resources:edit_curso' 0 %}";
         async function loadCursoEditForm(cursoId) {
             if (!cursoId) return;
-            if(loadingSpinnerEditarCurso) loadingSpinnerEditarCurso.style.display = "block";
-            if(cursoFormContainer) cursoFormContainer.style.display = "none";
-            if(cursoFormContainer) cursoFormContainer.innerHTML = "";
+            if (loadingSpinnerEditarCurso) loadingSpinnerEditarCurso.style.display = "block";
+            if (cursoFormContainer) {
+                cursoFormContainer.style.display = "none";
+                cursoFormContainer.innerHTML = "";
+            }
             try {
-                const url = getFormUrlBase.replace('0', cursoId); 
+                const url = getFormUrlBase.replace('0', cursoId);
                 const response = await fetch(url);
-                if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
+                if (!response.ok) throw new Error(`Error ${response.status}`);
                 const html = await response.text();
-                if(cursoFormContainer) {
+                
+                if (cursoFormContainer) {
                     cursoFormContainer.innerHTML = html;
                     cursoFormContainer.style.display = "block";
-                    // Dentro de loadCursoEditForm, reemplaza el setTimeout actual por este:
-                  setTimeout(function() {
-                      try {
-                          // --- INICIO LÓGICA TOGGLE CURSO EDIT ---
-                          const esGeneralCheckEdit = document.querySelector('#edit-curso-form [name$="-es_general"]');
-                          // Asegúrate de que tu formulario de edición de curso tenga un div con este ID envolviendo el campo de departamentos
-                          const deptoFieldEdit = document.getElementById('campoDepartamentosCurso-edit'); // <--- NECESITARÁS AÑADIR ESTE ID EN TU HTML PARCIAL DE EDICIÓN
-
-                          function toggleDeptosEdit() {
-                              if(deptoFieldEdit && esGeneralCheckEdit) {
-                                  deptoFieldEdit.style.display = esGeneralCheckEdit.checked ? 'none' : 'block';
-                              }
-                          }
-                          if(esGeneralCheckEdit) {
-                              toggleDeptosEdit();
-                              esGeneralCheckEdit.addEventListener('change', toggleDeptosEdit);
-                          }
-
-                          $('#edit-curso-form #id_edit-departamentos_destinados').select2({
-                              theme: 'bootstrap-5',
-                              allowClear: true,
-                              dropdownParent: $('#modalEditarCurso .modal-content')
-                          });
-                          $('#edit-curso-form #id_edit-inscritos').select2({
-                              theme: 'bootstrap-5',
-                              allowClear: true,
-                              dropdownParent: $('#modalEditarCurso .modal-content')
-                          });
-                      } catch (e) {
-                          console.error("¡Falló la inicialización (Editar Curso)!", e);
-                      }
-                  }, 0);
-                }
-            } catch (error) {
-                console.error("Error cargando el form de editar (curso):", error);
-                if(cursoFormContainer) {
-                    cursoFormContainer.innerHTML = `<div class="alert alert-danger">No se pudo cargar el formulario. ${error.message}</div>`;
-                    cursoFormContainer.style.display = "block";
-                }
-            } finally {
-                if(loadingSpinnerEditarCurso) loadingSpinnerEditarCurso.style.display = "none";
-            }
-        }
-        modalEditarCursoEl.addEventListener('show.bs.modal', function(event) {
-            const triggerButton = event.relatedTarget;
-            const selectorContainer = document.getElementById('curso-selector-container');
-            if(cursoSelector) cursoSelector.value = "";
-            if(cursoFormContainer) cursoFormContainer.innerHTML = "";
-            if(cursoFormContainer) cursoFormContainer.style.display = "none";
-            if(loadingSpinnerEditarCurso) loadingSpinnerEditarCurso.style.display = "none";
-            if (triggerButton && triggerButton.classList.contains('btn-edit-curso')) {
-                const cursoId = triggerButton.dataset.cursoId;
-                if(selectorContainer) selectorContainer.style.display = "none";
-                loadCursoEditForm(cursoId);
-            } else {
-                if(selectorContainer) selectorContainer.style.display = "block";
-            }
-        });
-        if (cursoSelector) {
-            cursoSelector.addEventListener('change', function() {
-                loadCursoEditForm(this.value);
-            });
-        }
-
-        // --- Lógica modal EDITAR DOCUMENTO ---
-        const getDocFormUrlBase = "{% url 'resources:edit_documento' 0 %}";
-        async function loadDocumentoEditForm(documentoId) {
-            if (!documentoId) return;
-            if(loadingSpinnerEditarDocumento) loadingSpinnerEditarDocumento.style.display = "block";
-            if(documentoFormContainer) documentoFormContainer.style.display = "none";
-            if(documentoFormContainer) documentoFormContainer.innerHTML = "";
-            try {
-                const url = getDocFormUrlBase.replace('0', documentoId); 
-                const response = await fetch(url);
-                if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
-                const html = await response.text();
-                if(documentoFormContainer) {
-                    documentoFormContainer.innerHTML = html;
-                    documentoFormContainer.style.display = "block";
-                    // Dentro de loadDocumentoEditForm, reemplaza el setTimeout por:
+                    
                     setTimeout(function() {
                         try {
-                            // --- INICIO LÓGICA TOGGLE DOCUMENTO EDIT ---
-                            const esGeneralCheckEdit = document.querySelector('#documento-form-container [name$="-es_general"]');
-                            // Asegúrate de añadir este ID en tu partial de edición de documento
-                            const deptoFieldEdit = document.getElementById('campoDepartamentosDoc-edit');
+                            const form = document.querySelector('#edit-curso-form');
+                            const esGeneralCheckEdit = form.querySelector('[name$="-es_general"]');
+                            const $deptoSelect = $(form).find('select[name$="-departamentos_destinados"]');
+                            const $inscritosSelect = $(form).find('select[name$="-inscritos"]');
 
-                            function toggleDeptosEdit() {
-                                if(deptoFieldEdit && esGeneralCheckEdit) {
-                                    deptoFieldEdit.style.display = esGeneralCheckEdit.checked ? 'none' : 'block';
-                                }
-                            }
-                            if(esGeneralCheckEdit) {
-                                toggleDeptosEdit();
-                                esGeneralCheckEdit.addEventListener('change', toggleDeptosEdit);
-                            }
-                            // --- FIN LÓGICA TOGGLE ---
-
-                            $('#documento-form-container #id_edit-doc-departamentos_destinados').select2({
-                                placeholder: "Busca y selecciona departamentos",
+                            // Inicializar Select2
+                            $deptoSelect.select2({
+                                theme: 'bootstrap-5',
                                 width: '100%',
-                                theme: "bootstrap-5",
-                                dropdownParent: $('#modalEditarDocumento .modal-content')
+                                dropdownParent: $('#modalEditarCurso .modal-content')
                             });
+                            
+                            $inscritosSelect.select2({
+                                theme: 'bootstrap-5',
+                                allowClear: true,
+                                width: '100%',
+                                dropdownParent: $('#modalEditarCurso .modal-content')
+                            });
+
+                            // Aplicar Selección Masiva (Sin ocultar el campo)
+                            setupSmartSelection(esGeneralCheckEdit, $deptoSelect);
                         } catch (e) {
-                            console.error("¡Falló la inicialización (Editar Doc)!", e);
+                            console.error("Error inicializando form dinámico Curso:", e);
                         }
                     }, 0);
                 }
             } catch (error) {
-                console.error("Error cargando el form de editar (documento):", error);
-                if(documentoFormContainer) {
-                    documentoFormContainer.innerHTML = `<div class="alert alert-danger">No se pudo cargar el formulario. ${error.message}</div>`;
-                    documentoFormContainer.style.display = "block";
-                }
+                console.error("Error:", error);
+                cursoFormContainer.innerHTML = `<div class="alert alert-danger">Error al cargar datos.</div>`;
+                cursoFormContainer.style.display = "block";
             } finally {
-                if(loadingSpinnerEditarDocumento) loadingSpinnerEditarDocumento.style.display = "none";
+                if (loadingSpinnerEditarCurso) loadingSpinnerEditarCurso.style.display = "none";
+            }
+        }
+
+        modalEditarCursoEl.addEventListener('show.bs.modal', function(event) {
+          const triggerButton = event.relatedTarget;
+          const selectorContainer = document.getElementById('curso-selector-container');
+          if (cursoSelector) cursoSelector.value = "";
+          if (cursoFormContainer) cursoFormContainer.innerHTML = "";
+          if (cursoFormContainer) cursoFormContainer.style.display = "none";
+          if (loadingSpinnerEditarCurso) loadingSpinnerEditarCurso.style.display = "none";
+          if (triggerButton && triggerButton.classList.contains('btn-edit-curso')) {
+            const cursoId = triggerButton.dataset.cursoId;
+            if (selectorContainer) selectorContainer.style.display = "none";
+            loadCursoEditForm(cursoId);
+          } else {
+            if (selectorContainer) selectorContainer.style.display = "block";
+          }
+        });
+        if (cursoSelector) {
+          cursoSelector.addEventListener('change', function() {
+            loadCursoEditForm(this.value);
+          });
+        }
+
+        // --- Editar Documento ---
+        const getDocFormUrlBase = "{% url 'resources:edit_documento' 0 %}";
+        async function loadDocumentoEditForm(documentoId) {
+            if (!documentoId) return;
+            if (loadingSpinnerEditarDocumento) loadingSpinnerEditarDocumento.style.display = "block";
+            if (documentoFormContainer) {
+                documentoFormContainer.style.display = "none";
+                documentoFormContainer.innerHTML = "";
+            }
+            try {
+                const url = getDocFormUrlBase.replace('0', documentoId);
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`Error ${response.status}`);
+                const html = await response.text();
+                
+                if (documentoFormContainer) {
+                    documentoFormContainer.innerHTML = html;
+                    documentoFormContainer.style.display = "block";
+                    
+                    setTimeout(function() {
+                        try {
+                            const esGeneralCheckEdit = documentoFormContainer.querySelector('[name$="-es_general"]');
+                            const $deptoSelect = $(documentoFormContainer).find('select[name$="-departamentos_destinados"]');
+
+                            $deptoSelect.select2({
+                                theme: "bootstrap-5",
+                                width: '100%',
+                                allowClear: true,
+                                dropdownParent: $('#modalEditarDocumento .modal-content')
+                            });
+
+                            // Aplicar Selección Masiva (Sin ocultar el campo)
+                            setupSmartSelection(esGeneralCheckEdit, $deptoSelect);
+
+
+                        } catch (e) {
+                            console.error("Error inicializando form dinámico Doc:", e);
+                        }
+                    }, 0);
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                documentoFormContainer.innerHTML = `<div class="alert alert-danger">Error al cargar.</div>`;
+                documentoFormContainer.style.display = "block";
+            } finally {
+                if (loadingSpinnerEditarDocumento) loadingSpinnerEditarDocumento.style.display = "none";
             }
         }
         modalEditarDocumentoEl.addEventListener('show.bs.modal', function(event) {
-            const triggerButton = event.relatedTarget;
-            const selectorContainerDoc = document.getElementById('documento-selector-container');
-            if(documentoSelector) documentoSelector.value = ""; 
-            if(documentoFormContainer) documentoFormContainer.innerHTML = "";
-            if(documentoFormContainer) documentoFormContainer.style.display = "none";
-            if(loadingSpinnerEditarDocumento) loadingSpinnerEditarDocumento.style.display = "none";
-            if (triggerButton && triggerButton.classList.contains('btn-edit-documento')) {
-                const documentoId = triggerButton.dataset.documentoId;
-                if(selectorContainerDoc) selectorContainerDoc.style.display = "none";
-                loadDocumentoEditForm(documentoId);
-            } else {
-                if(selectorContainerDoc) selectorContainerDoc.style.display = "block";
-            }
+          const triggerButton = event.relatedTarget;
+          const selectorContainerDoc = document.getElementById('documento-selector-container');
+          if (documentoSelector) documentoSelector.value = "";
+          if (documentoFormContainer) documentoFormContainer.innerHTML = "";
+          if (documentoFormContainer) documentoFormContainer.style.display = "none";
+          if (loadingSpinnerEditarDocumento) loadingSpinnerEditarDocumento.style.display = "none";
+          if (triggerButton && triggerButton.classList.contains('btn-edit-documento')) {
+            const documentoId = triggerButton.dataset.documentoId;
+            if (selectorContainerDoc) selectorContainerDoc.style.display = "none";
+            loadDocumentoEditForm(documentoId);
+          } else {
+            if (selectorContainerDoc) selectorContainerDoc.style.display = "block";
+          }
         });
         if (documentoSelector) {
-            documentoSelector.addEventListener('change', function() {
-                loadDocumentoEditForm(this.value);
-            });
+          documentoSelector.addEventListener('change', function() {
+            loadDocumentoEditForm(this.value);
+          });
         }
 
-        // --- Lógica modal EDITAR VIDEO ---
+        // --- Editar Video ---
         const getVideoFormUrlBase = "{% url 'resources:edit_video' 0 %}";
         async function loadVideoEditForm(videoId) {
             if (!videoId) return;
-
-            if(loadingSpinnerEditarVideo) loadingSpinnerEditarVideo.style.display = "block";
-            if(videoFormContainer) videoFormContainer.style.display = "none";
-            if(videoFormContainer) videoFormContainer.innerHTML = "";
-
+            if (loadingSpinnerEditarVideo) loadingSpinnerEditarVideo.style.display = "block";
+            if (videoFormContainer) {
+                videoFormContainer.style.display = "none";
+                videoFormContainer.innerHTML = "";
+            }
             try {
-                const url = getVideoFormUrlBase.replace('0', videoId); 
+                const url = getVideoFormUrlBase.replace('0', videoId);
                 const response = await fetch(url);
-                if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
-                
                 const html = await response.text();
-                
-                if(videoFormContainer) {
+
+                if (videoFormContainer) {
                     videoFormContainer.innerHTML = html;
                     videoFormContainer.style.display = "block";
-
-                    // Inicializar Select2s DENTRO del formulario cargado
+                    
                     setTimeout(function() {
                         try {
-                            // JS para el toggle 'es_general' DENTRO del modal de editar
-                            const esGeneralCheckEdit = document.querySelector('#edit-video-form #id_edit-video-es_general');
-                            const deptoFieldEdit = document.getElementById('campoDepartamentosVideo-edit');
-                            
-                            function toggleDeptosEdit() {
-                                if(deptoFieldEdit) deptoFieldEdit.style.display = esGeneralCheckEdit.checked ? 'none' : 'block';
-                            }
-                            if(esGeneralCheckEdit) {
-                                toggleDeptosEdit(); // Run on load
-                                esGeneralCheckEdit.addEventListener('change', toggleDeptosEdit);
-                            }
+                            const esGeneralCheckEdit = videoFormContainer.querySelector('[name$="-es_general"]');
+                            const $deptoSelect = $(videoFormContainer).find('select[name$="-departamentos_destinados"]');
+                            const $cursoSelect = $(videoFormContainer).find('select[name$="-curso"]');
 
-                            // JS para Select2 DENTRO del modal de editar
-                            $('#edit-video-form #id_edit-video-departamentos_destinados').select2({
+                            $deptoSelect.select2({
                                 theme: 'bootstrap-5',
-                                allowClear: true,
-                                dropdownParent: $('#modalEditarContenido .modal-content') 
+                                width: '100%',
+                                dropdownParent: $('#modalEditarContenido .modal-content')
                             });
-                             $('#edit-video-form #id_edit-video-curso').select2({
+
+                            $cursoSelect.select2({
                                 theme: 'bootstrap-5',
-                                allowClear: true,
-                                placeholder: "Opcional: asociar a un curso",
-                                dropdownParent: $('#modalEditarContenido .modal-content') 
+                                width: '100%',
+                                dropdownParent: $('#modalEditarContenido .modal-content')
                             });
+
+                            // Aplicar Selección Masiva (Sin ocultar el campo)
+                            setupSmartSelection(esGeneralCheckEdit, $deptoSelect);
                         } catch (e) {
-                            console.error("¡Falló la inicialización de Select2 (Editar Contenido)!", e);
+                            console.error("Error inicializando form dinámico Video:", e);
                         }
-                    }, 0); 
+                    }, 0);
                 }
             } catch (error) {
-                console.error("Error cargando el form de editar (video):", error);
-                if(videoFormContainer) {
-                    videoFormContainer.innerHTML = `<div class="alert alert-danger">No se pudo cargar el formulario. ${error.message}</div>`;
-                    videoFormContainer.style.display = "block";
-                }
+                console.error("Error:", error);
             } finally {
-                if(loadingSpinnerEditarVideo) loadingSpinnerEditarVideo.style.display = "none";
+                if (loadingSpinnerEditarVideo) loadingSpinnerEditarVideo.style.display = "none";
             }
         }
         modalEditarContenidoEl.addEventListener('show.bs.modal', function(event) {
-            const triggerButton = event.relatedTarget;
-            const selectorContainer = document.getElementById('video-selector-container');
+          const triggerButton = event.relatedTarget;
+          const selectorContainer = document.getElementById('video-selector-container');
 
-            if(videoSelector) videoSelector.value = "";
-            if(videoFormContainer) videoFormContainer.innerHTML = "";
-            if(videoFormContainer) videoFormContainer.style.display = "none";
-            if(loadingSpinnerEditarVideo) loadingSpinnerEditarVideo.style.display = "none";
+          if (videoSelector) videoSelector.value = "";
+          if (videoFormContainer) videoFormContainer.innerHTML = "";
+          if (videoFormContainer) videoFormContainer.style.display = "none";
+          if (loadingSpinnerEditarVideo) loadingSpinnerEditarVideo.style.display = "none";
 
-            // NOTA: Aún necesitas añadir la clase 'btn-edit-video' y 'data-video-id' 
-            // a un botón de engranaje en tus tarjetas de video si quieres esta funcionalidad.
-            if (triggerButton && triggerButton.classList.contains('btn-edit-video')) {
-                const videoId = triggerButton.dataset.videoId;
-                if(selectorContainer) selectorContainer.style.display = "none";
-                loadVideoEditForm(videoId); 
-            } else {
-                if(selectorContainer) selectorContainer.style.display = "block";
-            }
+          if (triggerButton && triggerButton.getAttribute('data-video-id')) {
+            const videoId = triggerButton.getAttribute('data-video-id');
+            if (selectorContainer) selectorContainer.style.display = "none"; // Ocultamos el select
+            loadVideoEditForm(videoId);
+          } else {
+            // Si se abrió desde el menú lateral (botón general), mostramos el select
+            if (selectorContainer) selectorContainer.style.display = "block";
+          }
         });
         if (videoSelector) {
-            videoSelector.addEventListener('change', function() {
-                loadVideoEditForm(this.value);
-            });
+          videoSelector.addEventListener('change', function() {
+            loadVideoEditForm(this.value);
+          });
         }
 
-        // --- Lógica Toasts ---
+        // ==========================================
+        // 8. LOGICA DE CERTIFICADOS Y TABLA DE HISTORIAL EMPLEADO
+        // ==========================================
+
+        function attachCertFormListeners() {
+          const forms = document.querySelectorAll('.form-update-cert');
+          forms.forEach(form => {
+            form.addEventListener('submit', function(e) {
+              e.preventDefault();
+              const url = this.action;
+              const formData = new FormData(this);
+              const btn = this.querySelector('button[type="submit"]');
+              const originalIcon = btn.innerHTML;
+
+              btn.disabled = true;
+              btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+
+              fetch(url, {
+                  method: 'POST',
+                  body: formData,
+                  headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                  }
+                })
+                .then(response => {
+                  if (!response.ok) {
+                    return response.text().then(text => {
+                      throw new Error(text)
+                    });
+                  }
+                  return response.json();
+                })
+                .then(data => {
+                  if (data.status === 'success') {
+                    btn.innerHTML = '<i class="bi bi-check-lg"></i>';
+                    btn.classList.remove('btn-primary');
+                    btn.classList.add('btn-success');
+                    setTimeout(() => {
+                      btn.innerHTML = originalIcon;
+                      btn.classList.remove('btn-success');
+                      btn.classList.add('btn-primary');
+                      btn.disabled = false;
+                    }, 2000);
+                  } else {
+                    alert('Error del servidor: ' + data.message);
+                    btn.innerHTML = originalIcon;
+                    btn.disabled = false;
+                  }
+                })
+                .catch(error => {
+                  console.error('Error detallado:', error);
+                  if (error.message && error.message.includes('<!DOCTYPE')) {
+                    alert('Error de ruta (404) o Servidor (500). Revisa la consola (F12) para ver detalles.');
+                  } else {
+                    alert('Error de conexión: ' + error);
+                  }
+                  btn.innerHTML = originalIcon;
+                  btn.disabled = false;
+                });
+            });
+          });
+        }
+
+        if (certificadoSelector) {
+          certificadoSelector.addEventListener('change', function() {
+            const empleadoId = this.value;
+            if (!empleadoId) return;
+
+            if (loadingSpinnerEditarCertificado) loadingSpinnerEditarCertificado.style.display = 'block';
+            if (certificadoContainer) {
+              certificadoContainer.style.display = 'none';
+              certificadoContainer.innerHTML = '';
+            }
+
+            fetch(`{% url "resources:get_historial_empleado" %}?empleado_id=${empleadoId}`)
+              .then(response => response.json())
+              .then(data => {
+                if (loadingSpinnerEditarCertificado) loadingSpinnerEditarCertificado.style.display = 'none';
+                if (certificadoContainer) {
+                  certificadoContainer.innerHTML = data.html;
+                  certificadoContainer.style.display = 'block';
+                  attachCertFormListeners();
+                }
+              })
+              .catch(error => {
+                console.error(error);
+                if (loadingSpinnerEditarCertificado) loadingSpinnerEditarCertificado.style.display = 'none';
+                if (certificadoContainer) {
+                  certificadoContainer.innerHTML = '<div class="alert alert-danger">Error al cargar datos.</div>';
+                  certificadoContainer.style.display = 'block';
+                }
+              });
+          });
+        }
+
+        document.addEventListener('click', function(e) {
+          const manageBtn = e.target.closest('.btn-manage-cert');
+          if (manageBtn) {
+            const empleadoId = manageBtn.getAttribute('data-empleado-id');
+            const selector = document.getElementById('select-empleado-a-editar');
+            
+            if (selector) {
+              selector.value = empleadoId;
+              // Disparamos manualmente el evento change para que el listener de arriba se active
+              selector.dispatchEvent(new Event('change'));
+            }
+          }
+        });
+        // ==========================================
+        // 9. TOASTS Y NAVEGACIÓN (HISTORY API)
+        // ==========================================
         const toastElements = document.querySelectorAll('.toast');
         if (toastElements.length > 0) {
-            toastElements.forEach(function (toastEl) {
-                const toast = new bootstrap.Toast(toastEl, { autohide: true, delay: 5000 });
-                toast.show();
+          toastElements.forEach(function(toastEl) {
+            const toast = new bootstrap.Toast(toastEl, {
+              autohide: true,
+              delay: 5000
+            });
+            toast.show();
+          });
+        }
+
+        // History States para cerrar modales con botón "Atrás"
+        const modalesHistory = [{
+            el: modalCrearCursoEl,
+            modal: myModalCrearCurso,
+            hash: '#modalCreateCurso',
+            state: 'createCurso'
+          },
+          {
+            el: modalEditarCursoEl,
+            modal: myModalEditarCurso,
+            hash: '#modalEditCurso',
+            state: 'editCurso'
+          },
+          {
+            el: modalCrearDocumentoEl,
+            modal: myModalCrearDocumento,
+            hash: '#modalCreateDoc',
+            state: 'createDoc'
+          },
+          {
+            el: modalEditarDocumentoEl,
+            modal: myModalEditarDocumento,
+            hash: '#modalEditDoc',
+            state: 'editDoc'
+          },
+          {
+            el: modalEditarCertificadoEl,
+            modal: myModalEditarCertificado,
+            hash: '#modalEditCert',
+            state: 'editCert'
+          },
+          {
+            el: modalEditarContenidoEl,
+            modal: myModalEditarContenido,
+            hash: '#modalEditVideo',
+            state: 'editVideo'
+          }
+        ];
+
+        modalesHistory.forEach(item => {
+          if (item.el) {
+            item.el.addEventListener('show.bs.modal', function() {
+              if (window.location.hash !== item.hash) {
+                history.pushState({
+                  modal: item.state
+                }, '', item.hash);
+              }
+            });
+            item.el.addEventListener('hide.bs.modal', function() {
+              if (history.state && history.state.modal === item.state) {
+                history.back();
+              }
+              // Limpiezas específicas
+              if (item.state === 'editVideo' || item.state === 'editCurso' || item.state === 'editDoc') {
+                // Limpieza general de contenedores de formularios dinámicos
+                if (videoFormContainer) videoFormContainer.innerHTML = "";
+                if (cursoFormContainer) cursoFormContainer.innerHTML = "";
+                if (documentoFormContainer) documentoFormContainer.innerHTML = "";
+              }
+              if (item.state === 'editCert') {
+                if (certificadoSelector) certificadoSelector.value = "";
+                if (certificadoContainer) {
+                  certificadoContainer.innerHTML = "";
+                  certificadoContainer.style.display = "none";
+                }
+              }
+            });
+          }
+        });
+
+        window.addEventListener('popstate', function(event) {
+          if (!event.state || !event.state.modal) {
+            if (modalCrearCursoEl.classList.contains('show')) myModalCrearCurso.hide();
+            if (modalEditarCursoEl.classList.contains('show')) myModalEditarCurso.hide();
+            if (modalCrearDocumentoEl.classList.contains('show')) myModalCrearDocumento.hide();
+            if (modalEditarDocumentoEl.classList.contains('show')) myModalEditarDocumento.hide();
+            if (modalCrearContenidoEl.classList.contains('show')) myModalCrearContenido.hide();
+            if (modalEditarContenidoEl.classList.contains('show')) myModalEditarContenido.hide();
+            if (modalEditarCertificadoEl.classList.contains('show')) myModalEditarCertificado.hide();
+          }
+        });
+
+
+        // ==========================================
+        // 10. LÓGICA DE FILTRADO Y PAGINACIÓN (AJAX)
+        // ==========================================
+        const registeredSections = {}; // Mapa para evitar doble registro
+
+        function setupFilterSection(config) {
+          // Si ya fue registrada esta sección, no volver a hacerlo
+          if (registeredSections[config.listContainerId]) return;
+          registeredSections[config.listContainerId] = true;
+
+          const searchInput = document.getElementById(config.searchInputId);
+          const listContainer = document.getElementById(config.listContainerId);
+          const loadMoreBtn = document.getElementById(config.loadMoreBtnId);
+          const loadingSpinner = document.getElementById(config.loadingSpinnerId);
+
+          let currentPage = 1;
+          let debounceTimer;
+
+          async function fetchItems(isNewSearch = false) {
+            currentPage = isNewSearch ? 1 : currentPage + 1;
+
+            let params = new URLSearchParams({
+              page: currentPage,
+              q: searchInput ? searchInput.value : ''
+            });
+
+            if (config.listContainerId === 'form-list-container') {
+              params.append('proceso', procesoSelect?.value || '');
+              params.append('procedimiento', procedimientoSelect?.value || '');
+              params.append('sub_categoria', subcategoriaActiva);
+            } else if (config.listContainerId === 'doc-list-container') {
+              params.append('departamento', document.getElementById('doc-filter-departamento')?.value || '');
+              params.append('tipo', document.getElementById('doc-filter-tipo')?.value || '');
+            } else if (config.listContainerId === 'vid-list-container') {
+              params.append('departamento', document.getElementById('vid-filter-departamento')?.value || '');
+              params.append('tematica', document.getElementById('vid-filter-tematica')?.value || '');
+            }
+
+            const url = `${config.apiUrl}?${params.toString()}`;
+            if (loadingSpinner) loadingSpinner.style.display = 'block';
+            if (isNewSearch && listContainer) listContainer.innerHTML = '';
+
+            try {
+              const response = await fetch(url);
+              const data = await response.json();
+              if (listContainer) {
+                if (isNewSearch) listContainer.innerHTML = data.html;
+                else listContainer.insertAdjacentHTML('beforeend', data.html);
+              }
+              if (loadMoreBtn) loadMoreBtn.style.display = data.has_next ? 'block' : 'none';
+            } catch (error) {
+              console.error('Error AJAX:', error);
+            } finally {
+              if (loadingSpinner) loadingSpinner.style.display = 'none';
+            }
+          }
+
+          if (searchInput) {
+            searchInput.addEventListener('input', () => {
+              clearTimeout(debounceTimer);
+              debounceTimer = setTimeout(() => fetchItems(true), 300);
+            });
+          }
+
+          config.extraFilters?.forEach(id => {
+            document.getElementById(id)?.addEventListener('change', () => {
+              if (id !== 'form-filter-proceso' && id !== 'form-filter-procedimiento') {
+                fetchItems(true);
+              }
+            });
+          });
+
+          if (loadMoreBtn) loadMoreBtn.addEventListener('click', () => fetchItems(false));
+        }
+        
+        // --- Configuración de Secciones ---
+        // 1. Documentos
+        setupFilterSection({
+          filterDeptoId: 'doc-filter-departamento',
+          filterTipoId: 'doc-filter-tipo',
+          searchInputId: 'doc-search-input',
+          listContainerId: 'doc-list-container',
+          loadMoreBtnId: 'doc-load-more-btn',
+          loadingSpinnerId: 'doc-loading-spinner',
+          apiUrl: "{% url 'resources:search_documentos' %}",
+          extraFilters: ['doc-filter-departamento', 'doc-filter-tipo']
+        });
+
+        // 2. Formatos
+        setupFilterSection({
+          searchInputId: 'form-search-input',
+          listContainerId: 'form-list-container',
+          loadMoreBtnId: 'form-load-more-btn',
+          loadingSpinnerId: 'form-loading-spinner',
+          apiUrl: "{% url 'resources:search_formatos' %}",
+          extraFilters: ['form-filter-proceso', 'form-filter-procedimiento']
+        });
+
+        // 3. Videos
+        setupFilterSection({
+          searchInputId: 'vid-search-input',
+          listContainerId: 'vid-list-container',
+          loadMoreBtnId: 'vid-load-more-btn',
+          loadingSpinnerId: 'vid-loading-spinner',
+          apiUrl: "{% url 'resources:search_videos' %}",
+          // Esta es la línea clave que faltaba:
+          extraFilters: ['vid-filter-departamento', 'vid-filter-tematica']
+        });
+
+        // 4. Certificados (Tarjetas)
+        setupFilterSection({
+          filterDeptoId: 'cert-search-input',
+          filterTipoId: null,
+          searchInputId: 'cert-search-input',
+          listContainerId: 'cert-list-container',
+          loadMoreBtnId: 'cert-load-more-btn',
+          loadingSpinnerId: 'cert-loading-spinner',
+          apiUrl: "{% url 'resources:search_certificados' %}"
+        });
+
+        // 5. Historial (Tabla)
+        setupFilterSection({
+          filterDeptoId: 'historial-filter-dummy',
+          filterTipoId: null,
+          searchInputId: 'cur-search-input',
+          listContainerId: 'historial-list-container',
+          loadMoreBtnId: 'historial-load-more-btn',
+          loadingSpinnerId: 'historial-loading-spinner',
+          apiUrl: "{% url 'resources:search_historial' %}"
+        });
+
+        // ==========================================
+        // 11. ENCADENAMIENTO JERÁRQUICO (FORMATOS)
+        // ==========================================
+        if (procesoSelect) {
+            // 1. Cargar todos los procesos automáticamente al iniciar la página
+            fetch(`/repositorio/get-procesos/`)
+              .then(res => res.json())
+              .then(data => {
+                  procesoSelect.innerHTML = '<option value="">🔄 Todos los procesos</option>';
+                  data.forEach(p => {
+                      procesoSelect.innerHTML += `<option value="${p.id}">${p.nombre}</option>`;
+                  });
+                  procesoSelect.disabled = false; // Nos aseguramos de que esté habilitado
+              })
+              .catch(err => console.error("Error al cargar procesos:", err));
+
+            // 2. Evento al cambiar el proceso (Carga los procedimientos de ese proceso)
+            procesoSelect.addEventListener('change', function() {
+                const procesoId = this.value;
+                procedimientoSelect.innerHTML = '<option value="">⚙️ Todos los procedimientos</option>';
+                procedimientoSelect.disabled = true;
+
+                if (procesoId) {
+                    fetch(`/repositorio/get-procedimientos/?proceso_id=${procesoId}`)
+                      .then(res => res.json())
+                      .then(data => {
+                          procedimientoSelect.disabled = false;
+                          data.forEach(pr => {
+                              procedimientoSelect.innerHTML += `<option value="${pr.id}">${pr.nombre}</option>`;
+                          });
+                      });
+                }
+                
+                // Disparar la búsqueda
+                document.getElementById('form-search-input').dispatchEvent(new Event('input'));
             });
         }
 
-        // EDITAR CONTENIDO
-        modalEditarContenidoEl.addEventListener('show.bs.modal', function () {
-            if (window.location.hash !== '#modalEditVideo') {
-                history.pushState({ modal: 'editVideo' }, '', '#modalEditVideo');
+        // 3. Evento al cambiar el procedimiento
+        if (procedimientoSelect) {
+          procedimientoSelect.addEventListener('change', function() {
+            if (this.value !== "") {
+              tabsContainer.style.display = 'block';
+            } else {
+              tabsContainer.style.display = 'none';
+              subcategoriaActiva = 'formato';
             }
-        });
-        modalEditarContenidoEl.addEventListener('hide.bs.modal', function () {
-            if (history.state && history.state.modal === 'editVideo') {
-                history.back();
-            }
-            if(videoFormContainer) videoFormContainer.innerHTML = "";
-            if(videoFormContainer) videoFormContainer.style.display = "none";
-            if(videoSelector) videoSelector.value = ""; 
-        });
-
-        // --- Lógica Botón Móvil (Historial) ---
-        modalCrearCursoEl.addEventListener('show.bs.modal', function () {
-            if (window.location.hash !== '#modalCreateCurso') {
-                history.pushState({ modal: 'createCurso' }, '', '#modalCreateCurso');
-            }
-        });
-        modalCrearCursoEl.addEventListener('hide.bs.modal', function () {
-            if (history.state && history.state.modal === 'createCurso') {
-                history.back();
-            }
-        });
-        modalEditarCursoEl.addEventListener('show.bs.modal', function () {
-            if (window.location.hash !== '#modalEditCurso') {
-                history.pushState({ modal: 'editCurso' }, '', '#modalEditCurso');
-            }
-        });
-        modalEditarCursoEl.addEventListener('hide.bs.modal', function () {
-            if (history.state && history.state.modal === 'editCurso') {
-                history.back();
-            }
-            if(cursoFormContainer) cursoFormContainer.innerHTML = "";
-            if(cursoFormContainer) cursoFormContainer.style.display = "none";
-            if(cursoSelector) cursoSelector.value = ""; 
-        });
-        modalCrearDocumentoEl.addEventListener('show.bs.modal', function () {
-            if (window.location.hash !== '#modalCreateDoc') {
-                history.pushState({ modal: 'createDoc' }, '', '#modalCreateDoc');
-            }
-        });
-        modalCrearDocumentoEl.addEventListener('hide.bs.modal', function () {
-            if (history.state && history.state.modal === 'createDoc') {
-                history.back();
-            }
-        });
-        modalEditarDocumentoEl.addEventListener('show.bs.modal', function () {
-            if (window.location.hash !== '#modalEditDoc') {
-                history.pushState({ modal: 'editDoc' }, '', '#modalEditDoc');
-            }
-        });
-        modalEditarDocumentoEl.addEventListener('hide.bs.modal', function () {
-            if (history.state && history.state.modal === 'editDoc') {
-                history.back();
-            }
-            if(documentoFormContainer) documentoFormContainer.innerHTML = "";
-            if(documentoFormContainer) documentoFormContainer.style.display = "none";
-            if(documentoSelector) documentoSelector.value = ""; 
-        });
-        window.addEventListener('popstate', function (event) {
-            if (!event.state || !event.state.modal) { 
-                if (modalCrearCursoEl.classList.contains('show')) myModalCrearCurso.hide();
-                if (modalEditarCursoEl.classList.contains('show')) myModalEditarCurso.hide();
-                if (modalCrearDocumentoEl.classList.contains('show')) myModalCrearDocumento.hide();
-                if (modalEditarDocumentoEl.classList.contains('show')) myModalEditarDocumento.hide();
-                if (modalCrearContenidoEl.classList.contains('show')) myModalCrearContenido.hide();
-                if (modalEditarContenidoEl.classList.contains('show')) myModalEditarContenido.hide();
-            }
-        });
-
-        /**
-        * Configura una sección de filtrado genérica.
-        * @param {object} config - Objeto de configuración con los IDs y la URL de la API.
-        */
-        function setupFilterSection(config) {
-            const deptoFilter = document.getElementById(config.filterDeptoId);
-            // --- CORRECCIÓN: 'tipoFilter' ahora es opcional ---
-            const tipoFilter = config.filterTipoId ? document.getElementById(config.filterTipoId) : null;
-            const searchInput = document.getElementById(config.searchInputId);
-            const listContainer = document.getElementById(config.listContainerId);
-            const loadMoreBtn = document.getElementById(config.loadMoreBtnId);
-            const loadingSpinner = document.getElementById(config.loadingSpinnerId);
-            
-            let currentPage = 1;
-            let debounceTimer;
-            const API_URL = config.apiUrl;
-
-            async function fetchItems(isNewSearch = false) {
-                if (isNewSearch) {
-                    currentPage = 1;
-                } else {
-                    currentPage++;
-                }
-
-                const deptoId = deptoFilter.value;
-                // --- CORRECCIÓN: Solo obtiene el valor si el filtro existe ---
-                const tipoId = tipoFilter ? tipoFilter.value : '';
-                const searchQuery = searchInput.value;
-
-                const params = new URLSearchParams({
-                    page: currentPage,
-                    departamento: deptoId,
-                    q: searchQuery
-                });
-
-                // --- CORRECCIÓN: Solo añade 'tipo' si es relevante ---
-                if (tipoId) {
-                    params.set('tipo', tipoId);
-                }
-                
-                const url = `${API_URL}?${params.toString()}`;
-
-                loadingSpinner.style.display = 'block';
-                if (isNewSearch) {
-                    listContainer.innerHTML = ''; 
-                }
-                loadMoreBtn.style.display = 'none';
-
-                try {
-                    const response = await fetch(url);
-                    if (!response.ok) throw new Error('Error en la respuesta de la red');
-                    
-                    const data = await response.json(); // { "html": "...", "has_next": true }
-
-                    if (isNewSearch) {
-                        listContainer.innerHTML = data.html;
-                    } else {
-                        listContainer.insertAdjacentHTML('beforeend', data.html);
-                    }
-
-                    loadMoreBtn.style.display = data.has_next ? 'block' : 'none';
-
-                } catch (error) {
-                    console.error('Error al cargar items:', error);
-                    listContainer.innerHTML = '<p class="text-danger">Error al cargar los resultados.</p>';
-                } finally {
-                    loadingSpinner.style.display = 'none';
-                }
-            }
-
-            function debounceFetch(func, delay) {
-                clearTimeout(debounceTimer);
-                debounceTimer = setTimeout(() => {
-                    func(true);
-                }, delay);
-            }
-
-            // --- Asignar Event Listeners ---
-            deptoFilter.addEventListener('change', () => fetchItems(true));
-            // --- CORRECCIÓN: Solo añade listener si el filtro existe ---
-            if (tipoFilter) {
-                tipoFilter.addEventListener('change', () => fetchItems(true));
-            }
-            searchInput.addEventListener('input', () => debounceFetch(fetchItems, 300));
-            loadMoreBtn.addEventListener('click', () => fetchItems(false));
-            
-            // Si el filtro de depto ya está preseleccionado, disparamos la búsqueda inicial
-            if (deptoFilter.value !== "") {
-                fetchItems(true);
-            }
+            document.getElementById('form-search-input').dispatchEvent(new Event('input'));
+          });
         }
 
-        // --- INICIALIZACIÓN DE LAS 3 SECCIONES ---
-        
-        // 1. Configurar la sección de DOCUMENTOS
-        setupFilterSection({
-            filterDeptoId: 'doc-filter-departamento',
-            filterTipoId: 'doc-filter-tipo',
-            searchInputId: 'doc-search-input',
-            listContainerId: 'doc-list-container',
-            loadMoreBtnId: 'doc-load-more-btn',
-            loadingSpinnerId: 'doc-loading-spinner',
-            apiUrl: "{% url 'resources:search_documentos' %}"
+        // 4. Lógica de las pestañas (Formatos / Procedimientos)
+        tabButtons.forEach(btn => {
+          btn.addEventListener('click', function() {
+            tabButtons.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            subcategoriaActiva = this.getAttribute('data-sub');
+            document.getElementById('form-search-input').dispatchEvent(new Event('input'));
+          });
         });
 
-        // 2. Configurar la sección de FORMATOS
-        setupFilterSection({
-            filterDeptoId: 'form-filter-departamento',
-            filterTipoId: 'form-filter-tipo',
-            searchInputId: 'form-search-input',
-            listContainerId: 'form-list-container',
-            loadMoreBtnId: 'form-load-more-btn',
-            loadingSpinnerId: 'form-loading-spinner',
-            apiUrl: "{% url 'resources:search_formatos' %}"
-        });
-
-        // 3. Configurar la sección de VIDEOS
-        setupFilterSection({
-            filterDeptoId: 'vid-filter-departamento',
-            filterTipoId: null, // <-- Se omite el filtro de tipo
-            searchInputId: 'vid-search-input',
-            listContainerId: 'vid-list-container',
-            loadMoreBtnId: 'vid-load-more-btn',
-            loadingSpinnerId: 'vid-loading-spinner',
-            apiUrl: "{% url 'resources:search_videos' %}" 
-        });
-    }); 
-  </script>
+      });
+    </script>
 {% endblock %}

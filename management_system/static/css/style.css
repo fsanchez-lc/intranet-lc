@@ -10,7 +10,6 @@ body {
 .btn-color:hover {
   background-color: #092C86;
   color: #D5D3D5;
-
 }
 
 /* ================================================================== */
@@ -18,6 +17,10 @@ body {
 /* ================================================================== */
 .bg-menu {
   background-color: #05174F;
+}
+
+.bg-menu-light {
+  background-color: #07286D;
 }
 
 .bg-menu-active {
@@ -68,20 +71,19 @@ body {
 /* ================================================================== */
 
 .carousel-bienvenida .carousel-item {
-  height: 450px; /* <--- ¡AJUSTA ESTA ALTURA A TU GUSTO! */
-  
-  /* Esto es opcional, pero ayuda a centrar imágenes
-     que sean más altas que anchas (verticales) */
-  background-color: #222; 
+    height: 700px !important;
+    background-color: #07286D; /* Un fondo neutro por si la imagen no llena todo */
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .carousel-bienvenida .carousel-item img {
-  height: 100%;            /* La imagen ocupa el 100% del alto del item (500px) */
-  width: 100%;             /* La imagen ocupa el 100% del ancho */
-  object-fit: cover;       /* Esta es la clave: 
-                             Cubre todo el espacio sin deformarse. 
-                             Recortará la imagen si es necesario. */
-  object-position: center; /* Centra la imagen al recortar */
+    max-height: 100%;
+    max-width: 100%;
+    width: auto !important; /* La imagen mantiene su forma original */
+    height: auto !important;
+    object-fit: contain !important; /* Muestra la foto completa sin recortar */
 }
 
 .carousel-bienvenida .carousel-item::after {
@@ -90,7 +92,7 @@ body {
   bottom: 0;
   left: 0;
   right: 0;
-  height: 40%; /* Altura del degradado */
+  height: 10%; /* Altura del degradado */
   background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.65) 100%);
   z-index: 1; /* Se asegura que esté sobre la imagen pero debajo del texto */
 }
@@ -102,18 +104,6 @@ body {
   bottom: 1.5rem; /* Un poco más de espacio desde abajo */
 }
 
-/* 3. Estilos para el Título (h5) */
-.carousel-bienvenida .carousel-caption h5 {
-  font-weight: 700; /* Letra más gruesa */
-  font-size: 2rem;  /* Letra más grande */
-  text-shadow: 1px 1px 3px rgba(0,0,0,0.5); /* Sombra para legibilidad */
-}
-
-/* 4. Estilos para la Descripción (p) */
-.carousel-bienvenida .carousel-caption p {
-  font-size: 1.1rem;
-  text-shadow: 1px 1px 2px rgba(0,0,0,0.7); /* Sombra para legibilidad */
-}
 
 /* 5. Estilos para los Indicadores (los puntos de abajo) */
 .carousel-bienvenida .carousel-indicators [data-bs-target] {
@@ -134,7 +124,7 @@ body {
 .carousel-bienvenida .carousel-control-prev-icon,
 .carousel-bienvenida .carousel-control-next-icon {
 
-  background-color: rgba(0, 0, 0, 0.);
+  background-color: rgba(0, 0, 0, 0.5);
   border-radius: 50%; /* Fondo circular */
   padding: 1.2rem;     /* Hacemos el círculo más grande que el icono */
 }
@@ -250,4 +240,11 @@ body {
 /* ================================================================== */
 html {
   scroll-behavior: smooth;
+}
+
+body {
+    overscroll-behavior-y: contain; /* Evita que la página se recargue al deslizar hacia abajo */
+}
+#contenedor-iframes {
+    -webkit-overflow-scrolling: touch; /* Suaviza el scroll en iOS */
 }

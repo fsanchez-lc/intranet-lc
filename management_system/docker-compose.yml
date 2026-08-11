@@ -9,6 +9,7 @@ services:
       # Este "volumen" guarda los datos de tu BD en tu disco duro
       # para que no se borren cada vez que reinicias el contenedor
       - postgres_data:/var/lib/postgresql/data/
+      - .:/backup
       
     environment:
       # Variables para crear la base de datos
@@ -35,6 +36,12 @@ services:
       - DB_PASS=sistemas_lc_pass
       - DB_HOST=db  # El nombre del host es el nombre del servicio 'db'
       - DB_PORT=5432
+
+      # --- CONFIGURACIÓN DE CORREO (cPanel) ---
+      - EMAIL_HOST=mail.lopez-castro.com.mx
+      - EMAIL_PORT=465
+      - EMAIL_HOST_USER=intranet@lopez-castro.com.mx
+      - EMAIL_HOST_PASSWORD=Wrm2c+[}MTpC
     depends_on:
       # Le dice a Docker que inicie el servicio 'db' ANTES que el 'web'
       - db

@@ -15,6 +15,9 @@ urlpatterns = [
 
     # URLS de las apps
     path('usuarios/', include('users.urls', namespace='users_urls')),
+    path('repositorio/', include('resources.urls', namespace='resources_urls')),
+    path('guias/', include('guides.urls', namespace='guides_urls')),
+
     path('equipos/', equipment_views.EquipmentView, name='lista_equipos'),
     path('equipos/crear/', equipment_views.CreateEquipmentView, name='crear_equipo_url'),
     path('empleados/', include('employees.urls')),
@@ -24,7 +27,9 @@ urlpatterns = [
     path('estaciones-servicio/', include('service_stations.urls', namespace='service_station_urls')),
     path('tickets/', include('tickets.urls', namespace='tickets_urls')),
     path('reportes/', include('reports.urls', namespace='reports_urls')),
-    path('repositorio/', include('resources.urls', namespace='resources_urls')),
+    path('administrador/', include('administrator.urls')),
+
+    
     # path('asistente-ia/', include('asistente-ia.urls', namespace='asistente-ia')),
     # path('permisos/', include('permisos.urls', namespace='permisos')),
     # ---- FIN DEL BLOQUE COMENTADO ----

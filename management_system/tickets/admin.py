@@ -17,29 +17,31 @@ class TicketAdmin(admin.ModelAdmin):
     Configuración para el modelo Ticket en el panel de administración.
     """
     list_display = (
+        'folio',
         'id', 
         'titulo', 
         'estado', 
-        'prioridad', 
+        'prioridad',
+        'departamento_destino',
         'creado_por', 
         'estacion_servicio', 
         'fecha_creacion',
         'fecha_cerrado'
     )
-    list_filter = ('estado', 'prioridad', 'estacion_servicio')
-    search_fields = ('titulo', 'descripcion', 'creado_por__nombre', 'estacion_servicio__nombre')
+    list_filter = ('estado', 'prioridad', 'departamento_destino', 'estacion_servicio')
+    search_fields = ('folio','titulo', 'descripcion', 'creado_por__nombre', 'estacion_servicio__nombre')
     
-    readonly_fields = ('fecha_creacion', 'ultima_actualizacion', 'fecha_cerrado')
+    readonly_fields = ('folio', 'fecha_creacion', 'ultima_actualizacion', 'fecha_cerrado')
 
     fieldsets = (
-        (None, {
-            'fields': ('titulo', 'descripcion')
+        ('Información Principal', {
+            'fields': ('folio', 'titulo', 'descripcion', 'observaciones')
         }),
-        ('Detalles y Estado', {
-            'fields': ('estado', 'prioridad', 'estacion_servicio')
+        ('Asignación y Flujo', {
+            'fields': ('departamento_destino', 'asignado_a', 'estado', 'prioridad')
         }),
-        ('Información de Creación', {
-            'fields': ('creado_por', 'fecha_creacion', 'ultima_actualizacion', 'fecha_cerrado')
+        ('Contexto y Creación', {
+            'fields': ('creado_por', 'estacion_servicio', 'fecha_creacion', 'ultima_actualizacion', 'fecha_cerrado')
         }),
     )
     

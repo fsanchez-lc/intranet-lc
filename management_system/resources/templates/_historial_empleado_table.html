@@ -1,0 +1,81 @@
+{% load static %}
+
+{% if inscripciones %}
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white fw-bold d-flex justify-content-between align-items-center">
+        <span>Cursos Inscritos</span>
+        <span class="badge bg-secondary">{{ inscripciones|length }} cursos</span>
+    </div>
+    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light small" style="position: sticky; top: 0; z-index: 5;">
+                <tr>
+                    <th style="width: 25%">Curso</th>
+                    <th style="width: 20%">Estado</th>
+                    <th style="width: 15%">Calif.</th>
+                    <th style="width: 25%">Certificado</th>
+                    <th style="width: 15%">Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ins in inscripciones %}
+                <tr id="row-{{ ins.id }}">
+                    <td>
+                        <div class="fw-bold small">{{ ins.curso.titulo }}</div>
+                        <div class="text-muted" style="font-size: 0.75rem;">
+                            {{ ins.curso.fecha|date:"d/m/Y" }}
+                        </div>
+                    </td>
+                    
+                    <td colspan="4" class="p-0 border-0">
+                            <form class="form-update-cert d-flex align-items-center w-100 p-2 border-bottom" 
+                                data-id="{{ ins.id }}" 
+                                action="{% url 'resources:update_certificacion' ins.id %}" 
+                                method="POST" 
+                                enctype="multipart/form-data">
+                                {% csrf_token %}
+                                
+                                <div style="width: 25%; margin-right: 1%;">
+                                    <select name="estado" class="form-select form-select-sm" style="font-size: 0.8rem;">
+                                        <option value="INSCRITO" {% if ins.estado == 'INSCRITO' %}selected{% endif %}>Inscrito</option>
+                                        <option value="COMPLETADO" {% if ins.estado == 'COMPLETADO' %}selected{% endif %}>Completado</option>
+                                        <option value="APROBADO" {% if ins.estado == 'APROBADO' %}selected{% endif %}>Aprobado</option>
+                                        <option value="RECHAZADO" {% if ins.estado == 'RECHAZADO' %}selected{% endif %}>Rechazado</option>
+                                        <option value="DADO DE BAJA" {% if ins.estado == 'DADO DE BAJA' %}selected{% endif %}>Baja</option>
+                                    </select>
+                                </div>
+
+                                <div style="width: 20%; margin-right: 1%;">
+                                    <input type="number" step="0.01" name="calificacion" class="form-control form-control-sm" 
+                                           value="{{ ins.calificacion|default:'' }}" placeholder="0-100">
+                                </div>
+
+                                <div style="width: 35%; margin-right: 1%;">
+                                    {% if ins.certificado %}
+                                        <div class="mb-1">
+                                            <a href="{{ ins.certificado.url }}" target="_blank" class="badge bg-info text-decoration-none">
+                                                <i class="bi bi-eye"></i> Ver actual
+                                            </a>
+                                        </div>
+                                    {% endif %}
+                                    <input type="file" name="certificado" class="form-control form-control-sm text-muted">
+                                </div>
+
+                                <div style="width: 15%; text-align: center;">
+                                    <button type="submit" class="btn btn-primary btn-sm rounded-circle shadow-sm" title="Guardar cambios">
+                                        <i class="bi bi-save"></i>
+                                    </button>
+                                </div>
+                            </form>
+                        </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<div class="alert alert-info text-center m-3">
+    <i class="bi bi-info-circle me-2"></i>Este empleado no está inscrito en ningún curso.
+</div>
+{% endif %}

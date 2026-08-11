@@ -5,3 +5,9 @@ sqlparse==0.5.2
 tzdata==2024.2
 django_browser_reload==1.17.0
 psycopg2-binary
+python-dotenv
+google-genai
+gunicorn
+django-import-export
+openpyxl
+django-cleanup

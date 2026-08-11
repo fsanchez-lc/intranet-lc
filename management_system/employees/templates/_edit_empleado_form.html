@@ -1,31 +1,86 @@
-<form action="{% url 'employees:edit_empleado' empleado.id %}" method="POST" enctype="multipart/form-data">
+<form id="formEditarEmpleado" action="{% url 'employees:edit_empleado' empleado.id %}" method="POST" enctype="multipart/form-data">
     {% csrf_token %}
     <input type="hidden" name="form_type" value="empleado_edit">
     
-    <p class="text-muted small">
+    <p class="text-muted small mb-4">
       Los campos con (<span class="text-danger">*</span>) son obligatorios.
     </p>
 
-    <div class="mb-3">
-      <label for="{{ form_empleado_edit.nombre.id_for_label }}" class="form-label fw-bold">
-        {{ form_empleado_edit.nombre.label }}<span class="text-danger"> *</span>
-      </label>
-      {{ form_empleado_edit.nombre }}
-      {% if form_empleado_edit.nombre.errors %}
-        <div class="invalid-feedback d-block">{{ form_empleado_edit.nombre.errors.0 }}</div>
-      {% endif %}
+    <h6 class="fw-bold text-primary mb-3 border-bottom pb-2">Información Personal</h6>
+    <div class="row">
+      <div class="col-md-4 mb-3">
+        <label for="{{ form_empleado_edit.numero_empleado.id_for_label }}" class="form-label fw-bold">
+          {{ form_empleado_edit.numero_empleado.label }}<span class="text-danger"> *</span>
+        </label>
+        {{ form_empleado_edit.numero_empleado }}
+        {% if form_empleado_edit.numero_empleado.errors %}
+          <div class="invalid-feedback d-block">{{ form_empleado_edit.numero_empleado.errors.0 }}</div>
+        {% endif %}
+      </div>
+      <div class="col-md-8 mb-3">
+        <label for="{{ form_empleado_edit.nombre.id_for_label }}" class="form-label fw-bold">
+          {{ form_empleado_edit.nombre.label }}<span class="text-danger"> *</span>
+        </label>
+        {{ form_empleado_edit.nombre }}
+        {% if form_empleado_edit.nombre.errors %}
+          <div class="invalid-feedback d-block">{{ form_empleado_edit.nombre.errors.0 }}</div>
+        {% endif %}
+      </div>
     </div>
 
-    <div class="mb-3">
-      <label for="{{ form_empleado_edit.email.id_for_label }}" class="form-label fw-bold">
-        {{ form_empleado_edit.email.label }}<span class="text-danger"> *</span>
-      </label>
-      {{ form_empleado_edit.email }}
-      {% if form_empleado_edit.email.errors %}
-        <div class="invalid-feedback d-block">{{ form_empleado_edit.email.errors.0 }}</div>
-      {% endif %}
+    <div class="row">
+      <div class="col-md-4 mb-3">
+        <label for="{{ form_empleado_edit.sexo.id_for_label }}" class="form-label fw-bold">
+          {{ form_empleado_edit.sexo.label }}
+        </label>
+        {{ form_empleado_edit.sexo }}
+        {% if form_empleado_edit.sexo.errors %}
+          <div class="invalid-feedback d-block">{{ form_empleado_edit.sexo.errors.0 }}</div>
+        {% endif %}
+      </div>
+      <div class="col-md-4 mb-3">
+        <label for="{{ form_empleado_edit.fecha_nacimiento.id_for_label }}" class="form-label fw-bold">
+          {{ form_empleado_edit.fecha_nacimiento.label }}<span class="text-danger"> *</span>
+        </label>
+        {{ form_empleado_edit.fecha_nacimiento }}
+        {% if form_empleado_edit.fecha_nacimiento.errors %}
+          <div class="invalid-feedback d-block">{{ form_empleado_edit.fecha_nacimiento.errors.0 }}</div>
+        {% endif %}
+      </div>
+      <div class="col-md-4 mb-3">
+        <label for="{{ form_empleado_edit.foto.id_for_label }}" class="form-label fw-bold">
+          {{ form_empleado_edit.foto.label }}
+        </label>
+        
+        <!-- Muestra la foto actual en pequeñito si es que tiene una -->
+        {% if form_empleado_edit.instance.foto %}
+          <div class="mb-2">
+            <img src="{{ form_empleado_edit.instance.foto.url }}" alt="Foto actual" class="img-thumbnail shadow-sm" style="height: 60px; width: 60px; object-fit: cover; border-radius: 50%;">
+            <span class="text-muted small ms-2">Foto actual</span>
+          </div>
+        {% endif %}
+        
+        <!-- Campo limpio de Bootstrap -->
+        {{ form_empleado_edit.foto }}
+        
+        {% if form_empleado_edit.foto.errors %}
+          <div class="invalid-feedback d-block">{{ form_empleado_edit.foto.errors.0 }}</div>
+        {% endif %}
+      </div>
     </div>
 
+    <h6 class="fw-bold text-primary mb-3 border-bottom pb-2 mt-2">Contacto</h6>
+    <div class="row">
+      <div class="col-md-12 mb-3">
+        <label for="{{ form_empleado_edit.email.id_for_label }}" class="form-label fw-bold">
+          {{ form_empleado_edit.email.label }}<span class="text-danger"> *</span>
+        </label>
+        {{ form_empleado_edit.email }}
+        {% if form_empleado_edit.email.errors %}
+          <div class="invalid-feedback d-block">{{ form_empleado_edit.email.errors.0 }}</div>
+        {% endif %}
+      </div>
+    </div>
     <div class="row">
       <div class="col-md-6 mb-3">
         <label for="{{ form_empleado_edit.telefono.id_for_label }}" class="form-label fw-bold">
@@ -37,27 +92,25 @@
         {% endif %}
       </div>
       <div class="col-md-6 mb-3">
-        <label for="{{ form_empleado_edit.posicion.id_for_label }}" class="form-label fw-bold">
-          {{ form_empleado_edit.posicion.label }}
+        <label for="{{ form_empleado_edit.telefono_emergencia.id_for_label }}" class="form-label fw-bold">
+          {{ form_empleado_edit.telefono_emergencia.label }}
         </label>
-        {{ form_empleado_edit.posicion }}
-        {% if form_empleado_edit.posicion.errors %}
-          <div class="invalid-feedback d-block">{{ form_empleado_edit.posicion.errors.0 }}</div>
+        {{ form_empleado_edit.telefono_emergencia }}
+        {% if form_empleado_edit.telefono_emergencia.errors %}
+          <div class="invalid-feedback d-block">{{ form_empleado_edit.telefono_emergencia.errors.0 }}</div>
         {% endif %}
       </div>
     </div>
 
-    <hr class="my-4">
-
+    <h6 class="fw-bold text-primary mb-3 border-bottom pb-2 mt-2">Información Laboral</h6>
     <div class="row">
       <div class="col-md-6 mb-3">
-        <label for="{{ form_empleado_edit.user.id_for_label }}" class="form-label fw-bold">
-          {{ form_empleado_edit.user.label }}
+        <label for="{{ form_empleado_edit.fecha_ingreso.id_for_label }}" class="form-label fw-bold">
+          {{ form_empleado_edit.fecha_ingreso.label }}<span class="text-danger"> *</span>
         </label>
-        {{ form_empleado_edit.user }}
-        <div class="form-text">Asignar un usuario de Django (opcional).</div>
-        {% if form_empleado_edit.user.errors %}
-          <div class="invalid-feedback d-block">{{ form_empleado_edit.user.errors.0 }}</div>
+        {{ form_empleado_edit.fecha_ingreso }}
+        {% if form_empleado_edit.fecha_ingreso.errors %}
+          <div class="invalid-feedback d-block">{{ form_empleado_edit.fecha_ingreso.errors.0 }}</div>
         {% endif %}
       </div>
       <div class="col-md-6 mb-3">
@@ -72,7 +125,16 @@
     </div>
 
     <div class="row">
-      <div class="col-md-6 mb-3">
+      <div class="col-md-4 mb-3">
+        <label for="{{ form_empleado_edit.posicion.id_for_label }}" class="form-label fw-bold">
+          {{ form_empleado_edit.posicion.label }}<span class="text-danger"> *</span>
+        </label>
+        {{ form_empleado_edit.posicion }}
+        {% if form_empleado_edit.posicion.errors %}
+          <div class="invalid-feedback d-block">{{ form_empleado_edit.posicion.errors.0 }}</div>
+        {% endif %}
+      </div>
+      <div class="col-md-4 mb-3">
         <label for="{{ form_empleado_edit.estacion_servicio.id_for_label }}" class="form-label fw-bold">
           {{ form_empleado_edit.estacion_servicio.label }}
         </label>
@@ -81,7 +143,7 @@
           <div class="invalid-feedback d-block">{{ form_empleado_edit.estacion_servicio.errors.0 }}</div>
         {% endif %}
       </div>
-      <div class="col-md-6 mb-3">
+      <div class="col-md-4 mb-3">
         <label for="{{ form_empleado_edit.estado.id_for_label }}" class="form-label fw-bold">
           {{ form_empleado_edit.estado.label }}<span class="text-danger"> *</span>
         </label>
@@ -92,24 +154,23 @@
       </div>
     </div>
 
+    <h6 class="fw-bold text-primary mb-3 border-bottom pb-2 mt-2">Sistema y Autenticación</h6>
     <div class="mb-3">
-      <label for="{{ form_empleado_edit.firma_digital.id_for_label }}" class="form-label fw-bold">
-        {{ form_empleado_edit.firma_digital.label }}
+      <label for="{{ form_empleado_edit.user.id_for_label }}" class="form-label fw-bold">
+        {{ form_empleado_edit.user.label }}
       </label>
-      {{ form_empleado_edit.firma_digital }}
-      <div class="form-text">Sube una imagen de la firma (opcional).</div>
-      {% if form_empleado_edit.firma_digital.errors %}
-        <div class="invalid-feedback d-block">{{ form_empleado_edit.firma_digital.errors.0 }}</div>
+      {{ form_empleado_edit.user }}
+      <div class="form-text">Asignar un usuario de Django (opcional).</div>
+      {% if form_empleado_edit.user.errors %}
+        <div class="invalid-feedback d-block">{{ form_empleado_edit.user.errors.0 }}</div>
       {% endif %}
     </div>
-
-    <hr class="my-4">
 
     <div class="mb-3">
       <label class="form-label fw-bold">
         {{ form_empleado_edit.grupos.label }}<span class="text-danger"> *</span>
       </label>
-      <div class="border rounded p-2" style="max-height: 200px; overflow-y: auto;">
+      <div class="border rounded p-2 bg-light" style="max-height: 150px; overflow-y: auto;">
         {% for check in form_empleado_edit.grupos %}
         <div class="form-check">
           {{ check.tag }}
@@ -119,7 +180,7 @@
         </div>
         {% endfor %}
       </div>
-      <div class="form-text">Grupos de permisos de Django.</div>
+      <div class="form-text">Grupo al que pertenece el empleado.</div>
       {% if form_empleado_edit.grupos.errors %}
         <div class="invalid-feedback d-block">{{ form_empleado_edit.grupos.errors.0 }}</div>
       {% endif %}
@@ -127,26 +188,53 @@
 
     <div class="mb-3">
       <label class="form-label fw-bold">
-        {{ form_empleado_edit.politicas_permisos.label }}<span class="text-danger"> *</span>
+        {{ form_empleado_edit.firma_digital.label }}
       </label>
-      <div class="border rounded p-2" style="max-height: 200px; overflow-y: auto;">
-        {% for check in form_empleado_edit.politicas_permisos %}
-        <div class="form-check">
-          {{ check.tag }}
-          <label class="form-check-label" for="{{ check.id_for_label }}">
-            {{ check.choice_label }}
-          </label>
+
+      {% if form_empleado_edit.instance.firma_digital %}
+        <div id="container-firma-actual" class="text-center border rounded p-3 bg-light mb-2">
+          <p class="text-muted small mb-2">Firma actual:</p>
+          <img src="{{ form_empleado_edit.instance.firma_digital.url }}" alt="Firma Actual" class="img-fluid border bg-white mb-3" style="max-height: 100px;">
+          <br>
+          <button type="button" class="btn btn-sm btn-outline-primary" id="btn-cambiar-firma">
+            <i class="bi bi-pencil-square"></i> Cambiar Firma
+          </button>
         </div>
-        {% endfor %}
+      {% endif %}
+
+      <div id="container-canvas-edit" class="border rounded p-2 bg-light text-center {% if form_empleado_edit.instance.firma_digital %}d-none{% endif %}">
+        <canvas id="signature-canvas-edit" class="border bg-white" width="450" height="150" style="touch-action: none; max-width: 100%;"></canvas>
+        
+        <div class="d-flex justify-content-between mt-2">
+          <small class="text-muted">Dibuja la nueva firma</small>
+          <div>
+            {% if form_empleado_edit.instance.firma_digital %}
+              <button type="button" class="btn btn-sm btn-outline-secondary me-1" id="btn-cancelar-cambio">
+                Cancelar
+              </button>
+            {% endif %}
+            <button type="button" class="btn btn-sm btn-outline-danger" id="clear-signature-btn-edit">
+              <i class="bi bi-eraser"></i> Borrar
+            </button>
+          </div>
+        </div>
       </div>
-      <div class="form-text">Políticas de permisos personalizadas.</div>
-      {% if form_empleado_edit.politicas_permisos.errors %}
-        <div class="invalid-feedback d-block">{{ form_empleado_edit.politicas_permisos.errors.0 }}</div>
+
+      <input type="hidden" name="edit-empleado-firma_b64" id="firma_b64_edit">
+
+      <div class="d-none">
+        {{ form_empleado_edit.firma_digital }}
+      </div>
+
+      {% if form_empleado_edit.firma_digital.errors %}
+        <div class="invalid-feedback d-block">{{ form_empleado_edit.firma_digital.errors.0 }}</div>
       {% endif %}
     </div>
 
-    <div class="modal-footer px-0 pb-0 pt-3">
+    <div class="modal-footer px-0 pb-0 pt-3 bg-light">
       <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-      <button type="submit" class="btn btn-warning">Guardar Cambios</button>
+      <button type="submit" class="btn btn-warning fw-bold text-white">
+        <i class="bi bi-save me-1"></i>Guardar Cambios
+      </button>
     </div>
 </form>

@@ -1,69 +1,133 @@
+{% load static %}
+
 {% for empleado in empleados_page %}
-<div class="col-12 col-md-6 col-lg-4 mb-3">
-  <div class="card h-100 shadow-sm border-light-subtle"> 
-    <div class="card-body">
-      <div class="d-flex align-items-center mb-3">
-        <i class="bi bi-person-badge display-4 text-primary me-3"></i>
-        <div>
-          <h5 class="card-title fw-bold mb-1">{{ empleado.nombre }}</h5>
-          <h6 class="card-subtitle mb-2 text-muted">{{ empleado.posicion|default:"Sin Posición" }}</h6>
-        </div>
+<div class="col-12 col-md-6 col-lg-4 mb-4">
+  <div class="card h-100 shadow-sm border-light-subtle overflow-hidden"> 
+    <div class="bg-primary" style="height: 60px; opacity: 0.1;"></div>
+    
+    <div class="card-body pt-0 text-center">
+      <div class="position-relative d-inline-block" style="margin-top: -45px;">
+        {% if empleado.foto %}
+          <img src="{{ empleado.foto.url }}" 
+               class="rounded-circle border border-4 border-white shadow-sm object-fit-cover" 
+               style="width: 120px; height: 120px;">
+        {% else %}
+          <div class="rounded-circle border border-4 border-white shadow-sm bg-white d-flex align-items-center justify-content-center" 
+               style="width: 120px; height: 120px;">
+               <i class="bi bi-person-circle display-4 text-primary"></i>
+          </div>
+        {% endif %}
+        
+        {% if perms.employees.change_empleado %}
+        <button type="button" 
+                class="btn btn-primary btn-sm rounded-circle position-absolute bottom-0 end-0 shadow"
+                data-bs-toggle="modal" 
+                data-bs-target="#modalFotoEmpleado{{ empleado.id }}"
+                style="width: 28px; height: 28px; padding: 0; border: 2px solid white;"
+                title="Cambiar foto">
+          <i class="bi bi-camera-fill" style="font-size: 0.75rem;"></i>
+        </button>
+        {% endif %}
       </div>
 
-      <ul class="list-group list-group-flush">
-      
-        <li class="list-group-item px-0 d-flex align-items-center">
-          <i class="bi bi-envelope-fill me-2 text-muted" style="width: 20px;"></i>
-          <a href="mailto:{{ empleado.email }}" class="text-decoration-none text-truncate" style="min-width: 0;">
+
+      <div class="mt-3">
+        <h5 class="card-title fw-bold mb-1 text-dark">{{ empleado.nombre }}</h5>
+        <p class="text-primary small fw-medium mb-1">{{ empleado.posicion|default:"Sin Posición"|upper }}</p>
+        
+        <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-3 py-1 mb-3">
+          <i class="bi bi-person-badge me-1"></i> ID: {{ empleado.numero_empleado|default:"Sin clave" }}
+        </span>
+      </div>
+
+      <ul class="list-group list-group-flush text-start border-top pt-2">
+        <li class="list-group-item px-0 py-2 d-flex align-items-center border-0">
+          <i class="bi bi-envelope-at me-2 text-muted"></i>
+          <a href="mailto:{{ empleado.email }}" class="text-decoration-none text-truncate small">
             {{ empleado.email }}
           </a>
         </li>
-
-        <li class="list-group-item px-0 d-flex align-items-center">
-          <i class="bi bi-building me-2 text-muted" style="width: 20px;"></i>
-          <span class="text-truncate d-inline-block" style="min-width: 0;">
-            {{ empleado.departamento.nombre|default:"<span class='text-danger'>Sin Depto.</span>"|safe }}
+        <li class="list-group-item px-0 py-2 d-flex align-items-center border-0">
+          <i class="bi bi-telephone me-2 text-muted"></i>
+          <a href="tel:{{ empleado.telefono }}" class="text-decoration-none text-dark small">
+            {{ empleado.telefono|default:"Sin teléfono" }}
+          </a>
+        </li>
+        <li class="list-group-item px-0 py-2 d-flex align-items-center border-0">
+          <i class="bi bi-building me-2 text-muted"></i>
+          <span class="text-truncate small">
+            {{ empleado.departamento.nombre|default:"Sin Depto." }}
           </span>
         </li>
-
-        <li class="list-group-item px-0 d-flex align-items-center">
-          <i class="bi bi-person-circle me-2 text-muted" style="width: 20px;"></i>
-          <span class="text-truncate d-inline-block" style="min-width: 0;">
-            {% if empleado.user %}
-              <span class="fw-medium text-success">{{ empleado.user.username }}</span>
-            {% else %}
-              <span class="text-danger small">Sin usuario de sistema</span>
-            {% endif %}
-          </span>
-        </li>
-
-        <li class="list-group-item px-0 d-flex align-items-center">
-          <i class="bi bi-geo-alt-fill me-2 text-muted" style="width: 20px;"></i>
-          <span class="text-truncate d-inline-block" style="min-width: 0;">
-            {{ empleado.estacion_servicio.nombre|default:"<span class='text-muted small'>Sin estación</span>"|safe }}
+        <li class="list-group-item px-0 py-2 d-flex align-items-center border-0">
+          <i class="bi bi-geo-alt me-2 text-muted"></i>
+          <span class="text-truncate small">
+            {{ empleado.estacion_servicio.nombre|default:"Sin estación" }}
           </span>
         </li>
       </ul>
     </div>
 
-    <div class="card-footer bg-light-subtle text-end border-0 pt-0 pb-3">
+    <div class="card-footer bg-white border-0 text-center pb-3">
       <button type="button" 
-              class="btn btn-outline-secondary btn-sm me-2"
+              class="btn btn-outline-dark btn-sm w-100 shadow-sm mb-2" 
               data-bs-toggle="modal" 
-              data-bs-target="#modalExpedientes{{ empleado.id }}"
-              title="Ver expedientes">
-          <i class="bi bi-archive-fill me-1"></i> Expediente
+              data-bs-target="#modalHerramientas{{ empleado.id }}">
+        <i class="bi bi-person-workspace me-1"></i> Ver herramientas y equipo de seguridad
       </button>
 
-      {% if is_admin %}
-      <button type="button" 
-          class="btn btn-outline-primary btn-sm btn-edit-empleado" 
-          data-bs-toggle="modal" 
-          data-bs-target="#modalEditarEmpleado" 
-          data-empleado-id="{{ empleado.id }}">
-          <i class="bi bi-pencil me-1"></i> Modificar
-      </button>
-      {% endif %}
+      <div class="btn-group w-100 shadow-sm" role="group">
+        {% if perms.employees.view_expediente %}
+        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#modalExpedientes{{ empleado.id }}">
+          <i class="bi bi-folder"></i> Expediente
+        </button>
+        {% endif %}
+        
+        {% if perms.employees.change_expediente %}
+        <button type="button" 
+                class="btn btn-outline-primary btn-sm btn-edit-empleado" 
+                data-bs-toggle="modal" 
+                data-bs-target="#modalEditarEmpleado" 
+                data-id="{{ empleado.id }}"> <i class="bi bi-pencil"></i> Editar
+        </button>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>  
+
+<div class="modal fade" id="modalFotoEmpleado{{ empleado.id }}" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content shadow">
+      <div class="modal-header bg-primary text-white py-2">
+        <h6 class="modal-title fw-bold"><i class="bi bi-camera me-2"></i>Foto de Perfil</h6>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      
+      <form action="{% url 'employees:actualizar_foto' empleado.id %}" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="modal-body text-center bg-light">
+          <div class="mb-3">
+            {% if empleado.foto %}
+              <img src="{{ empleado.foto.url }}" id="preview-foto-{{ empleado.id }}" class="img-thumbnail rounded-circle mb-2" style="width: 120px; height: 120px; object-fit: cover;">
+            {% else %}
+              <div class="bg-secondary-subtle rounded-circle d-flex align-items-center justify-content-center mx-auto mb-2" style="width: 120px; height: 120px;">
+                <i class="bi bi-person display-1 text-secondary"></i>
+              </div>
+            {% endif %}
+            <p class="small text-muted">Selecciona una imagen (JPG o PNG)</p>
+          </div>
+          
+          <input type="file" name="foto" class="form-control form-control-sm" accept="image/*" required onchange="previewImage(this, '{{ empleado.id }}')">
+        </div>
+        
+        <div class="modal-footer p-2">
+          <button type="button" class="btn btn-sm btn-light border" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-sm btn-primary">
+            <i class="bi bi-upload me-1"></i> Actualizar Foto
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 </div>
@@ -71,49 +135,657 @@
 <div class="modal fade" id="modalExpedientes{{ empleado.id }}" tabindex="-1" aria-labelledby="modalExpedientesLabel{{ empleado.id }}" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
     <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="modalExpedientesLabel{{ empleado.id }}">
-          <i class="bi bi-archive-fill me-2"></i>
-          Expediente de: {{ empleado.nombre }}
-        </h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        
-        {% comment %}
-        {% if empleado.expedientes.all %}
-          <ul class="list-group list-group-flush">
-            {% for expediente in empleado.expedientes.all %}
-              <li class="list-group-item d-flex justify-content-between align-items-center">
-                {{ expediente.nombre }}
-                <a href="{{ expediente.archivo.url }}" class="btn btn-sm btn-outline-primary" target="_blank">
-                  <i class="bi bi-eye-fill me-1"></i> Ver
-                </a>
-              </li>
-            {% endfor %}
-          </ul>
-        {% else %}
-          <p class="text-muted text-center py-4">Este empleado no tiene expedientes registrados.</p>
-        {% endif %}
-        {% endcomment %}
-        
-        <p class="text-muted text-center py-4">Aquí se mostrará la lista de expedientes.</p>
+      <div class="modal-header d-flex flex-column align-items-stretch">
+        <div class="d-flex justify-content-between align-items-center w-100">
+          <h6 class="modal-title" id="modalExpedientesLabel{{ empleado.id }}">
+            <i class="bi bi-archive-fill me-2"></i>
+            Expediente de: {{ empleado.nombre }}
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
 
+        <div class="d-flex gap-2 mt-2">
+          <button type="button" 
+                  class="btn btn-sm d-flex bg-success align-items-center gap-2 fw-medium text-white shadow-sm py-1"
+                  data-bs-toggle="modal" 
+                  data-bs-target="#modalAddExpediente{{ empleado.id }}">
+            <i class="bi bi-plus-circle"></i>
+            <span style="font-size: 0.85rem;">Añadir documento</span>
+          </button>
+
+          <button type="button" 
+                  class="btn btn-sm d-flex bg-primary align-items-center gap-2 fw-medium text-white shadow-sm py-1"
+                  data-bs-toggle="modal" 
+                  data-bs-target="#modalMasivoExpediente{{ empleado.id }}">
+            <i class="bi bi-cloud-upload"></i>
+            <span style="font-size: 0.85rem;">Carga masiva</span>
+          </button>
+        </div>
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+
+      <div class="bg-light p-1 border-bottom sticky-top" style="z-index: 1020;">
+        <div class="input-group">
+            <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+            <input type="text" 
+                   class="form-control border-start-0 ps-0" 
+                   placeholder="Buscar por nombre o tipo..." 
+                   onkeyup="filtrarExpedientes(this)">
+        </div>
+      </div>
+
+      <div class="modal-body p-0">
+        {% if empleado.expedientes.all %}
+          
+          {% regroup empleado.expedientes.all|dictsort:"categoria" by get_categoria_display as lista_documentos %}
+
+          <div class="list-group list-group-flush" id="listaExpedientesContainer">
+            
+            {% for grupo in lista_documentos %}
+              <div class="grupo-expedientes">
+                <div class="list-group-item bg-primary text-white border-0 fw-bold text-uppercase px-3 py-1 mt-3 d-flex align-items-center shadow-sm" 
+                  style="font-size: 0.75rem; letter-spacing: 0.8px; background: linear-gradient(90deg, #0d6efd 0%, #0a58ca 100%); border-radius: 0;">
+                  
+                  {% if "Personal" in grupo.grouper %}
+                      <i class="bi bi-person-badge me-2" style="font-size: 1rem;"></i>
+                  {% else %}
+                      <i class="bi bi-briefcase me-2" style="font-size: 1rem;"></i>
+                  {% endif %}
+                  
+                  <span>{{ grupo.grouper }}</span>
+
+                  <span class="badge rounded-pill bg-white text-primary ms-auto" style="font-size: 0.65rem;">
+                      {{ grupo.list|length }}
+                  </span>
+                </div>
+
+                {% for expediente in grupo.list %}
+                  <div class="list-group-item list-group-item-action p-1 item-expediente">
+                    <div class="d-flex w-100 justify-content-between align-items-start">
+                      <div class="me-2">
+                        <h6 class="m-1 fw-bold text-dark text-break nombre-documento">
+                          <i class="bi bi-file-earmark-text me-2 text-secondary"></i>{{ expediente.titulo }}
+                        </h6>
+                        <small class="text-muted d-block">
+                          {{ expediente.get_tipo_display }} 
+                          {% if expediente.fecha_vencimiento %}
+                            &bull; Vence: {{ expediente.fecha_vencimiento|date:"d M Y" }}
+                          {% endif %}
+                        </small>
+
+                        {% if expediente.fecha_vencimiento and not expediente.archivo %}
+                          <div class="alerta-vencimiento mt-1" 
+                              data-vencimiento="{{ expediente.fecha_vencimiento|date:'Y-m-d' }}" 
+                              style="display: none;">
+                              
+                              <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill">
+                                <i class="bi bi-exclamation-circle-fill me-1"></i>
+                                A punto de vencer: <span class="dias-restantes fw-bold"></span> días
+                              </span>
+                          </div>
+                        {% endif %}
+                      </div>
+
+                      <div class="flex-shrink-0 text-end">
+                        {% if not expediente.archivo %}
+                          <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle rounded-pill">
+                            <i class="bi bi-cloud-arrow-up-fill me-1"></i> Por subir
+                          </span>
+                        {% else %}
+                          {% if expediente.requiere_firma %}
+                            {% if expediente.firmado %}
+                              <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill">
+                              <i class="bi bi-pen-fill me-1"></i> Firmado
+                              </span>
+                              <div class="small text-muted mt-1" style="font-size: 0.7rem;">
+                              {{ expediente.fecha_firma|date:"d/m/y"|default:"" }}
+                              </div>
+                            {% else %}
+                              <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill">
+                                  <i class="bi bi-check-circle-fill me-1"></i> Cargado
+                              </span>
+                            {% endif %}
+                          {% else %}
+                            <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill">
+                                <i class="bi bi-check-circle-fill me-1"></i> Cargado
+                            </span>
+                          {% endif %}
+                        {% endif %}
+                      </div>
+                    </div>
+                    
+                    <p class="mb-2 text-muted small descripcion-documento">
+                      {{ expediente.descripcion|default:"Sin descripción adicional." }}
+                    </p>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end"> 
+                      
+                      {% if expediente.archivo %}
+                        {% if ".pdf" in expediente.archivo.url|lower %}
+                          <button type="button" 
+                                  class="btn btn-outline-primary btn-sm d-flex align-items-center justify-content-center"
+                                  data-bs-toggle="modal" 
+                                  data-bs-target="#previewModal"
+                                  data-src="{{ expediente.archivo.url }}" 
+                                  data-title="{{ expediente.titulo }}"
+                                  data-return-id="#modalExpedientes{{ empleado.id }}">
+                              <i class="bi bi-eye me-2"></i> Vista previa
+                          </button>
+                        {% endif %}
+
+                        <a href="{{ expediente.archivo.url }}" target="_blank" class="btn btn-sm btn-outline-dark d-flex align-items-center justify-content-center">
+                          <i class="bi bi-box-arrow-up-right me-2"></i> Abrir
+                        </a>
+
+                        <a href="{{ expediente.archivo.url }}" 
+                          class="btn btn-sm btn-outline-dark d-flex align-items-center justify-content-center"
+                          download="{{ expediente.titulo }}_{{ empleado.nombre }}">
+                          <i class="bi bi-download me-2"></i> Descargar 
+                        </a>
+
+                        {% if perms.employees.delete_expediente %}
+                        <button type="button" 
+                          class="btn btn-sm btn-outline-danger d-flex align-items-center justify-content-center"
+                          data-bs-toggle="modal" 
+                          data-bs-target="#modalBajaArchivo{{ expediente.id }}"
+                          title="Eliminar este documento">
+                          <i class="bi bi-trash me-2"></i> Bajar
+                        </button>
+                        {% endif %}
+
+                      {% else %}
+                        <div class="d-flex gap-2 w-100">
+                          
+                          <button type="button" 
+                            class="btn btn-sm btn-outline-dark fw-bold flex-fill align-items-center justify-content-center"
+                            data-bs-toggle="modal" 
+                            data-bs-target="#modalSubir{{ expediente.id }}"
+                            title="Subir documento faltante">
+                            <i class="bi bi-cloud-upload-fill me-2"></i> Subir
+                          </button>
+
+                          {% if expediente.requiere_firma %}
+                            <a href="{% static 'plantillas/' %}{{ expediente.titulo|slugify }}.{{ expediente.extension_plantilla }}" 
+                              class="btn btn-sm btn-outline-secondary flex-fill align-items-center justify-content-center"
+                              download="{{ expediente.titulo|slugify }}.{{ expediente.extension_plantilla }}"
+                              title="Descargar formato para firmar">
+                              <i class="bi bi-file-earmark-arrow-down me-2"></i> Formato
+                            </a>
+                          {% endif %}
+
+                          {% if perms.expediente.delete_expediente %}
+                          <button type="button" 
+                              class="btn btn-sm btn-outline-danger d-flex align-items-center justify-content-center px-3"
+                              data-bs-toggle="modal" 
+                              data-bs-target="#modalEliminarExpediente{{ expediente.id }}"
+                              title="Quitar este requerimiento de la lista">
+                              <i class="bi bi-trash-fill"></i>
+                          </button>
+                          {% endif %}
+
+                        </div>
+                      {% endif %}
+                    </div>
+                  </div>
+                {% endfor %}
+              </div> {% endfor %} 
+          </div>
+        {% else %}
+          <div class="text-center py-5">
+            <div class="mb-3">
+              <i class="bi bi-folder2-open display-1 text-muted opacity-25"></i>
+            </div>
+            <h6 class="text-muted fw-bold">Carpeta vacía</h6>
+            <p class="text-muted small mb-0">Este empleado aún no tiene expedientes cargados.</p>
+          </div>
+        {% endif %}
       </div>
     </div>
   </div>
 </div>
 
+<div class="modal fade" id="modalAddExpediente{{ empleado.id }}" aria-hidden="true" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title fw-bold">
+            <i class="bi bi-folder-plus me-2"></i>Nuevo Expediente
+        </h5>
+        <button type="button" class="btn-close btn-close-white" 
+                data-bs-toggle="modal" 
+                data-bs-target="#modalExpedientes{{ empleado.id }}" 
+                aria-label="Volver"></button>
+      </div>
+
+      <form action="{% url 'employees:crear_expediente' %}" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="modal-body bg-light-subtle">
+            <input type="hidden" name="empleado_id" value="{{ empleado.id }}">
+            
+            <div class="mb-3">
+                <label for="titulo{{ empleado.id }}" class="form-label fw-bold text-dark">Título del Documento <span class="text-danger">*</span></label>
+                <div class="input-group">
+                    <span class="input-group-text bg-white"><i class="bi bi-type"></i></span>
+                    <input type="text" class="form-control" id="titulo{{ empleado.id }}" name="titulo" required placeholder="Ej. Contrato 2024">
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6 mb-3 mb-md-0">
+                    <label for="categoria{{ empleado.id }}" class="form-label fw-bold text-dark">Categoría <span class="text-danger">*</span></label>
+                    <select class="form-select" id="categoria{{ empleado.id }}" name="categoria" required>
+                        <option value="personal">Documentación Personal</option>
+                        <option value="laboral">Documentación Laboral</option>
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label for="tipo{{ empleado.id }}" class="form-label fw-bold text-dark">Tipo de Documento</label>
+                    <select class="form-select" id="tipo{{ empleado.id }}" name="tipo">
+                        <option value="otro">Otro</option>
+                        <option value="contrato">Contrato</option>
+                        <option value="identificacion">Identificación</option>
+                        <option value="certificacion">Certificación</option>
+                        <option value="comprobante">Comprobante</option>
+                        <option value="constancia">Constancia</option>
+                        <option value="documento">Documento General</option>
+                        <option value="convenio">Convenio</option>
+                        <option value="responsiva">Responsiva</option>
+                        <option value="acta">Acta</option>
+                        <option value="baja">Baja</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="alert alert-warning border-warning d-flex align-items-center shadow-sm mb-4" role="alert">
+                <i class="bi bi-pen-fill fs-1 me-3 text-warning-emphasis"></i>
+                <div class="flex-grow-1">
+                    <h6 class="fw-bold text-dark mb-0">Estado de la Firma</h6>
+                    <div class="small text-muted lh-1">¿El archivo ya contiene las firmas?</div>
+                </div>
+                <div class="form-check form-switch ms-3">
+                  <input class="form-check-input" type="checkbox" role="switch" 
+                        id="firmado{{ empleado.id }}" name="firmado" 
+                        style="transform: scale(1.5); cursor: pointer;">
+                </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="vencimiento{{ empleado.id }}" class="form-label fw-bold text-dark">Fecha de Vencimiento</label>
+              <input type="date" class="form-control" id="vencimiento{{ empleado.id }}" name="fecha_vencimiento">
+              <div class="form-text text-muted small">Opcional (ej. vigencia de contrato o INE).</div>
+            </div>
+
+            <div class="mb-3">
+              <label for="archivo{{ empleado.id }}" class="form-label fw-bold text-dark">Archivo Adjunto</label>
+              <input type="file" class="form-control" id="archivo{{ empleado.id }}" name="archivo">
+              <div class="form-text">Formatos sugeridos: PDF, JPG, PNG, DOCX.</div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-bold text-dark">
+                <i class="bi bi-people-fill me-1"></i> Responsables del Expediente
+              </label>
+              
+              <div class="card p-3 border-light-subtle" style="max-height: 200px; overflow-y: auto;">
+                  
+                {% for emp in responsables_rh %}
+                  <div class="form-check">
+                      <input class="form-check-input" 
+                            type="checkbox" 
+                            name="responsables" 
+                            value="{{ emp.id }}" 
+                            id="resp_{{ empleado.id }}_{{ emp.id }}">
+                      
+                      <label class="form-check-label" for="resp_{{ empleado.id }}_{{ emp.id }}">
+                          {{ emp.nombre }} 
+                          {% if emp.departamento %}
+                              <span class="text-muted small">({{ emp.departamento.nombre }})</span>
+                          {% endif %}
+                      </label>
+                  </div>
+                {% endfor %}
+                  
+              </div>
+              <div class="form-text small">Selecciona las personas encargadas.</div>
+            </div>
+
+
+            <div class="mb-0">
+                <label for="desc{{ empleado.id }}" class="form-label fw-bold text-dark">Descripción</label>
+                <textarea class="form-control" id="desc{{ empleado.id }}" name="descripcion" rows="2" placeholder="Detalles adicionales..."></textarea>
+            </div>
+        </div>
+
+        <div class="modal-footer bg-white">
+            <button type="submit" class="btn btn-success d-flex align-items-center gap-2">
+              <i class="bi bi-save"></i> Guardar Expediente
+            </button>
+            <button type="button" class="btn btn-light text-muted" data-bs-toggle="modal" data-bs-target="#modalExpedientes{{ empleado.id }}">
+                Cancelar
+            </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="modalHerramientas{{ empleado.id }}" tabindex="-1" aria-labelledby="modalHerramientasLabel{{ empleado.id }}" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content shadow">
+      
+      <div class="modal-header bg-dark text-white py-3">
+        <h6 class="modal-title fw-bold" id="modalHerramientasLabel{{ empleado.id }}">
+          <i class="bi bi-person-workspace me-2"></i>Equipo y Herramientas Asignadas
+        </h6>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body p-0 bg-light">
+        <div class="p-3 border-bottom bg-white d-flex justify-content-between align-items-center">
+          <div>
+            <h6 class="mb-0 fw-bold text-dark">{{ empleado.nombre }}</h6>
+            <small class="text-muted">{{ empleado.posicion|default:"Sin Posición" }}</small>
+          </div>
+          <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle rounded-pill px-3 py-2">
+            Total: {{ empleado.equipos_asignados.count }}
+          </span>
+        </div>
+
+        {% if empleado.equipos_asignados.all %}
+          <div class="list-group list-group-flush">
+            {% for equipo in empleado.equipos_asignados.all %}
+              <div class="list-group-item p-3 border-bottom">
+                <div class="d-flex justify-content-between align-items-start mb-1">
+                  <h6 class="fw-bold text-dark mb-0 d-flex align-items-center gap-2">
+                    <i class="bi bi-box-seam text-secondary"></i> 
+                    {{ equipo.nombre }}
+                  </h6>
+                  
+                  <span class="badge 
+                    {% if equipo.estado.nombre|lower == 'nuevo' or equipo.estado.nombre|lower == 'bueno' %}bg-success-subtle text-success border-success-subtle
+                    {% elif equipo.estado.nombre|lower == 'regular' %}bg-warning-subtle text-warning-emphasis border-warning-subtle
+                    {% else %}bg-secondary-subtle text-secondary border-secondary-subtle{% endif %} 
+                    border rounded-pill" style="font-size: 0.65rem;">
+                    {{ equipo.estado.nombre|default:"Sin estado"|upper }}
+                  </span>
+                </div>
+
+                <p class="text-muted small mb-2 ms-4">
+                  {{ equipo.tipo_equipo.nombre|default:"Clasificación general" }}
+                </p>
+
+                <div class="d-flex flex-wrap gap-2 ms-4" style="font-size: 0.75rem;">
+                  {% if equipo.marca or equipo.modelo %}
+                    <span class="bg-light border text-secondary px-2 py-1 rounded">
+                      <i class="bi bi-upc-scan me-1"></i>
+                      {{ equipo.marca }} {{ equipo.modelo }}
+                    </span>
+                  {% endif %}
+
+                  {% if equipo.numero_serie %}
+                    <span class="bg-light border text-secondary px-2 py-1 rounded">
+                      <i class="bi bi-hash me-1"></i>SN: <strong class="text-dark">{{ equipo.numero_serie }}</strong>
+                    </span>
+                  {% endif %}
+                  
+                  {% if equipo.vencimiento_garantia %}
+                    <span class="bg-light border text-secondary px-2 py-1 rounded">
+                      <i class="bi bi-shield-check me-1"></i>Garantía: {{ equipo.vencimiento_garantia|date:"d/m/Y" }}
+                    </span>
+                  {% endif %}
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="text-center py-5">
+            <div class="mb-3">
+              <i class="bi bi-inbox display-1 text-muted opacity-25"></i>
+            </div>
+            <h6 class="text-muted fw-bold">Sin equipo asignado</h6>
+            <p class="text-muted small mb-0 px-4">Este empleado no tiene herramientas, uniformes ni dispositivos registrados a su nombre.</p>
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="modal-footer bg-white border-top justify-content-between p-2">
+        <button type="button" class="btn btn-sm btn-light border text-muted" data-bs-dismiss="modal">Cerrar</button>
+        
+        {% if perms.equipos.change_equipo %}
+        <a href="#" class="btn btn-sm btn-dark d-flex align-items-center gap-2">
+          <i class="bi bi-plus-circle"></i> Asignar nuevo equipo
+        </a>
+        {% endif %}
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+{% for expediente in empleado.expedientes.all %}
+  {% if not expediente.archivo %}
+    <div class="modal fade" id="modalSubir{{ expediente.id }}" aria-hidden="true" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content border-warning shadow">
+          
+          <div class="modal-header bg-warning-subtle text-dark py-2">
+            <h6 class="modal-title fs-6 fw-bold">
+               <i class="bi bi-upload me-2"></i>Cargar archivo
+            </h6>
+            <button type="button" class="btn-close btn-sm" 
+                    data-bs-toggle="modal" 
+                    data-bs-target="#modalExpedientes{{ empleado.id }}"></button>
+          </div>
+
+          <form action="{% url 'employees:editar_expediente' expediente.id %}" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="hidden" name="empleado_id" value="{{ empleado.id }}">
+            <div class="modal-body bg-light">
+               <p class="small text-muted mb-2 text-center">
+                  Subiendo documento para:<br>
+                  <strong class="text-dark">{{ expediente.titulo }}</strong>
+               </p>
+               
+               <div class="mb-2">
+                  <input type="file" class="form-control form-control-sm" name="archivo" required>
+               </div>
+            </div>
+
+            <div class="modal-footer p-1 bg-white justify-content-center">
+               <button type="button" class="btn btn-sm btn-light border" 
+                       data-bs-toggle="modal" 
+                       data-bs-target="#modalExpedientes{{ empleado.id }}">
+                   Cancelar
+               </button>
+               <button type="submit" class="btn btn-sm btn-warning fw-bold shadow-sm">
+                   <i class="bi bi-save me-1"></i> Guardar
+               </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+{% endfor %}
+
+<div class="modal fade" id="modalMasivoExpediente{{ empleado.id }}" aria-hidden="true" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content border-primary shadow">
+      <div class="modal-header bg-primary text-white py-2">
+        <h6 class="modal-title fs-6 fw-bold">
+            <i class="bi bi-cloud-upload-fill me-2"></i>Carga Múltiple
+        </h6>
+        <button type="button" class="btn-close btn-close-white btn-sm" data-bs-toggle="modal" data-bs-target="#modalExpedientes{{ empleado.id }}"></button>
+      </div>
+
+      <form action="{% url 'employees:carga_masiva_expediente' %}" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="hidden" name="empleado_id" value="{{ empleado.id }}">
+        
+        <div class="modal-body bg-light">
+            <p class="small text-muted mb-3 text-center">
+              Selecciona todos los documentos para:<br>
+              <strong class="text-dark">{{ empleado.nombre }}</strong>
+            </p>
+
+            <div class="alert alert-info p-2 mb-3 border-0 shadow-sm" style="font-size: 0.7rem;">
+                <i class="bi bi-info-circle-fill me-1"></i> 
+                No importa el nombre de los archivos. En el siguiente paso podrás elegir a qué registro pertenecen.
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label small fw-bold mb-1">Seleccionar archivos:</label>
+                <input type="file" class="form-control form-control-sm" name="archivos_batch" multiple required>
+            </div>
+            
+            <p class="text-muted text-center" style="font-size: 0.65rem;">
+                Al hacer clic en continuar, irás a la pantalla de clasificación.
+            </p>
+        </div>
+
+        <div class="modal-footer p-1 bg-white justify-content-center">
+            <button type="button" class="btn btn-sm btn-light border" data-bs-toggle="modal" data-bs-target="#modalExpedientes{{ empleado.id }}">
+                Cancelar
+            </button>
+            <button type="submit" class="btn btn-sm btn-primary fw-bold shadow-sm">
+                Continuar <i class="bi bi-arrow-right ms-1"></i>
+            </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% for expediente in empleado.expedientes.all %}
+  {% if expediente.archivo %}
+    <div class="modal fade" id="modalBajaArchivo{{ expediente.id }}" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content shadow border-danger">
+          <div class="modal-header bg-danger-subtle text-danger py-2 border-bottom border-danger-subtle">
+            <h6 class="modal-title fw-bold">
+              <i class="bi bi-exclamation-triangle-fill me-2"></i>Bajar Documento
+            </h6>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body text-center">
+            <p class="mb-0 small">¿Estás seguro que deseas eliminar el archivo cargado para:</p>
+            <p class="fw-bold my-2">{{ expediente.titulo }}?</p>
+            <p class="text-muted small fst-italic mb-0">Esta acción no se puede deshacer.</p>
+          </div>
+          <div class="modal-footer bg-light p-1 justify-content-center">
+            <form action="{% url 'employees:bajar_expediente' expediente.id %}" method="POST">
+              {% csrf_token %}
+              <input type="hidden" name="empleado_id" value="{{ empleado.id }}">
+              <div class="d-flex gap-2">
+                <button type="button" class="btn btn-sm btn-light border" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" class="btn btn-sm btn-danger fw-bold">
+                  <i class="bi bi-trash-fill me-1"></i> Confirmar Baja
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+{% endfor %}
+
+{% for expediente in empleado.expedientes.all %}
+  <div class="modal fade" id="modalEliminarExpediente{{ expediente.id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+      <div class="modal-content shadow border-danger">
+        
+        <div class="modal-header bg-danger text-white py-2">
+          <h6 class="modal-title fw-bold">
+            <i class="bi bi-trash-fill me-2"></i>Eliminar Registro
+          </h6>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body text-center bg-light">
+          <p class="mb-2">¿Deseas quitar este expediente de la lista?</p>
+          
+          <div class="card border-danger-subtle mb-3">
+            <div class="card-body py-2 px-1">
+               <span class="fw-bold text-danger">{{ expediente.titulo }}</span>
+            </div>
+          </div>
+
+          <p class="text-muted small fst-italic mb-0">
+            Esta acción borrará el requerimiento permanentemente.
+          </p>
+        </div>
+
+        <div class="modal-footer bg-white p-1 justify-content-center">
+          <form action="{% url 'employees:eliminar_expediente_db' expediente.id %}" method="POST">
+            {% csrf_token %}
+            <div class="d-flex gap-2">
+              <button type="button" class="btn btn-sm btn-light border" data-bs-dismiss="modal">Cancelar</button>
+              <button type="submit" class="btn btn-sm btn-danger fw-bold">
+                <i class="bi bi-trash me-1"></i> Sí, eliminar
+              </button>
+            </div>
+          </form>
+        </div>
+
+      </div>
+    </div>
+  </div>
+{% endfor %}
+
 {% empty %}
-{% if empleados_page.number == 1 %}
-<div class="col-12">
-    <div class="alert alert-info text-center shadow-sm">
-        <h4 class="alert-heading">No se encontraron empleados</h4>
-        <p class="mb-0">No hay empleados activos que coincidan con los filtros de búsqueda.</p>
+
+<div class="col-12 text-center py-5">
+    <div class="alert alert-info border-0 shadow-sm" role="alert">
+        <h4 class="alert-heading fw-bold"><i class="bi bi-exclamation-octagon me-2"></i> Sin Resultados</h4>
+        <p class="mb-0">
+            No se encontraron empleados, intente con otros criterios de búsqueda (nombre, departamento o estación).
+        </p>
     </div>
 </div>
-{% endif %}
+
+
 {% endfor %}
+
+<script>
+  function filtrarExpedientes(inputElement) {
+      // 1. Obtenemos el texto a buscar en minúsculas
+      let busqueda = inputElement.value.toLowerCase();
+      
+      // 2. Buscamos el contenedor principal de la lista dentro de ESTE modal específico
+      // Usamos .closest para asegurarnos que solo afectamos al modal donde se escribe
+      let modalBody = inputElement.closest('.modal-content');
+      
+      // 3. Obtenemos todos los grupos de expedientes (Categoría + Archivos)
+      let grupos = modalBody.querySelectorAll('.grupo-expedientes');
+      
+      // 4. Iteramos sobre cada grupo (Ej. Documentación Personal, Laboral)
+      grupos.forEach(grupo => {
+          let items = grupo.querySelectorAll('.item-expediente');
+          let hayVisiblesEnGrupo = false;
+
+          // 5. Iteramos sobre cada archivo dentro del grupo
+          items.forEach(item => {
+              // Buscamos en el texto completo del ítem (título, fechas, descripción)
+              let textoItem = item.innerText.toLowerCase();
+              
+              if (textoItem.includes(busqueda)) {
+                  item.classList.remove('d-none'); // Mostrar
+                  hayVisiblesEnGrupo = true;
+              } else {
+                  item.classList.add('d-none'); // Ocultar
+              }
+          });
+
+          // 6. Lógica inteligente para los encabezados de categoría:
+          // Si no hay ningún archivo visible en este grupo, ocultamos todo el grupo (incluido el encabezado)
+          if (hayVisiblesEnGrupo) {
+              grupo.classList.remove('d-none');
+          } else {
+              grupo.classList.add('d-none');
+          }
+      });
+  }
+
+</script>

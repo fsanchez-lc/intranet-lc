@@ -1,0 +1,56 @@
+{% for inscripcion in historial %}
+<tr>
+  <td>
+    <strong class="fst-italic">{{ inscripcion.curso.titulo }}</strong>
+  </td>
+  <td>
+    {# Lógica de colores basada en tu TextChoices #}
+    {% if inscripcion.estado == 'APROBADO' or inscripcion.estado == 'COMPLETADO' %}
+      <span class="badge bg-success">{{ inscripcion.get_estado_display }}</span>
+    {% elif inscripcion.estado == 'INSCRITO' %}
+      <span class="badge bg-primary">{{ inscripcion.get_estado_display }}</span>
+    {% elif inscripcion.estado == 'DADO DE BAJA' or inscripcion.estado == 'RECHAZADO' %}
+      <span class="badge bg-danger">{{ inscripcion.get_estado_display }}</span>
+    {% else %}
+      <span class="badge bg-secondary">{{ inscripcion.get_estado_display }}</span>
+    {% endif %}
+  </td>
+  <td>
+    {{ inscripcion.fecha_finalizacion|date:"d/m/Y"|default:"-" }}
+  </td>
+  <td>
+    {% if inscripcion.calificacion is not None %}
+      <span class="fw-bold">{{ inscripcion.calificacion|floatformat:0 }}/100</span>
+    {% else %}
+      <span class="text-muted small">N/A</span>
+    {% endif %}
+  </td>
+  <td>
+    {% if inscripcion.certificado %}
+      <a href="{{ inscripcion.certificado.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+        <i class="bi bi-download me-1"></i> Descargar
+      </a>
+    {% else %}
+      <span class="text-muted small">No disponible</span>
+    {% endif %}
+    
+    {% if is_admin or is_rh %}
+      <button class="btn btn-sm btn-warning btn-manage-cert" 
+              data-bs-toggle="modal" 
+              data-bs-target="#modalEditarCertificado" 
+              data-empleado-id="{{ inscripcion.empleado.id }}"
+              title="Gestionar certificación">
+        <i class="bi bi-gear-fill"></i>
+      </button>
+    {% endif %}
+  </td>
+</tr>
+{% empty %}
+    {% if not request.GET.page or request.GET.page == '1' %}
+    <tr>
+      <td colspan="5" class="text-center text-muted py-4">
+        No se encontraron cursos finalizados en el historial.
+      </td>
+    </tr>
+    {% endif %}
+{% endfor %}

@@ -1,87 +1,82 @@
 {% for documento in documentos %}
 <div class="col">
-  <div class="bg-body-secondary p-3 rounded-3 position-relative h-100 d-flex flex-column">
-    
-    {% if documento.enlace_externo %}
-      <a href="{{ documento.enlace_externo }}" 
-         target="_blank" 
-         rel="noopener noreferrer" 
-         class="text-dark position-absolute top-0 end-0 m-3 fs-5"
-         title="Abrir en pestaña nueva">
-        <i class="bi bi-box-arrow-up-right"></i>
-      </a>
-    {% elif documento.archivo %}
-      <a href="{{ documento.archivo.url }}" 
-         target="_blank" 
-         rel="noopener noreferrer" 
-         class="text-dark position-absolute top-0 end-0 m-3 fs-5"
-         title="Abrir en pestaña nueva">
-        <i class="bi bi-box-arrow-up-right"></i>
-      </a>
-    {% else %}
-      <a href="#" 
-         class="text-muted position-absolute top-0 end-0 m-3 fs-5 disabled"
-         title="No disponible" 
-         onclick="return false;">
-        <i class="bi bi-box-arrow-up-right"></i>
-      </a>
-    {% endif %}
-    <div>
-      <h6 class="mb-1 me-5">{{ documento.nombre }}</h6>
-      <p class="text-muted small mb-3">
-          {{ documento.tipo_documento.nombre }}
-      </p>
-    </div>
-
-    <div class="d-flex flex-wrap gap-2 mt-auto">
-      
-      {% if documento.archivo and ".pdf" in documento.archivo.url|lower %}
-        <button type="button" 
-          class="btn btn-secondary btn-sm d-flex align-items-center gap-1 btn-color"
-          data-bs-toggle="modal" 
-          data-bs-target="#previewModal"
-          data-src="{{ documento.archivo.url }}" data-title="{{ documento.nombre }}">
-          Vista previa
-          <i class="bi bi-arrows-fullscreen"></i>
-        </button>
-      {% elif not documento.archivo and documento.enlace_externo and ".pdf" in documento.enlace_externo|lower %}
-        <button type="button" 
-          class="btn btn-secondary btn-sm d-flex align-items-center gap-1 btn-color"
-          data-bs-toggle="modal" 
-          data-bs-target="#previewModal"
-          data-src="{{ documento.enlace_externo }}" data-title="{{ documento.nombre }}">
-          Vista previa
-          <i class="bi bi-arrows-fullscreen"></i>
-        </button>
-      {% endif %}
-      {% if documento.archivo %}
-        <a href="{{ documento.archivo.url }}" 
-           class="btn btn-secondary btn-sm d-flex align-items-center gap-1 btn-color" 
-           download> 
-           Descargar
-           <i class="bi bi-download"></i>
-        </a>
-      {% elif documento.enlace_externo %}
-        <a href="{{ documento.enlace_externo }}" 
-           target="_blank" rel="noopener noreferrer"
-           class="btn btn-secondary btn-sm d-flex align-items-center gap-1 btn-color"> 
-           Ver enlace
-           <i class="bi bi-box-arrow-up-right"></i>
-        </a>
-      {% endif %}
-
-      {% if is_admin %}
+    <div class="card h-100 shadow-sm border-0 video-card position-relative" style="overflow: hidden;">
+        
+        {% if is_admin or is_rh %}
         <a href="#" 
-           class="btn btn-warning btn-sm d-flex align-items-center justify-content-center btn-edit-documento ms-auto" 
+           class="btn-edit-documento position-absolute top-0 end-0 m-2 d-flex align-items-center justify-content-center shadow-sm" 
+           style="z-index: 10; width: 30px; height: 30px; background-color: #ffc107; border-radius: 50%; color: #000; text-decoration: none;"
+           title="Editar documento"
            data-bs-toggle="modal" 
-           data-bs-target="#modalEditarDocumento" 
-           data-documento-id="{{ documento.id }}"
-           title="Editar este documento"
-           style="width: 32px; height: 32px;"> 
-           <i class="bi bi-gear-fill"></i>
+           data-bs-target="#modalEditarDocumento"
+           data-documento-id="{{ documento.id }}">
+            <i class="bi bi-pencil-fill" style="font-size: 0.75rem;"></i>
         </a>
-      {% endif %}
-      </div>
-  </div>
+        {% endif %}
+
+        <div class="card-body p-3">
+          <div class="d-flex align-items-center" style="min-width: 0;">
+            <div class="flex-shrink-0 me-3">
+                <div class="rounded-3 d-flex align-items-center justify-content-center bg-light" style="width: 45px; height: 45px;">
+                  {% if ".pdf" in documento.archivo.url|lower or ".pdf" in documento.enlace_externo|lower %}
+                    <i class="bi bi-file-earmark-pdf-fill text-danger fs-4"></i>
+                  {% elif ".xlsx" in documento.archivo.url|lower or ".xls" in documento.archivo.url|lower or ".csv" in documento.archivo.url|lower %}
+                    <i class="bi bi-file-earmark-excel-fill text-success fs-4"></i>
+                  {% elif documento.enlace_externo %}
+                    <i class="bi bi-link-45deg text-primary fs-4"></i>
+                  {% else %}
+                    <i class="bi bi-file-earmark-text-fill text-secondary fs-4"></i>
+                  {% endif %}
+                </div>
+            </div>
+
+            <div class="flex-grow-1" style="min-width: 0; overflow: hidden; padding-right: 35px;">
+                <p class="text-primary fw-bold mb-0 text-uppercase" style="font-size: 0.6rem; letter-spacing: 0.5px;">
+                    {{ documento.tipo_documento.nombre }}
+                </p>
+                
+                <h6 class="text-dark fw-bold mb-0" title="{{ documento.nombre }}" style="font-size: 0.9rem;">
+                    {{ documento.nombre }}
+                </h6>
+                
+                {% if documento.codigo_documento %}
+                  <span class="badge bg-light text-secondary border fw-normal" style="font-size: 0.7rem;"> {{ documento.codigo_documento }} </span> 
+                {% endif %}
+            </div>
+          </div>
+
+          <div class="d-flex gap-2 mt-3">
+            {% if documento.archivo and ".pdf" in documento.archivo.url|lower %}
+                <button type="button" 
+                        class="btn btn-sm btn-outline-primary flex-grow-1 py-1 px-2"
+                        data-bs-toggle="modal" 
+                        data-bs-target="#previewModal"
+                        data-src="{{ documento.archivo.url }}" 
+                        data-title="{{ documento.nombre }}">
+                    <i class="bi bi-eye-fill"></i> Ver
+                </button>
+            {% elif documento.enlace_externo %}
+                <a href="{{ documento.enlace_externo }}" target="_blank" 
+                    class="btn btn-sm btn-outline-primary flex-grow-1 py-1 px-2">
+                    <i class="bi bi-box-arrow-up-right"></i> Link
+                </a>
+            {% endif %}
+
+            {% if documento.archivo %}
+              <a href="{{ documento.archivo.url }}" download 
+                 class="btn btn-sm btn-color px-3" title="Descargar">
+                 <i class="bi bi-download"></i>
+              </a>
+            {% endif %}
+          </div>
+        </div>
+    </div>
+</div>
+{% empty %}
+<div class="col-12">
+    <div class="text-center py-5 bg-light rounded-4 border border-dashed">
+        <i class="bi bi-folder2-open fs-1 text-muted"></i>
+        <p class="text-muted mt-2">No se encontraron documentos.</p>
+    </div>
 </div>
 {% endfor %}

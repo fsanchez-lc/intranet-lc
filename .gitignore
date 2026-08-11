@@ -1,3 +1,19 @@
-env
+# Entornos virtuales
+venv/
+env/
+.venv/
+
+# Archivos de la base de datos local (Opcional, pero recomendado)
 db.sqlite3
-datos_sqlite_nuevo.json
+
+# Variables de entorno y contraseñas
+.env
+local_settings.py
+
+# Archivos cacheados de Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Archivos subidos por usuarios (Media)
+**/media/

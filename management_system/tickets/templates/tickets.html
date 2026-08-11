@@ -1,49 +1,316 @@
 {% extends "base.html" %}
 
-{% block title %}Tickets{% endblock %}
+{% load static %}
+
+{% block title %}Centro de Tickets{% endblock %}
 
 {% block content %}
-  <div class="d-flex justify-content-between align-items-start mb-4">
+  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
     <div>
-      <h2 class="h3 fw-bold mb-2">Tickets - Mesa de Ayuda</h2>
-      <h3 class="h5 fw-italic mb-4 text-muted">Gestión de tickets de soporte técnico</h3>
+      <h2 class="h3 fw-bold mb-1">Centro de Tickets</h2>
+      <p class="text-muted mb-0">Gestión de soporte a colaboradores.</p>
     </div>
-    <a href="#" class="btn btn-primary">Añadir Nuevo Usuario</a>
+    <div class="d-flex gap-2">
+      <a href="#" class="btn btn-outline-secondary">
+        <i class="bi bi-funnel"></i> Mis Tickets Asignados
+      </a>
+      <a href="" class="btn btn-primary">
+        <i class="bi bi-plus-lg"></i> Crear Nueva Solicitud
+      </a>
+    </div>
   </div>
 
-  <div class="card shadow-sm">
-    <div class="card-body">
-      <div class="table-responsive">
-        <table class="table table-hover align-middle">
-          <thead class="table-light">
-            <tr>
-              <th scope="col">ID</th>
-              <th scope="col">Nombre de Usuario</th>
-              <th scope="col">Correo Electrónico</th>
-              <th scope="col">Nombre Completo</th>
-              <th scope="col">Acciones</th>
+  <div class="row g-3 mb-4">
+    <div class="col-12 col-sm-6 col-md-3">
+      <div class="card border-0 shadow-sm rounded-3">
+        <div class="card-body d-flex align-items-center">
+          <div class="bg-primary bg-opacity-10 p-3 rounded-3 me-3">
+            <i class="bi bi-inbox text-primary fs-4"></i>
+          </div>
+          <div>
+            <div class="text-muted small fw-bold text-uppercase">Abiertos</div>
+            <div class="h4 mb-0 fw-bold">{{ tickets_abiertos|default:"0" }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-sm-6 col-md-3">
+      <div class="card border-0 shadow-sm rounded-3">
+        <div class="card-body d-flex align-items-center">
+          <div class="bg-warning bg-opacity-10 p-3 rounded-3 me-3">
+            <i class="bi bi-person-gear text-warning fs-4"></i>
+          </div>
+          <div>
+            <div class="text-muted small fw-bold text-uppercase">En Proceso</div>
+            <div class="h4 mb-0 fw-bold">{{ tickets_proceso|default:"0" }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-sm-6 col-md-3">
+      <div class="card border-0 shadow-sm rounded-3">
+        <div class="card-body d-flex align-items-center">
+          <div class="bg-danger bg-opacity-10 p-3 rounded-3 me-3">
+            <i class="bi bi-exclamation-octagon text-danger fs-4"></i>
+          </div>
+          <div>
+            <div class="text-muted small fw-bold text-uppercase">Prioridad Alta</div>
+            <div class="h4 mb-0 fw-bold text-danger">{{ tickets_alta|default:"0" }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-sm-6 col-md-3">
+      <div class="card border-0 shadow-sm rounded-3">
+        <div class="card-body d-flex align-items-center">
+          <div class="bg-success bg-opacity-10 p-3 rounded-3 me-3">
+            <i class="bi bi-check2-all text-success fs-4"></i>
+          </div>
+          <div>
+            <div class="text-muted small fw-bold text-uppercase">Completados</div>
+            <div class="h4 mb-0 fw-bold">{{ tickets_cerrados|default:"0" }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card shadow-sm border-0 rounded-3">
+    <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+      <h5 class="card-title mb-0 fw-semibold text-secondary">Bandeja General de Solicitudes</h5>
+      <div class="input-group" style="max-width: 300px;">
+        <input type="text" class="form-control form-control-sm" placeholder="Buscar solicitud...">
+        <button class="btn btn-sm btn-outline-secondary" type="button"><i class="bi bi-search"></i></button>
+      </div>
+    </div>
+    <div class="card-body p-0">
+      <div class="table">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light text-secondary small text-uppercase">
+            <tr> <th scope="col" class="ps-4">Folio</th>
+              <th scope="col">Estado</th>
+              <th scope="col">Departamento</th>
+              <th scope="col">Estación que solicita</th>
+              <th scope="col">Título</th>
+              <th scope="col">Fecha de Solicitud</th>
+              <th scope="col" class="pe-4 text-end">Acciones</th>
             </tr>
           </thead>
           <tbody>
-            {# Bucle para recorrer cada usuario de la lista pasada desde la vista #}
-            {% for user in lista_de_usuarios %}
-            <tr>
-              <th scope="row">{{ user.id }}</th>
-              <td>{{ user.username }}</td>
-              <td>{{ user.email }}</td>
-              <td>{{ user.first_name }} {{ user.last_name }}</td>
-              <td>
-                <a href="#" class="btn btn-sm btn-outline-secondary">Editar</a>
-                <a href="#" class="btn btn-sm btn-outline-danger">Eliminar</a>
+            {% for ticket in lista_de_tickets %}
+
+            <tr style="cursor: pointer;"
+                class="{% if ticket.prioridad == 'ALTA' %}table-danger
+                       {% elif ticket.prioridad == 'MEDIA' %}table-warning
+                       {% elif ticket.prioridad == 'BAJA' %}table-info
+                       {% endif %}">
+              
+              <th scope="row" class="ps-4 text-secondary" data-bs-toggle="modal" data-bs-target="#ticketModal{{ ticket.id }}">
+                #{{ ticket.id|stringformat:"04d" }}
+              </th>
+              
+              <td data-bs-toggle="modal" data-bs-target="#ticketModal{{ ticket.id }}">
+                {% if ticket.estado == 'ABIERTO' %}
+                  <span class="badge bg-info text-dark rounded-1">Abierto</span>
+                {% elif ticket.estado == 'ASIGNADO' %}
+                  <span class="badge bg-primary rounded-1">Asignado</span>
+                {% elif ticket.estado == 'EN_PROCESO' %}
+                  <span class="badge bg-warning text-dark rounded-1">En Proceso</span>
+                {% elif ticket.estado == 'CERRADO' %}
+                  <span class="badge bg-success rounded-1">Cerrado</span>
+                {% endif %}
+              </td>
+              
+              <td data-bs-toggle="modal" data-bs-target="#ticketModal{{ ticket.id }}">
+                <span class="fw-semibold text-dark">{{ ticket.departamento_destino.nombre }}</span>
+              </td>
+              
+              <td data-bs-toggle="modal" data-bs-target="#ticketModal{{ ticket.id }}">
+                <div class="fw-bold text-dark">{{ ticket.creado_por.nombre }}</div>
+                <div class="text-muted small">
+                  <i class="bi bi-geo-alt"></i> 
+                  {{ ticket.creado_por.estacion_servicio.nombre|default:"Sin asignar" }}
+                </div>
+              </td>
+              
+              <td data-bs-toggle="modal" data-bs-target="#ticketModal{{ ticket.id }}">
+                <div class="text-truncate" style="max-width: 250px;" title="{{ ticket.titulo }}">
+                  {{ ticket.titulo }}
+                </div>
+              </td>
+              
+              <td class="text-muted small" data-bs-toggle="modal" data-bs-target="#ticketModal{{ ticket.id }}">
+                {{ ticket.fecha_creacion|date:"d M Y, g:i a" }}
+              </td>
+              
+              <td class="pe-4 text-end">
+                <div class="dropdown">
+                  <button class="btn btn-sm btn-light border text-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    Acciones
+                  </button>
+                  <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
+                    <li>
+                      <a class="dropdown-item" href="#">
+                        <i class="bi bi-person-plus me-2 text-primary"></i> Asignar
+                      </a>
+                    </li>
+                    <li>
+                      <a class="dropdown-item" href="#">
+                        <i class="bi bi-chat-text me-2 text-info"></i> Ver comentarios
+                      </a>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                      <a class="dropdown-item text-danger" href="#">
+                        <i class="bi bi-check2-circle me-2"></i> Cerrar
+                      </a>
+                    </li>
+                  </ul>
+                </div>
               </td>
             </tr>
-            {# Bloque que se muestra si la lista de usuarios está vacía #}
+
+            <div class="modal fade" id="ticketModal{{ ticket.id }}" tabindex="-1" aria-labelledby="ticketModalLabel{{ ticket.id }}" aria-hidden="true">
+              <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content shadow border-0">
+                  <div class="modal-header bg-light border-bottom-0 py-3">
+                    <h5 class="modal-title fw-bold text-dark" id="ticketModalLabel{{ ticket.id }}">
+                      Solicitud Folio #{{ ticket.id|stringformat:"04d" }}
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  
+                  <div class="modal-body text-start px-4">
+                    <div class="mb-4">
+                      <span class="text-muted small text-uppercase fw-bold d-block mb-1">Título de la Solicitud</span>
+                      <h4 class="fw-bold text-dark mb-2">{{ ticket.titulo }}</h4>
+                      
+                      <div class="d-flex gap-2 mt-2">
+                        {% if ticket.estado == 'ABIERTO' %}
+                          <span class="badge bg-info text-dark rounded-1 px-2 py-1">Abierto</span>
+                        {% elif ticket.estado == 'ASIGNADO' %}
+                          <span class="badge bg-primary rounded-1 px-2 py-1">Asignado</span>
+                        {% elif ticket.estado == 'EN_PROCESO' %}
+                          <span class="badge bg-warning text-dark rounded-1 px-2 py-1">En Proceso</span>
+                        {% elif ticket.estado == 'CERRADO' %}
+                          <span class="badge bg-success rounded-1 px-2 py-1">Cerrado</span>
+                        {% endif %}
+
+                        {% if ticket.prioridad == 'ALTA' %}
+                          <span class="badge bg-danger rounded-1 px-2 py-1">Prioridad Alta</span>
+                        {% elif ticket.prioridad == 'MEDIA' %}
+                          <span class="badge bg-warning text-dark rounded-1 px-2 py-1">Prioridad Media</span>
+                        {% elif ticket.prioridad == 'BAJA' %}
+                          <span class="badge bg-info text-dark rounded-1 px-2 py-1">Prioridad Baja</span>
+                        {% endif %}
+                      </div>
+                    </div>
+
+                    <div class="row g-3 mb-4 p-3 bg-light rounded-3">
+                      <div class="col-12 col-md-4">
+                        <div class="text-muted small text-uppercase fw-bold">Solicitado por:</div>
+                        <div class="fw-semibold text-dark">{{ ticket.creado_por.nombre }}</div>
+                        <div class="text-muted small"><i class="bi bi-geo-alt"></i> {{ ticket.creado_por.estacion_servicio.nombre|default:"Sin asignar" }}</div>
+                      </div>
+                      <div class="col-12 col-md-4">
+                        <div class="text-muted small text-uppercase fw-bold">Departamento Destino:</div>
+                        <div class="fw-semibold text-dark">{{ ticket.departamento_destino.nombre }}</div>
+                      </div>
+                      
+                      <div class="col-12 col-md-4">
+                        <div class="text-muted small text-uppercase fw-bold">Persona Asignada:</div>
+                        <div class="fw-semibold text-dark">
+                          {% if ticket.asignado_a %}
+                            {{ ticket.asignado_a.nombre }}
+                          {% else %}
+                            <span class="text-secondary fst-italic">Sin asignación</span>
+                          {% endif %}
+                        </div>
+                      </div>
+
+                      <div class="col-12">
+                        <div class="text-muted small text-uppercase fw-bold">Fecha y Hora de Registro:</div>
+                        <div class="text-dark small"><i class="bi bi-calendar3 me-1"></i> {{ ticket.fecha_creacion|date:"d M Y, g:i a" }}</div>
+                      </div>
+                    </div>
+
+                    <div class="mb-4">
+                      <div class="text-muted small text-uppercase fw-bold mb-1">Detalles / Descripción del problema:</div>
+                      <div class="p-3 border rounded-3 bg-white text-secondary" style="white-space: pre-line; max-height: 150px; overflow-y: auto;">
+                        {{ ticket.descripcion|default:"No se proporcionó ninguna descripción para esta solicitud." }}
+                      </div>
+                    </div>
+
+                    <hr class="text-muted border-secondary opacity-25">
+
+                    <div class="mb-2">
+                      <div class="text-muted small text-uppercase fw-bold mb-2 d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-chat-dots me-1"></i> Historial de Comentarios</span>
+                        <span class="badge bg-secondary rounded-pill">{{ ticket.comentarios.count|default:"0" }}</span>
+                      </div>
+                      
+                      <div class="p-3 border rounded-3 bg-light mb-3" style="height: 500px; overflow-y: auto; display: flex; flex-direction: column;">
+                        
+                        {% for comentario in ticket.comentarios.all %}
+                          
+                          <div class="mb-3 {% if comentario.autor.user == request.user %}text-end align-self-end{% else %}text-start align-self-start{% endif %}" style="max-width: 85%;">
+                            <div class="small text-muted mb-1" style="font-size: 0.75rem;">
+                              <strong>{{ comentario.autor.nombre }}</strong> • {{ comentario.fecha_creacion|date:"d M, g:i a" }}
+                            </div>
+                            <div class="d-inline-block p-2 px-3 rounded-3 shadow-sm 
+                                        {% if comentario.autor.user == request.user %}bg-primary text-white{% else %}bg-white border{% endif %}" 
+                                 style="text-align: left;">
+                              {{ comentario.texto }}
+                            </div>
+                          </div>
+
+                        {% empty %}
+                          <div class="text-center text-muted small py-4 m-auto">
+                            <i class="bi bi-chat-square-text fs-3 d-block mb-2 text-opacity-50"></i>
+                            No hay comentarios aún. Escribe el primero para iniciar la conversación.
+                          </div>
+                        {% endfor %}
+                        
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="modal-footer bg-light border-top py-3">
+                    <div class="w-100">
+                      <form action="{ }" method="POST" class="m-0" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <div class="input-group">
+                          <input type="text" name="texto_comentario" class="form-control border-secondary" placeholder="Escribe una respuesta..." required autocomplete="off">
+                          
+                          <input type="file" name="archivo_comentario" id="fileInput{{ ticket.id }}" class="d-none" onchange="mostrarNombreArchivo(this, 'fileName{{ ticket.id }}')">
+                          
+                          <label for="fileInput{{ ticket.id }}" class="btn btn-outline-secondary border-secondary mb-0 d-flex align-items-center" style="cursor: pointer;" title="Adjuntar archivo">
+                            <i class="bi bi-paperclip fs-5"></i>
+                          </label>
+
+                          <button class="btn btn-primary px-4" type="submit">
+                            <i class="bi bi-send"></i> Enviar
+                          </button>
+                        </div>
+                        
+                        <div id="fileName{{ ticket.id }}" class="form-text small text-muted text-start mt-1 d-none"></div>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+
             {% empty %}
             <tr>
-              <td colspan="5" class="text-center text-muted py-4">
-                No se encontraron usuarios registrados.
+              <td colspan="8" class="text-center py-5">
+                <div class="mb-3"><i class="bi bi-inbox fs-1 text-muted"></i></div>
+                <h6 class="text-muted fw-normal">No hay solicitudes internas pendientes.</h6>
               </td>
             </tr>
+
             {% endfor %}
           </tbody>
         </table>
@@ -51,3 +318,19 @@
     </div>
   </div>
 {% endblock %}
+
+<script>
+  if (typeof mostrarNombreArchivo !== 'function') {
+    function mostrarNombreArchivo(inputElement, displayElementId) {
+      const displayElement = document.getElementById(displayElementId);
+      if (inputElement.files && inputElement.files.length > 0) {
+        const nombreArchivo = inputElement.files[0].name;
+        displayElement.innerHTML = `<i class="bi bi-file-earmark-check text-success"></i> Archivo listo: <strong>${nombreArchivo}</strong>`;
+        displayElement.classList.remove('d-none');
+      } else {
+        displayElement.classList.add('d-none');
+        displayElement.innerHTML = '';
+      }
+    }
+  }
+</script>
