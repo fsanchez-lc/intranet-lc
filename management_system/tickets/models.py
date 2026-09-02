@@ -31,6 +31,7 @@ class Ticket(models.Model):
         choices=Prioridad.choices,
         default=Prioridad.MEDIA
     )
+    
     estado = models.CharField(
         max_length=10,
         choices=Estado.choices,
@@ -67,6 +68,7 @@ class Ticket(models.Model):
         related_name="tickets_creados",
         help_text="Empleado que creó el ticket."
     )
+
     estacion_servicio = models.ForeignKey(
         'service_stations.ServiceStation',
         on_delete=models.SET_NULL,

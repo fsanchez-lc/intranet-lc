@@ -1,0 +1,57 @@
+
+<!--
+    CONTENIDO DEL MODAL PARA LA CREACION DEL TICKET
+    CONSTA DE 4 CAMPOS LLENADOS POR EL USUARIO
+    TITULO
+    DESCRIPCION
+    PRIORIDAD
+    DEPARTAMENTO ASIGNADO - SE TRAE DIRECTAMENTE DEL CATALOGO DE LA DB SELECCIONADO POR ID, CADA DEPARTAMENTO ES UN REGISTRO AÑADIDO Y NO UNA TABLA(MODEL)
+    
+    LOS OTROS CAMPOS DEL OBJETO TICKET SE LLENAN DESDE
+    (USUARIO QUE CREA EL TICKET, FECHAS, ESTADO DEL TICKET, OBSERVACIONES)
+    NOTA::::: EL USUARIO ASIGNADO AL TICKET DEBERA SER ASIGNADO DIRECTAMENTE POR EL COORDINADOR O
+
+    LOS COMENTARIOS ADICIONALES SON EXTERNOS A LA CREACION DEL TICKET
+-->
+
+<!-- VALIDAMOS QUE NO TENGA ERROR EL HTML, SI ERROR -> ITERA SOBRE CADA ERROR Y MUESTRA EN PANTALLA -->
+{% if ticket_form.non_field_errors %}
+  <div class="alert alert-danger" role="alert">
+    {% for error in ticket_form.non_field_errors %}
+      <div>{{ error }}</div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<!-- ITERAMOS CADA ELEMENTO EN FIELD(DENTRO DE TICKET_FORM)  -->
+{% for field in ticket_form %}
+  <div class="mb-3">
+    <label
+      for="{{ field.id_for_label }}"
+      class="form-label fw-bold"
+    >
+<!-- MUESTRA EL LABEL ACTUAL -->
+      {{ field.label }}
+<!-- SI TIENE ATTR -> REQUIRED, CONCATENA UN * CON ASPECTO DANGER -->
+      {% if field.field.required %}
+        <span class="text-danger">*</span>
+      {% endif %}
+    </label>
+
+    {{ field }} <!-- MUESTRA EL FIELD ACTUAL -->
+
+<!-- SI EL FIELD TIENE UN HELP TEXT ASOCIADO, MUESTRA EN PANTALLA -->
+    {% if field.help_text %}
+      <div class="form-text">
+        {{ field.help_text }}
+      </div>
+    {% endif %}
+
+<!-- SI FIELD FALLA, CADA ERROR SE MUESTRA EN PANTALLA -->
+    {% for error in field.errors %}
+      <div class="text-danger small mt-1">
+        {{ error }}
+      </div>
+    {% endfor %}
+  </div>
+{% endfor %}

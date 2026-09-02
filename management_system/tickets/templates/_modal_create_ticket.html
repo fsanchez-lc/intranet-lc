@@ -1,0 +1,56 @@
+
+<!-- class [
+ modal= avisa que es un modal, 
+ fade = animacion de entrada y salida], 
+ tabindex = indica teclado trabajar sobre el modal,  
+ aria-labelledby = titulo de la venta vide desde el id proporcionado "modalCrearTicket en el mismo fichero"
+ aria-hidden = ocultar modal]-->
+<div
+    class="modal fade"
+    id="modalCrearTicket"
+    tabindex="-1"
+    aria-labelledby="modalCrearTicketLabel"
+    aria-hidden="true">  <!-- SECCION DEL MODAL -->
+
+    <div class="modal-dialog modal-lg modal-dialog-centered"> <!-- SECCION DIALOG MODAL -->
+
+        <div class="modal-content shadow border-0"> <!-- SECCION CONTENIDO DEL MODAL -->
+
+            <div class="modal-header bg-light">  <!-- SECCION HEADER DEL MODAL -->
+                <h5 class="modal-title fw-bold" id="modalCrearTicketLabel">Crear nueva solicitud</h5>
+                <div class="form-text">Crea un nuevo ticket y asignalo al departameto correspondiente</div>
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Cerrar">
+                </button>
+            </div>
+
+            
+
+            <form method="post" action="{% url 'tickets:create_ticket' %}"> <!-- AREA DEL FORMULARIO, METODO POST APUNTANDO AL URL PARA CREAR TICKETS-->
+                {% csrf_token %}
+                <div class="modal-body">  <!-- SECCION BODY DEL MODAL -->
+                    {% include "ticket_form.html" %}
+                </div>
+                <div class="modal-footer bg-light"> <!-- SECCION FOOTER DEL MODAL -->
+                    <button
+                        type="button"
+                        class="btn btn-outline-secondary"
+                        data-bs-dismiss="modal">  <!-- BOTON CANCELAR -->
+                        Cancelar
+                    </button>
+
+                    <button
+                        type="submit"
+                        class="btn btn-success"> <!-- BOTON SUBMIT -->
+                        <i class="bi bi-check-lg"></i>
+                        Guardar solicitud
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

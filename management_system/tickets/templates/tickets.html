@@ -5,6 +5,10 @@
 {% block title %}Centro de Tickets{% endblock %}
 
 {% block content %}
+
+<!-- SE AGREGA EL MENSAJE DE SUCCESS O ERROR DESPUES DE CREAR EL TICKET -->
+{% include "_tickets_messages.html" %}
+
   <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
     <div>
       <h2 class="h3 fw-bold mb-1">Centro de Tickets</h2>
@@ -14,10 +18,27 @@
       <a href="#" class="btn btn-outline-secondary">
         <i class="bi bi-funnel"></i> Mis Tickets Asignados
       </a>
-      <a href="" class="btn btn-primary">
-        <i class="bi bi-plus-lg"></i> Crear Nueva Solicitud
+
+<!--    BASE PARA BOTONES QUE DESPLIEGUEN MODALS
+      {% if perms.employees.add_empleado %}
+    <a href="#" id="btn-main-add" class="btn bg-success d-flex align-items-center gap-2 d-none d-md-flex fw-medium text-white"
+       data-bs-toggle="modal" 
+       data-bs-target="#modalCrearEmpleado">
+      <i class="bi bi-plus-lg"></i>
+      <span>Añadir un empleado</span>
+    </a>
+    {% endif %} 
+-->
+
+
+      <a href="#" id="btn-main" class="btn bg-success d-flex align-items-center gap-2 d-none d-md-flex fw-medium text-white border-0"
+      data-bs-toggle="modal"
+      data-bs-target="#modalCrearTicket">
+        <i class="bi bi-plus-lg"></i>
+        <span>Crear Nueva Solicitud</span>
       </a>
     </div>
+    
   </div>
 
   <div class="row g-3 mb-4">
@@ -315,10 +336,35 @@
           </tbody>
         </table>
       </div>
-    </div>
+    </div>  
   </div>
+  {% include "_modal_create_ticket.html" %}
 {% endblock %}
 
+
+{% block scripts %}
+  {{ block.super }}
+
+  <script>
+    document.addEventListener(
+      "DOMContentLoaded",
+      function () {
+        const toastElements = document.querySelectorAll(
+          "#ticket-toast-container .toast"
+        );
+
+        toastElements.forEach(function (toastElement) {
+          const toast = bootstrap.Toast.getOrCreateInstance(
+            toastElement
+          );
+
+          toast.show();
+        });
+      }
+    );
+  </script>
+{% endblock %}
+   
 <script>
   if (typeof mostrarNombreArchivo !== 'function') {
     function mostrarNombreArchivo(inputElement, displayElementId) {

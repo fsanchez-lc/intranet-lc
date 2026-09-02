@@ -1,0 +1,48 @@
+{% if messages %}
+  <div
+    id="ticket-toast-container"
+    class="toast-container position-fixed top-50 start-50 translate-middle p-3"
+    style="z-index: 2000;"
+  >
+    {% for message in messages %}
+      <div
+        class="toast border-0 shadow"
+        role="alert"
+        aria-live="assertive"
+        aria-atomic="true"
+        data-bs-autohide="true"
+        data-bs-delay="1500"
+      >
+        <div
+          class="toast-header text-white
+            {% if message.tags == 'success' %}
+              bg-success
+            {% elif message.tags == 'error' %}
+              bg-danger
+            {% elif message.tags == 'warning' %}
+              bg-warning
+            {% else %}
+              bg-info
+            {% endif %}"
+        >
+          <i class="bi bi-bell-fill me-2"></i>
+
+          <strong class="me-auto">
+            Notificación
+          </strong>
+
+          <button
+            type="button"
+            class="btn-close btn-close-white"
+            data-bs-dismiss="toast"
+            aria-label="Cerrar"
+          ></button>
+        </div>
+
+        <div class="toast-body bg-white text-dark">
+          {{ message }}
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
