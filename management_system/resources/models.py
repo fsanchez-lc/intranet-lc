@@ -192,23 +192,9 @@ class TipoDocumento(models.Model):
 
     def __str__(self):
         return self.nombre
-    
-class Area(models.Model):
-    """📍 Nivel 1: Representa las grandes divisiones (ej. Operaciones, Administración)"""
-    nombre = models.CharField(max_length=100, unique=True, verbose_name="Nombre del Área")
-    descripcion = models.TextField(blank=True, null=True, verbose_name="Descripción")
-
-    class Meta:
-        verbose_name = "Área"
-        verbose_name_plural = "Áreas"
-        ordering = ['nombre']
-
-    def __str__(self):
-        return f"📍 {self.nombre}"
 
 class Proceso(models.Model):
-    """⚙️ Nivel 2: Conjunto de actividades (ej. Reclutamiento, Ventas, Mantenimiento)"""
-    area = models.ForeignKey(Area, on_delete=models.CASCADE, related_name="procesos", null=True, blank=True) # Añade null=True
+    """⚙️ Nivel 1 (Ahora): Conjunto de actividades (ej. Reclutamiento, Ventas, Mantenimiento)"""
     nombre = models.CharField(max_length=100, verbose_name="Nombre del Proceso")
     descripcion = models.TextField(blank=True, null=True, verbose_name="Descripción")
 
@@ -216,20 +202,17 @@ class Proceso(models.Model):
         verbose_name = "Proceso"
         verbose_name_plural = "Procesos"
         ordering = ['nombre']
-        unique_together = ('area', 'nombre') # Evita procesos duplicados en la misma área
 
     def __str__(self):
-        return f"⚙️ {self.nombre} ({self.area.nombre})"
+        return f"⚙️ {self.nombre}"
     
 class Procedimiento(models.Model):
-    """📑 Nivel 3: El 'paso a paso' específico (ej. Solicitud de Vacaciones, Arqueo de Caja)"""
+    """📑 Nivel 2 (Ahora): El 'paso a paso' específico (ej. Solicitud de Vacaciones)"""
+    # 4. CONSERVAMOS la relación con Proceso
     proceso = models.ForeignKey(Proceso, on_delete=models.CASCADE, related_name="procedimientos", null=True, blank=True)
     nombre = models.CharField(max_length=100, verbose_name="Nombre del Procedimiento")
     descripcion = models.TextField(blank=True, null=True, verbose_name="Descripción")
     
-    # Quitamos la relación ManyToMany con Departamento para que sea puramente jerárquico
-    # pero si quieres filtros por departamento en RRHH, lo manejamos vía Documento.
-
     class Meta:
         verbose_name = "Procedimiento"
         verbose_name_plural = "Procedimientos"
@@ -237,7 +220,7 @@ class Procedimiento(models.Model):
 
     def __str__(self):
         return f"📑 {self.nombre}"
-    
+
 class Documento(models.Model):
     class Estado(models.TextChoices):
         ACTIVO = 'activo', 'Activo'

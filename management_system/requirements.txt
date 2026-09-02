@@ -11,3 +11,6 @@ gunicorn
 django-import-export
 openpyxl
 django-cleanup
+channels
+channels-redis
+daphne

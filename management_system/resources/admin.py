@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Curso, Slide, TipoDocumento, Documento, VideoCurso, InscripcionCurso, Procedimiento, TematicaVideo, Area, Proceso
+from .models import Curso, Slide, TipoDocumento, Documento, VideoCurso, InscripcionCurso, Procedimiento, TematicaVideo, Proceso
 
 @admin.register(Slide)
 class SlideAdmin(admin.ModelAdmin):
@@ -53,30 +53,17 @@ class DocumentoInline(admin.TabularInline):
     fields = ('nombre', 'tipo_documento', 'estado')
     readonly_fields = ('nombre', 'tipo_documento', 'estado') # Solo lectura para no saturar
 
-@admin.register(Area)
-class AreaAdmin(admin.ModelAdmin):
-    list_display = ('nombre',)
-
 @admin.register(Proceso)
 class ProcesoAdmin(admin.ModelAdmin):
-    list_display = ('nombre', 'area')
-    list_filter = ('area',)
+    list_display = ('nombre',)
+    search_fields = ('nombre',)
 
 @admin.register(Procedimiento)
 class ProcedimientoAdmin(admin.ModelAdmin):
-    # Asegúrate de que estas columnas existan en el modelo
-    list_display = ('nombre', 'proceso', 'get_area')
-    list_filter = ('proceso__area', 'proceso')
+    list_display = ('nombre', 'proceso')
+    list_filter = ( 'proceso',)
     search_fields = ('nombre',)
-
-    def get_area(self, obj):
-        # Validamos: Si el objeto tiene proceso y ese proceso tiene área...
-        if obj.proceso and obj.proceso.area:
-            return obj.proceso.area.nombre
-        return "⚠️ Sin Área asignada" # Mensaje amigable en lugar de un error
     
-    get_area.short_description = 'Área'
-
 @admin.register(VideoCurso)
 class VideoCursoAdmin(admin.ModelAdmin):
     list_display = ('titulo', 'curso', 'tematica', 'ponente', 'fecha_grabacion', 'fecha_registro', 'estado', 'check_reciente')
@@ -84,7 +71,7 @@ class VideoCursoAdmin(admin.ModelAdmin):
     list_editable = ('estado', 'fecha_grabacion')
     search_fields = ('titulo', 'ponente', 'curso__titulo')
     filter_horizontal = ('departamentos_destinados',)
-    ields = ('titulo', 'video_url', 'ponente', 'fecha_grabacion', 'fecha_registro', 'tematica', 'curso', 'estado', 'es_general', 'departamentos_destinados')
+    fields = ('titulo', 'video_url', 'ponente', 'fecha_grabacion', 'fecha_registro', 'tematica', 'curso', 'estado', 'es_general', 'departamentos_destinados')
 
     # Creamos un método para que se vea bonito en el admin (con iconos)
     @admin.display(description='¿Es Reciente?', boolean=False)

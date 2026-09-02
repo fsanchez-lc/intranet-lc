@@ -20,7 +20,7 @@ services:
   # 2. El servicio de tu aplicación Django
   web:
     build: .  # Le dice que construya la imagen usando el Dockerfile de esta carpeta
-    command: python manage.py runserver 0.0.0.0:8000 # El comando para iniciar
+    command: daphne -b 0.0.0.0 -p 8000 management_system.asgi:application
     volumes:
       # ¡IMPORTANTE! Esto sincroniza tu código local con el contenedor.
       # Puedes editar tu código en tu PC y el servidor se reiniciará
@@ -36,6 +36,7 @@ services:
       - DB_PASS=sistemas_lc_pass
       - DB_HOST=db  # El nombre del host es el nombre del servicio 'db'
       - DB_PORT=5432
+      - REDIS_HOST=redis
 
       # --- CONFIGURACIÓN DE CORREO (cPanel) ---
       - EMAIL_HOST=mail.lopez-castro.com.mx
@@ -45,7 +46,13 @@ services:
     depends_on:
       # Le dice a Docker que inicie el servicio 'db' ANTES que el 'web'
       - db
+      - redis
 
+  redis:
+    image: redis:alpine
+    container_name: redis_server
+    ports:
+      - "6379:6379"
 # Define el volumen que usará la base de datos
 volumes:
   postgres_data:

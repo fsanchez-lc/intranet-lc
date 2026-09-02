@@ -28,7 +28,7 @@ urlpatterns = [
     path('tickets/', include('tickets.urls', namespace='tickets_urls')),
     path('reportes/', include('reports.urls', namespace='reports_urls')),
     path('administrador/', include('administrator.urls')),
-
+    path('dinamicas/', include('dinamicas.urls')),
     
     # path('asistente-ia/', include('asistente-ia.urls', namespace='asistente-ia')),
     # path('permisos/', include('permisos.urls', namespace='permisos')),

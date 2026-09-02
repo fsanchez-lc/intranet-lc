@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required, user_passes_test
-from .models import Slide, Curso, Documento, TipoDocumento, VideoCurso, InscripcionCurso, Procedimiento, TematicaVideo, Proceso, Area
+from .models import Slide, Curso, Documento, TipoDocumento, VideoCurso, InscripcionCurso, Procedimiento, TematicaVideo, Proceso
 from employees.models import Empleado, Departamento, Tarea
 from django.db.models import Q
 from django.core.paginator import Paginator
@@ -151,8 +151,8 @@ def ResourcesView(request):
     ).distinct().order_by('nombre')
 
     # DOCUMENTACIÓN SECCIÓN INTERNA (FORMATOS) - Jerarquía Nueva
-    # Solo necesitamos las ÁREAS, el resto se carga por AJAX
-    all_areas = Area.objects.all().order_by('nombre')
+    # Solo necesitamos los PROCESOS, el resto se carga por AJAX
+    all_procesos = Proceso.objects.all().order_by('nombre')
     formatos_internos_list = Documento.objects.filter(
         estado='activo', tipo_documento__categoria='interno'
     ).distinct().order_by('nombre')
@@ -186,7 +186,7 @@ def ResourcesView(request):
         'todos_los_cursos': Curso.objects.all().order_by('titulo'),
         
         # Formatos (Internos - Nueva Jerarquía)
-        'all_areas': all_areas, 
+        'all_procesos': all_procesos, 
         'formatos': Paginator(formatos_internos_list, 4).get_page(1),
         
         # Documentos (Externos - Lógica Original)
@@ -279,7 +279,6 @@ def BuscarFormatosView(request):
     # 1. Captura de parámetros
     page_number = request.GET.get('page', 1)
     query = request.GET.get('q', '')
-    area_id = request.GET.get('area', '')
     proceso_id = request.GET.get('proceso', '')
     proc_id = request.GET.get('procedimiento', '')
     sub_categoria = request.GET.get('sub_categoria', '')
@@ -293,10 +292,6 @@ def BuscarFormatosView(request):
     )
 
     # 3. Aplicación de Filtros Jerárquicos
-    # Si no hay filtros, documentos_qs contendrá TODOS los formatos.
-    if area_id:
-        documentos_qs = documentos_qs.filter(procedimiento__proceso__area_id=area_id)
-    
     if proceso_id:
         documentos_qs = documentos_qs.filter(procedimiento__proceso_id=proceso_id)
 
@@ -673,11 +668,9 @@ def BuscarHistorialView(request):
     is_admin = request.user.groups.filter(name='Administrador').exists()
     is_rh = request.user.groups.filter(name="Recursos Humanos").exists()
 
-    # Verificación de seguridad: asegurarse que el usuario tiene un empleado asociado
     if not hasattr(request.user, 'empleado'):
         return JsonResponse({'html': '', 'has_next': False})
 
-    # Definir qué estados consideramos "Historial" (Todo menos lo que está cursando actualmente)
     estados_finalizados = [
         InscripcionCurso.EstadoInscripcion.COMPLETADO,
         InscripcionCurso.EstadoInscripcion.APROBADO,
@@ -685,20 +678,17 @@ def BuscarHistorialView(request):
         InscripcionCurso.EstadoInscripcion.DADO_DE_BAJA,
     ]
 
-    # QuerySet Base: Solo del empleado actual y estados finalizados
     historial = InscripcionCurso.objects.filter(
         empleado=request.user.empleado,
         estado__in=estados_finalizados
     ).select_related('curso', 'empleado')
 
-    # Filtro de búsqueda (si el usuario escribió algo)
     if query:
         historial = historial.filter(
             Q(curso__titulo__icontains=query) | 
             Q(fecha_finalizacion__icontains=query)
         )
     
-    # Ordenamiento (Aunque ya lo tienes en Meta, forzamos para asegurar consistencia)
     historial = historial.order_by('-fecha_finalizacion', '-fecha_inscripcion')
 
     # Paginación
@@ -706,7 +696,7 @@ def BuscarHistorialView(request):
     page_obj = paginator.get_page(page_number)
 
     # Renderizado del parcial
-    # Nota: Pasamos 'historial' como contexto, asegúrate de usar esa variable en el HTML parcial
+    # Nota: Pasamos 'historial' como contexto.
     html = render_to_string('_historial_partial.html', {
         'historial': page_obj,
         'is_admin': is_admin,
@@ -721,15 +711,7 @@ def BuscarHistorialView(request):
 
 @login_required
 def GetProcesosView(request):
-    area_id = request.GET.get('area_id')
-    
-    # Si nos mandan un área, filtramos por esa área. 
-    # Si está vacío, traemos TODOS los procesos.
-    if area_id:
-        procesos = Proceso.objects.filter(area_id=area_id).values('id', 'nombre').order_by('nombre')
-    else:
-        procesos = Proceso.objects.all().values('id', 'nombre').order_by('nombre')
-        
+    procesos = Proceso.objects.all().values('id', 'nombre').order_by('nombre')
     return JsonResponse(list(procesos), safe=False)
 
 @login_required

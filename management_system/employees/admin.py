@@ -124,9 +124,53 @@ class IncapacidadInline(admin.TabularInline):
 class ConfiguracionRHAdmin(admin.ModelAdmin):
     list_display = ['gerente_general']
 
+class VacacionAdminForm(forms.ModelForm):
+    # Creamos un campo virtual más amigable
+    dias_ingresados = forms.CharField(
+        label="Días específicos",
+        required=False,
+        help_text="Ingresa las fechas (AAAA-MM-DD) separadas por comas. Ej: 2024-12-24, 2024-12-25",
+        widget=forms.Textarea(attrs={
+            'rows': 3, 
+            'placeholder': '2024-12-24, 2024-12-25'
+        })
+    )
+
+    class Meta:
+        model = Vacacion
+        fields = '__all__'
+        # Excluimos el campo crudo original
+        exclude = ['dias_seleccionados']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Si ya hay fechas guardadas, las cargamos separadas por coma
+        if self.instance and self.instance.pk and self.instance.dias_seleccionados:
+            if isinstance(self.instance.dias_seleccionados, list):
+                self.fields['dias_ingresados'].initial = ", ".join(self.instance.dias_seleccionados)
+
+    def clean_dias_ingresados(self):
+        # Recibimos el texto, lo separamos por comas y limpiamos espacios
+        data = self.cleaned_data.get('dias_ingresados', '')
+        if not data.strip():
+            return []
+        
+        fechas = [f.strip() for f in data.split(',') if f.strip()]
+        return fechas
+
+    def save(self, commit=True):
+        # Guardamos la lista de Python resultante de vuelta al campo JSON real
+        instance = super().save(commit=False)
+        instance.dias_seleccionados = self.cleaned_data.get('dias_ingresados', [])
+        if commit:
+            instance.save()
+            self.save_m2m() # Importante si tienes campos ManyToMany
+        return instance
+
 # --- ADMIN VACACION ---
 @admin.register(Vacacion)
 class VacacionAdmin(admin.ModelAdmin):
+    form = VacacionAdminForm
     list_display = (
         'empleado',
         'dias_solicitados_lista',
@@ -143,9 +187,10 @@ class VacacionAdmin(admin.ModelAdmin):
     search_fields = ('empleado__nombre', 'autorizador__nombre', 'gerente_autorizador__nombre')
     autocomplete_fields = ['empleado', 'autorizador', 'gerente_autorizador']
     filter_horizontal = ('empleados_redireccion',)
+
     fieldsets = (
         ('Información de la Solicitud', {
-            'fields': ('empleado', 'estado')
+            'fields': ('empleado', 'dias_ingresados', 'estado')
         }),
         ('Autorizaciones', {
             'fields': (
@@ -174,7 +219,6 @@ class VacacionAdmin(admin.ModelAdmin):
     @admin.display(description='✍️ Gerente', boolean=True)
     def firma_gerente(self, obj):
         return obj.gerente_firmado
-    @admin.display(description='Periodo')
     
     @admin.display(description='Días Solicitados')
     def dias_solicitados_lista(self, obj):

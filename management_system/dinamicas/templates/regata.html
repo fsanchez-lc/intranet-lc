@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Prueba de Regata en Tiempo Real</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f9; }
+        .pista { 
+            border-bottom: 2px dashed #999; 
+            margin: 20px 0; 
+            padding: 10px 0; 
+            position: relative; 
+            height: 50px; 
+            background-color: #e0f7fa;
+        }
+        /* Los "buques" serán simples cuadrados por ahora */
+        .barco { 
+            width: 50px; 
+            height: 50px; 
+            color: white; 
+            text-align: center; 
+            line-height: 50px;
+            position: absolute; 
+            left: 0; /* Inician en la posición 0 */
+            top: 0; 
+            transition: left 0.3s ease-in-out; /* Movimiento suave de CSS */
+        }
+        #barco-1 { background-color: #ff3333; }
+        #barco-2 { background-color: #33cc33; }
+        #barco-3 { background-color: #3333ff; }
+    </style>
+</head>
+<body>
+    <h1>Prueba Multijugador: Regata</h1>
+
+    <!-- Controles para enviar la señal al servidor -->
+    <div style="margin-bottom: 20px;">
+        <button onclick="hacerClicEnBuque(1)">Avanzar Buque 1</button>
+        <button onclick="hacerClicEnBuque(2)">Avanzar Buque 2</button>
+        <button onclick="hacerClicEnBuque(3)">Avanzar Buque 3</button>
+    </div>
+
+    <!-- Pistas visuales -->
+    <div class="pista">
+        <div id="barco-1" class="barco">B1</div>
+    </div>
+    <div class="pista">
+        <div id="barco-2" class="barco">B2</div>
+    </div>
+    <div class="pista">
+        <div id="barco-3" class="barco">B3</div>
+    </div>
+
+    <script>
+        console.log("Iniciando script con reconexión automática...");
+        var socket;
+        var pingInterval;
+
+        function conectarWebSocket() {
+            var protocolo = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+            var url = protocolo + window.location.host + '/ws/dinamicas/regata/';
+            
+            console.log("Intentando conectar a: " + url);
+            socket = new WebSocket(url);
+
+            socket.onopen = function(e) {
+                console.log("¡Conectado al servidor de WebSockets exitosamente!");
+                
+                // Iniciar "Heartbeat": Enviar un ping cada 20 segundos para mantener viva la conexión
+                clearInterval(pingInterval);
+                pingInterval = setInterval(function() {
+                    if (socket.readyState === WebSocket.OPEN) {
+                        socket.send(JSON.stringify({ 'tipo': 'ping' }));
+                    }
+                }, 20000);
+            };
+
+            socket.onmessage = function(e) {
+                var data = JSON.parse(e.data);
+                
+                // Ignorar respuestas de ping si el servidor las devuelve
+                if (data.tipo === 'pong') return;
+
+                if (data.accion === 'mover') {
+                    var buqueId = data.buque_id;
+                    posiciones[buqueId] += 50; 
+                    var elementoBarco = document.getElementById('barco-' + buqueId);
+                    if (elementoBarco) {
+                        elementoBarco.style.left = posiciones[buqueId] + 'px';
+                    }
+                }
+            };
+
+            socket.onclose = function(e) {
+                console.warn("El WebSocket se cerró. Reintentando conexión en 3 segundos...");
+                clearInterval(pingInterval);
+                // Intentar reconectarse automáticamente en 3 segundos
+                setTimeout(conectarWebSocket, 3000);
+            };
+
+            socket.onerror = function(e) {
+                console.error("Error en el WebSocket.");
+                socket.close(); // Forzar el cierre para que se dispare la reconexión
+            };
+        }
+
+        var posiciones = { 1: 0, 2: 0, 3: 0 };
+
+        // Iniciar conexión por primera vez
+        conectarWebSocket();
+
+        function hacerClicEnBuque(id_del_buque) {
+            if (!socket || socket.readyState !== WebSocket.OPEN) {
+                console.error("No se puede enviar: Conexión no lista. Reintentando en breve...");
+                return;
+            }
+            console.log("Enviando orden de mover buque: " + id_del_buque);
+            socket.send(JSON.stringify({
+                'buque_id': id_del_buque
+            }));
+        }
+    </script>
+</body>
+</html>
+

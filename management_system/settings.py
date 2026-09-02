@@ -19,7 +19,6 @@ LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = '/'
 
 INSTALLED_APPS = [
-    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -40,18 +39,7 @@ INSTALLED_APPS = [
     "django_browser_reload",
     'guides',
     'administrator',
-    'dinamicas',
-    'channels',
 ]
-
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {
-            "hosts": [(os.environ.get("REDIS_HOST", "redis"), 6379)],
-        },
-    },
-}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -86,7 +74,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'management_system.wsgi.application'
 
-ASGI_APPLICATION = 'management_system.asgi.application'
+
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
