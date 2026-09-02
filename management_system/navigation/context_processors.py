@@ -21,5 +21,4 @@ def contador_tareas_global(request):
     # 4. Devolvemos el diccionario que se inyectará en el HTML
     return {
         'tareas_pendientes_count': count,
-        'empleado':empleado_actual
         }
