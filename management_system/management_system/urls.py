@@ -3,8 +3,13 @@ from django.contrib.auth import views as auth_views
 from django.urls import path, include
 from equipment import views as equipment_views
 from django.conf.urls.static import static
+<<<<<<< HEAD
 from django.conf import settings  # <--- AÑADE ESTA LÍNEA
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+=======
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+from django.conf import settings
+>>>>>>> ba46064 (Settings modificados por statics)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
